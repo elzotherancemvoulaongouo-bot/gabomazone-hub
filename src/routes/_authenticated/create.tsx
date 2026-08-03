@@ -96,7 +96,7 @@ function CreatePage() {
           accept="image/*,video/*"
           className="hidden"
           onChange={onFileChange}
-philosophy        />
+        />
       </label>
 
       <div className="space-y-2">
