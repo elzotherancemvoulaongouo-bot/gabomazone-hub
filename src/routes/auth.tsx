@@ -35,6 +35,8 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -45,6 +47,8 @@ function AuthPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setNotice(null);
+    setErrorMsg(null);
     try {
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
@@ -59,6 +63,11 @@ function AuthPage() {
         if (data.session) {
           navigate({ to: "/feed", replace: true });
         } else {
+          setNotice(
+            "Compte créé. Ouvrez l'e-mail de confirmation envoyé à " +
+              email +
+              " puis revenez vous connecter. Sans cette confirmation, l'accès reste bloqué.",
+          );
           toast.success("Compte créé", {
             description: "Vérifiez votre e-mail pour confirmer votre inscription.",
           });
@@ -69,7 +78,16 @@ function AuthPage() {
         navigate({ to: "/feed", replace: true });
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Une erreur est survenue");
+      const raw = err instanceof Error ? err.message : "Une erreur est survenue";
+      const message = raw.includes("weak")
+        ? "Ce mot de passe est trop courant. Choisissez-en un plus original (12+ caractères)."
+        : raw === "Invalid login credentials"
+          ? "E-mail ou mot de passe incorrect."
+          : raw === "Email not confirmed"
+            ? "E-mail non confirmé : cliquez sur le lien reçu par e-mail avant de vous connecter."
+            : raw;
+      setErrorMsg(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -98,6 +116,16 @@ function AuthPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-4 rounded-2xl border border-border/70 p-5 brand-surface">
+          {notice && (
+            <p className="rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm text-foreground">
+              {notice}
+            </p>
+          )}
+          {errorMsg && (
+            <p className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-foreground">
+              {errorMsg}
+            </p>
+          )}
           {mode === "signup" && (
             <div className="space-y-2">
               <Label htmlFor="username">Pseudo</Label>
