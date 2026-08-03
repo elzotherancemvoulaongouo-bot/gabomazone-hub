@@ -9,7 +9,7 @@ export function Media({
 }: {
   path: string;
   type: string;
-  className?: string;
+  className?: string | undefined;
   alt: string;
 }) {
   const { data: url, isPending } = useSignedUrl(path);
