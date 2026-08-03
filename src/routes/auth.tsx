@@ -164,7 +164,7 @@ function AuthPage() {
             {mode === "signin" ? "Se connecter" : "Créer mon compte"}
           </Button>
           <Button type="button" variant="secondary" className="w-full" onClick={handleGoogle}>
-            Continuer avec Google
+            {mode === "signin" ? "Se connecter avec Google" : "S'inscrire avec Google"}
           </Button>
           <button
             type="button"
