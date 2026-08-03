@@ -16,7 +16,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Gabomazone — Réseau social photo & vidéo" },
       {
         property: "og:description",
-        content: "Partagez vos photos et vidéos avec la communauté Gabomazone.",
+        content: "Gabomazone : partagez vos photos et vidéos, likez et commentez les publications de la communauté.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
