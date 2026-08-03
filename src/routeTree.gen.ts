@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
 import { Route as AuthenticatedExploreRouteImport } from './routes/_authenticated/explore'
 import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
+import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedPPostIdRouteImport } from './routes/_authenticated/p.$postId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -46,6 +47,11 @@ const AuthenticatedFeedRoute = AuthenticatedFeedRouteImport.update({
   path: '/feed',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
+  id: '/me',
+  path: '/me',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPPostIdRoute = AuthenticatedPPostIdRouteImport.update({
   id: '/p/$postId',
   path: '/p/$postId',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/create': typeof AuthenticatedCreateRoute
   '/explore': typeof AuthenticatedExploreRoute
   '/feed': typeof AuthenticatedFeedRoute
+  '/me': typeof AuthenticatedMeRoute
   '/p/$postId': typeof AuthenticatedPPostIdRoute
 }
 export interface FileRoutesByTo {
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/create': typeof AuthenticatedCreateRoute
   '/explore': typeof AuthenticatedExploreRoute
   '/feed': typeof AuthenticatedFeedRoute
+  '/me': typeof AuthenticatedMeRoute
   '/p/$postId': typeof AuthenticatedPPostIdRoute
 }
 export interface FileRoutesById {
@@ -76,13 +84,15 @@ export interface FileRoutesById {
   '/_authenticated/create': typeof AuthenticatedCreateRoute
   '/_authenticated/explore': typeof AuthenticatedExploreRoute
   '/_authenticated/feed': typeof AuthenticatedFeedRoute
+  '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/p/$postId': typeof AuthenticatedPPostIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/create' | '/explore' | '/feed' | '/p/$postId'
+  fullPaths:
+    '/' | '/auth' | '/create' | '/explore' | '/feed' | '/me' | '/p/$postId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/create' | '/explore' | '/feed' | '/p/$postId'
+  to: '/' | '/auth' | '/create' | '/explore' | '/feed' | '/me' | '/p/$postId'
   id:
     | '__root__'
     | '/'
@@ -91,6 +101,7 @@ export interface FileRouteTypes {
     | '/_authenticated/create'
     | '/_authenticated/explore'
     | '/_authenticated/feed'
+    | '/_authenticated/me'
     | '/_authenticated/p/$postId'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +155,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFeedRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/me': {
+      id: '/_authenticated/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof AuthenticatedMeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/p/$postId': {
       id: '/_authenticated/p/$postId'
       path: '/p/$postId'
@@ -158,6 +176,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
   AuthenticatedExploreRoute: typeof AuthenticatedExploreRoute
   AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
+  AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedPPostIdRoute: typeof AuthenticatedPPostIdRoute
 }
 
@@ -165,6 +184,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
   AuthenticatedExploreRoute: AuthenticatedExploreRoute,
   AuthenticatedFeedRoute: AuthenticatedFeedRoute,
+  AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedPPostIdRoute: AuthenticatedPPostIdRoute,
 }
 
