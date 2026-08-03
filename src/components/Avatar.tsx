@@ -6,9 +6,9 @@ export function UserAvatar({
   name,
   className,
 }: {
-  avatarPath?: string | null;
-  name?: string | null;
-  className?: string;
+  avatarPath?: string | null | undefined;
+  name?: string | null | undefined;
+  className?: string | undefined;
 }) {
   const { data: url } = useSignedUrl(avatarPath);
   const initials = (name ?? "?").slice(0, 2).toUpperCase();
