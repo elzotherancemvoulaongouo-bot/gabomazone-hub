@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Compass, Home, LogOut, PlusSquare, User } from "lucide-react";
+import { Compass, Home, LogOut, PlusSquare, Settings, User, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ const navItems = [
   { to: "/feed", label: "Accueil", icon: Home },
   { to: "/explore", label: "Explorer", icon: Compass },
   { to: "/create", label: "Publier", icon: PlusSquare },
+  { to: "/friends", label: "Amis", icon: Users },
   { to: "/me", label: "Profil", icon: User },
 ] as const;
 
@@ -30,9 +31,16 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/feed" className="font-display text-xl font-bold brand-text">
             gabomazone
           </Link>
-          <Button variant="ghost" size="icon" onClick={signOut} aria-label="Se déconnecter">
-            <LogOut className="size-5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button asChild variant="ghost" size="icon" aria-label="Paramètres du profil">
+              <Link to="/settings">
+                <Settings className="size-5" />
+              </Link>
+            </Button>
+            <Button variant="ghost" size="icon" onClick={signOut} aria-label="Se déconnecter">
+              <LogOut className="size-5" />
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -45,7 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               key={to}
               to={to}
               aria-label={label}
-              className="flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-[11px] text-muted-foreground transition-colors"
+              className="flex flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] text-muted-foreground transition-colors"
               activeProps={{ className: "text-primary" }}
             >
               <Icon className="size-5" />
