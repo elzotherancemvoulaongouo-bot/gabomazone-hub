@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
 import { Route as AuthenticatedExploreRouteImport } from './routes/_authenticated/explore'
 import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
+import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedPPostIdRouteImport } from './routes/_authenticated/p.$postId'
 import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated/u.$username'
@@ -48,6 +49,11 @@ const AuthenticatedFeedRoute = AuthenticatedFeedRouteImport.update({
   path: '/feed',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFriendsRoute = AuthenticatedFriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
   id: '/me',
   path: '/me',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/create': typeof AuthenticatedCreateRoute
   '/explore': typeof AuthenticatedExploreRoute
   '/feed': typeof AuthenticatedFeedRoute
+  '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRoute
   '/p/$postId': typeof AuthenticatedPPostIdRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/create': typeof AuthenticatedCreateRoute
   '/explore': typeof AuthenticatedExploreRoute
   '/feed': typeof AuthenticatedFeedRoute
+  '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRoute
   '/p/$postId': typeof AuthenticatedPPostIdRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/_authenticated/create': typeof AuthenticatedCreateRoute
   '/_authenticated/explore': typeof AuthenticatedExploreRoute
   '/_authenticated/feed': typeof AuthenticatedFeedRoute
+  '/_authenticated/friends': typeof AuthenticatedFriendsRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/p/$postId': typeof AuthenticatedPPostIdRoute
   '/_authenticated/u/$username': typeof AuthenticatedUUsernameRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
     | '/create'
     | '/explore'
     | '/feed'
+    | '/friends'
     | '/me'
     | '/p/$postId'
     | '/u/$username'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
     | '/create'
     | '/explore'
     | '/feed'
+    | '/friends'
     | '/me'
     | '/p/$postId'
     | '/u/$username'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
     | '/_authenticated/create'
     | '/_authenticated/explore'
     | '/_authenticated/feed'
+    | '/_authenticated/friends'
     | '/_authenticated/me'
     | '/_authenticated/p/$postId'
     | '/_authenticated/u/$username'
@@ -180,6 +192,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFeedRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/friends': {
+      id: '/_authenticated/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof AuthenticatedFriendsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/me': {
       id: '/_authenticated/me'
       path: '/me'
@@ -208,6 +227,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
   AuthenticatedExploreRoute: typeof AuthenticatedExploreRoute
   AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
+  AuthenticatedFriendsRoute: typeof AuthenticatedFriendsRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedPPostIdRoute: typeof AuthenticatedPPostIdRoute
   AuthenticatedUUsernameRoute: typeof AuthenticatedUUsernameRoute
@@ -217,6 +237,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
   AuthenticatedExploreRoute: AuthenticatedExploreRoute,
   AuthenticatedFeedRoute: AuthenticatedFeedRoute,
+  AuthenticatedFriendsRoute: AuthenticatedFriendsRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedPPostIdRoute: AuthenticatedPPostIdRoute,
   AuthenticatedUUsernameRoute: AuthenticatedUUsernameRoute,
@@ -233,13 +254,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
