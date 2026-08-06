@@ -12,6 +12,7 @@ export function VoiceRecorder({
   disabled?: boolean;
 }) {
   const recorderRef = useRef<MediaRecorder | null>(null);
+  const secondsRef = useRef(0);
   const chunksRef = useRef<BlobPart[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [recording, setRecording] = useState(false);
@@ -52,8 +53,6 @@ export function VoiceRecorder({
       toast.error("Micro indisponible. Autorisez l'accès au microphone.");
     }
   }
-
-  const secondsRef = useRef(0);
 
   function stop() {
     if (timerRef.current) clearInterval(timerRef.current);
