@@ -6,6 +6,7 @@ import { UserAvatar } from "@/components/Avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { FriendButton } from "@/components/FriendButton";
+import { MessageButton } from "@/components/MessageButton";
 import { useAuth } from "@/lib/auth";
 import { MapPin, Cake, Mail, Phone, Globe } from "lucide-react";
 
@@ -71,7 +72,10 @@ export function ProfileView({ profile }: { profile: ProfileRow }) {
             <Link to="/settings">Modifier le profil</Link>
           </Button>
         ) : (
-          <FriendButton profileId={profile.id} />
+          <>
+            <FriendButton profileId={profile.id} />
+            <MessageButton profileId={profile.id} />
+          </>
         )}
       </div>
 
