@@ -53,6 +53,36 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string
+          last_message_preview: string | null
+          updated_at: string
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          last_message_preview?: string | null
+          updated_at?: string
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          last_message_preview?: string | null
+          updated_at?: string
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
@@ -120,6 +150,50 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          audio_path: string | null
+          content: string | null
+          conversation_id: string
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          kind: string
+          read_at: string | null
+          sender_id: string
+        }
+        Insert: {
+          audio_path?: string | null
+          content?: string | null
+          conversation_id: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          kind?: string
+          read_at?: string | null
+          sender_id: string
+        }
+        Update: {
+          audio_path?: string | null
+          content?: string | null
+          conversation_id?: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          kind?: string
+          read_at?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -225,6 +299,10 @@ export type Database = {
     }
     Functions: {
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
+      is_conversation_participant: {
+        Args: { _conversation_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
