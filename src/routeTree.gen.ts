@@ -17,7 +17,9 @@ import { Route as AuthenticatedExploreRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
 import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
+import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedMConversationIdRouteImport } from './routes/_authenticated/m.$conversationId'
 import { Route as AuthenticatedPPostIdRouteImport } from './routes/_authenticated/p.$postId'
 import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated/u.$username'
 
@@ -60,11 +62,22 @@ const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
   path: '/me',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMConversationIdRoute =
+  AuthenticatedMConversationIdRouteImport.update({
+    id: '/m/$conversationId',
+    path: '/m/$conversationId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPPostIdRoute = AuthenticatedPPostIdRouteImport.update({
   id: '/p/$postId',
   path: '/p/$postId',
@@ -84,7 +97,9 @@ export interface FileRoutesByFullPath {
   '/feed': typeof AuthenticatedFeedRoute
   '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRoute
+  '/messages': typeof AuthenticatedMessagesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/m/$conversationId': typeof AuthenticatedMConversationIdRoute
   '/p/$postId': typeof AuthenticatedPPostIdRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
 }
@@ -96,7 +111,9 @@ export interface FileRoutesByTo {
   '/feed': typeof AuthenticatedFeedRoute
   '/friends': typeof AuthenticatedFriendsRoute
   '/me': typeof AuthenticatedMeRoute
+  '/messages': typeof AuthenticatedMessagesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/m/$conversationId': typeof AuthenticatedMConversationIdRoute
   '/p/$postId': typeof AuthenticatedPPostIdRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
 }
@@ -110,7 +127,9 @@ export interface FileRoutesById {
   '/_authenticated/feed': typeof AuthenticatedFeedRoute
   '/_authenticated/friends': typeof AuthenticatedFriendsRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
+  '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/m/$conversationId': typeof AuthenticatedMConversationIdRoute
   '/_authenticated/p/$postId': typeof AuthenticatedPPostIdRoute
   '/_authenticated/u/$username': typeof AuthenticatedUUsernameRoute
 }
@@ -124,7 +143,9 @@ export interface FileRouteTypes {
     | '/feed'
     | '/friends'
     | '/me'
+    | '/messages'
     | '/settings'
+    | '/m/$conversationId'
     | '/p/$postId'
     | '/u/$username'
   fileRoutesByTo: FileRoutesByTo
@@ -136,7 +157,9 @@ export interface FileRouteTypes {
     | '/feed'
     | '/friends'
     | '/me'
+    | '/messages'
     | '/settings'
+    | '/m/$conversationId'
     | '/p/$postId'
     | '/u/$username'
   id:
@@ -149,7 +172,9 @@ export interface FileRouteTypes {
     | '/_authenticated/feed'
     | '/_authenticated/friends'
     | '/_authenticated/me'
+    | '/_authenticated/messages'
     | '/_authenticated/settings'
+    | '/_authenticated/m/$conversationId'
     | '/_authenticated/p/$postId'
     | '/_authenticated/u/$username'
   fileRoutesById: FileRoutesById
@@ -218,11 +243,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/messages': {
+      id: '/_authenticated/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof AuthenticatedMessagesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/m/$conversationId': {
+      id: '/_authenticated/m/$conversationId'
+      path: '/m/$conversationId'
+      fullPath: '/m/$conversationId'
+      preLoaderRoute: typeof AuthenticatedMConversationIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/p/$postId': {
@@ -248,7 +287,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
   AuthenticatedFriendsRoute: typeof AuthenticatedFriendsRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
+  AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedMConversationIdRoute: typeof AuthenticatedMConversationIdRoute
   AuthenticatedPPostIdRoute: typeof AuthenticatedPPostIdRoute
   AuthenticatedUUsernameRoute: typeof AuthenticatedUUsernameRoute
 }
@@ -259,7 +300,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFeedRoute: AuthenticatedFeedRoute,
   AuthenticatedFriendsRoute: AuthenticatedFriendsRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
+  AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedMConversationIdRoute: AuthenticatedMConversationIdRoute,
   AuthenticatedPPostIdRoute: AuthenticatedPPostIdRoute,
   AuthenticatedUUsernameRoute: AuthenticatedUUsernameRoute,
 }

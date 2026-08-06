@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Compass, Home, LogOut, PlusSquare, Settings, User, Users } from "lucide-react";
+import { Compass, Home, LogOut, MessageCircle, PlusSquare, Settings, User, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ const navItems = [
   { to: "/explore", label: "Explorer", icon: Compass },
   { to: "/create", label: "Publier", icon: PlusSquare },
   { to: "/friends", label: "Amis", icon: Users },
+  { to: "/messages", label: "Messages", icon: MessageCircle },
   { to: "/me", label: "Profil", icon: User },
 ] as const;
 
