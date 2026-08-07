@@ -198,14 +198,72 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          conversation_id: string | null
+          created_at: string
+          id: string
+          post_id: string | null
+          preview: string | null
+          read_at: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          preview?: string | null
+          read_at?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          preview?: string | null
+          read_at?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_profile_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           caption: string | null
           created_at: string
           id: string
           location: string | null
-          media_type: string
-          media_url: string
+          media_type: string | null
+          media_url: string | null
           user_id: string
         }
         Insert: {
@@ -213,8 +271,8 @@ export type Database = {
           created_at?: string
           id?: string
           location?: string | null
-          media_type?: string
-          media_url: string
+          media_type?: string | null
+          media_url?: string | null
           user_id: string
         }
         Update: {
@@ -222,8 +280,8 @@ export type Database = {
           created_at?: string
           id?: string
           location?: string | null
-          media_type?: string
-          media_url?: string
+          media_type?: string | null
+          media_url?: string | null
           user_id?: string
         }
         Relationships: [
