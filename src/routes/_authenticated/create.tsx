@@ -45,21 +45,25 @@ function CreatePage() {
 
   async function handlePublish(e: React.FormEvent) {
     e.preventDefault();
-    if (!file) return;
+    const text = caption.trim();
+    if (!file && !text) return;
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() ?? "bin";
-      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from(MEDIA_BUCKET)
-        .upload(path, file, { contentType: file.type, upsert: false });
-      if (uploadError) throw uploadError;
+      let path: string | null = null;
+      if (file) {
+        const ext = file.name.split(".").pop() ?? "bin";
+        path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from(MEDIA_BUCKET)
+          .upload(path, file, { contentType: file.type, upsert: false });
+        if (uploadError) throw uploadError;
+      }
 
       const { error } = await supabase.from("posts").insert({
         user_id: user.id,
         media_url: path,
-        media_type: file.type.startsWith("video") ? "video" : "image",
-        caption: caption.trim() || null,
+        media_type: file ? (file.type.startsWith("video") ? "video" : "image") : null,
+        caption: text || null,
         location: location.trim() || null,
       });
       if (error) throw error;
@@ -78,7 +82,18 @@ function CreatePage() {
     <form onSubmit={handlePublish} className="space-y-5">
       <h1 className="font-display text-2xl font-bold">Nouvelle publication</h1>
 
-      <label className="flex aspect-square w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border brand-surface">
+      <div className="space-y-2">
+        <Label htmlFor="caption">Votre texte</Label>
+        <Textarea
+          id="caption"
+          value={caption}
+          onChange={(e) => setCaption(e.target.value)}
+          placeholder="Racontez votre moment…"
+          rows={4}
+        />
+      </div>
+
+      <label className="flex min-h-32 w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border brand-surface">
         {preview ? (
           file?.type.startsWith("video") ? (
             <video src={preview} className="size-full object-cover" controls playsInline />
@@ -86,9 +101,9 @@ function CreatePage() {
             <img src={preview} alt="Aperçu" className="size-full object-cover" />
           )
         ) : (
-          <span className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+          <span className="flex flex-col items-center gap-2 px-4 py-8 text-center text-sm text-muted-foreground">
             <ImagePlus className="size-10 text-primary" />
-            Choisir une photo ou une vidéo
+            Ajouter une photo ou une vidéo (facultatif)
           </span>
         )}
         <input
@@ -100,17 +115,6 @@ function CreatePage() {
       </label>
 
       <div className="space-y-2">
-        <Label htmlFor="caption">Légende</Label>
-        <Textarea
-          id="caption"
-          value={caption}
-          onChange={(e) => setCaption(e.target.value)}
-          placeholder="Racontez votre moment…"
-          rows={3}
-        />
-      </div>
-
-      <div className="space-y-2">
         <Label htmlFor="location">Lieu</Label>
         <Input
           id="location"
@@ -120,7 +124,7 @@ function CreatePage() {
         />
       </div>
 
-      <Button type="submit" className="w-full" disabled={!file || uploading}>
+      <Button type="submit" className="w-full" disabled={(!file && !caption.trim()) || uploading}>
         {uploading ? "Publication…" : "Publier"}
       </Button>
     </form>
