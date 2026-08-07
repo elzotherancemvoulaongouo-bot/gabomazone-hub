@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 export type FeedPost = {
   id: string;
   user_id: string;
-  media_url: string;
-  media_type: string;
+  media_url: string | null;
+  media_type: string | null;
   caption: string | null;
   location: string | null;
   created_at: string;
@@ -73,12 +73,16 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
         </div>
       </header>
 
-      <Media
-        path={post.media_url}
-        type={post.media_type}
-        alt={post.caption ?? "Publication"}
-        className="aspect-square w-full bg-muted object-cover"
-      />
+      {post.media_url ? (
+        <Media
+          path={post.media_url}
+          type={post.media_type ?? "image"}
+          alt={post.caption ?? "Publication"}
+          className="aspect-square w-full bg-muted object-cover"
+        />
+      ) : post.caption ? (
+        <p className="px-4 pb-1 text-base leading-relaxed">{post.caption}</p>
+      ) : null}
 
       <div className="flex items-center gap-4 px-4 pt-3">
         <button
@@ -101,7 +105,7 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
         </Link>
       </div>
 
-      {post.caption ? (
+      {post.caption && post.media_url ? (
         <p className="px-4 py-3 text-sm leading-relaxed">
           <span className="mr-2 font-semibold">{post.author?.username}</span>
           {post.caption}
