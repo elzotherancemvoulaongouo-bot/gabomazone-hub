@@ -128,6 +128,7 @@ export function ProfileView({ profile }: { profile: ProfileRow }) {
                   path={post.media_url}
                   type={post.media_type}
                   alt={post.caption ?? "Publication"}
+                  fallbackText={post.caption}
                   className="size-full object-cover"
                 />
               </Link>
