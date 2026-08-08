@@ -23,6 +23,7 @@ import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authen
 import { Route as AuthenticatedPagesRouteImport } from './routes/_authenticated/pages'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedGSlugRouteImport } from './routes/_authenticated/g.$slug'
+import { Route as AuthenticatedGroupSettingsSlugRouteImport } from './routes/_authenticated/group-settings.$slug'
 import { Route as AuthenticatedMConversationIdRouteImport } from './routes/_authenticated/m.$conversationId'
 import { Route as AuthenticatedPPostIdRouteImport } from './routes/_authenticated/p.$postId'
 import { Route as AuthenticatedPageSettingsSlugRouteImport } from './routes/_authenticated/page-settings.$slug'
@@ -100,6 +101,12 @@ const AuthenticatedGSlugRoute = AuthenticatedGSlugRouteImport.update({
   path: '/g/$slug',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGroupSettingsSlugRoute =
+  AuthenticatedGroupSettingsSlugRouteImport.update({
+    id: '/group-settings/$slug',
+    path: '/group-settings/$slug',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMConversationIdRoute =
   AuthenticatedMConversationIdRouteImport.update({
     id: '/m/$conversationId',
@@ -148,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/pages': typeof AuthenticatedPagesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/g/$slug': typeof AuthenticatedGSlugRoute
+  '/group-settings/$slug': typeof AuthenticatedGroupSettingsSlugRoute
   '/m/$conversationId': typeof AuthenticatedMConversationIdRoute
   '/p/$postId': typeof AuthenticatedPPostIdRoute
   '/page-settings/$slug': typeof AuthenticatedPageSettingsSlugRoute
@@ -169,6 +177,7 @@ export interface FileRoutesByTo {
   '/pages': typeof AuthenticatedPagesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/g/$slug': typeof AuthenticatedGSlugRoute
+  '/group-settings/$slug': typeof AuthenticatedGroupSettingsSlugRoute
   '/m/$conversationId': typeof AuthenticatedMConversationIdRoute
   '/p/$postId': typeof AuthenticatedPPostIdRoute
   '/page-settings/$slug': typeof AuthenticatedPageSettingsSlugRoute
@@ -192,6 +201,7 @@ export interface FileRoutesById {
   '/_authenticated/pages': typeof AuthenticatedPagesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/g/$slug': typeof AuthenticatedGSlugRoute
+  '/_authenticated/group-settings/$slug': typeof AuthenticatedGroupSettingsSlugRoute
   '/_authenticated/m/$conversationId': typeof AuthenticatedMConversationIdRoute
   '/_authenticated/p/$postId': typeof AuthenticatedPPostIdRoute
   '/_authenticated/page-settings/$slug': typeof AuthenticatedPageSettingsSlugRoute
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
     | '/pages'
     | '/settings'
     | '/g/$slug'
+    | '/group-settings/$slug'
     | '/m/$conversationId'
     | '/p/$postId'
     | '/page-settings/$slug'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/pages'
     | '/settings'
     | '/g/$slug'
+    | '/group-settings/$slug'
     | '/m/$conversationId'
     | '/p/$postId'
     | '/page-settings/$slug'
@@ -258,6 +270,7 @@ export interface FileRouteTypes {
     | '/_authenticated/pages'
     | '/_authenticated/settings'
     | '/_authenticated/g/$slug'
+    | '/_authenticated/group-settings/$slug'
     | '/_authenticated/m/$conversationId'
     | '/_authenticated/p/$postId'
     | '/_authenticated/page-settings/$slug'
@@ -372,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGSlugRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/group-settings/$slug': {
+      id: '/_authenticated/group-settings/$slug'
+      path: '/group-settings/$slug'
+      fullPath: '/group-settings/$slug'
+      preLoaderRoute: typeof AuthenticatedGroupSettingsSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/m/$conversationId': {
       id: '/_authenticated/m/$conversationId'
       path: '/m/$conversationId'
@@ -429,6 +449,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPagesRoute: typeof AuthenticatedPagesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedGSlugRoute: typeof AuthenticatedGSlugRoute
+  AuthenticatedGroupSettingsSlugRoute: typeof AuthenticatedGroupSettingsSlugRoute
   AuthenticatedMConversationIdRoute: typeof AuthenticatedMConversationIdRoute
   AuthenticatedPPostIdRoute: typeof AuthenticatedPPostIdRoute
   AuthenticatedPageSettingsSlugRoute: typeof AuthenticatedPageSettingsSlugRoute
@@ -449,6 +470,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPagesRoute: AuthenticatedPagesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedGSlugRoute: AuthenticatedGSlugRoute,
+  AuthenticatedGroupSettingsSlugRoute: AuthenticatedGroupSettingsSlugRoute,
   AuthenticatedMConversationIdRoute: AuthenticatedMConversationIdRoute,
   AuthenticatedPPostIdRoute: AuthenticatedPPostIdRoute,
   AuthenticatedPageSettingsSlugRoute: AuthenticatedPageSettingsSlugRoute,
@@ -468,3 +490,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
