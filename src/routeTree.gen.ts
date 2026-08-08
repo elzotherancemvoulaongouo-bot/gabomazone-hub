@@ -22,6 +22,7 @@ import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedPagesRouteImport } from './routes/_authenticated/pages'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedGSlugRouteImport } from './routes/_authenticated/g.$slug'
 import { Route as AuthenticatedMConversationIdRouteImport } from './routes/_authenticated/m.$conversationId'
 import { Route as AuthenticatedPPostIdRouteImport } from './routes/_authenticated/p.$postId'
 import { Route as AuthenticatedPgSlugRouteImport } from './routes/_authenticated/pg.$slug'
@@ -93,6 +94,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGSlugRoute = AuthenticatedGSlugRouteImport.update({
+  id: '/g/$slug',
+  path: '/g/$slug',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMConversationIdRoute =
   AuthenticatedMConversationIdRouteImport.update({
     id: '/m/$conversationId',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/pages': typeof AuthenticatedPagesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/g/$slug': typeof AuthenticatedGSlugRoute
   '/m/$conversationId': typeof AuthenticatedMConversationIdRoute
   '/p/$postId': typeof AuthenticatedPPostIdRoute
   '/pg/$slug': typeof AuthenticatedPgSlugRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/pages': typeof AuthenticatedPagesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/g/$slug': typeof AuthenticatedGSlugRoute
   '/m/$conversationId': typeof AuthenticatedMConversationIdRoute
   '/p/$postId': typeof AuthenticatedPPostIdRoute
   '/pg/$slug': typeof AuthenticatedPgSlugRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/pages': typeof AuthenticatedPagesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/g/$slug': typeof AuthenticatedGSlugRoute
   '/_authenticated/m/$conversationId': typeof AuthenticatedMConversationIdRoute
   '/_authenticated/p/$postId': typeof AuthenticatedPPostIdRoute
   '/_authenticated/pg/$slug': typeof AuthenticatedPgSlugRoute
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/pages'
     | '/settings'
+    | '/g/$slug'
     | '/m/$conversationId'
     | '/p/$postId'
     | '/pg/$slug'
@@ -214,6 +224,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/pages'
     | '/settings'
+    | '/g/$slug'
     | '/m/$conversationId'
     | '/p/$postId'
     | '/pg/$slug'
@@ -234,6 +245,7 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications'
     | '/_authenticated/pages'
     | '/_authenticated/settings'
+    | '/_authenticated/g/$slug'
     | '/_authenticated/m/$conversationId'
     | '/_authenticated/p/$postId'
     | '/_authenticated/pg/$slug'
@@ -340,6 +352,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/g/$slug': {
+      id: '/_authenticated/g/$slug'
+      path: '/g/$slug'
+      fullPath: '/g/$slug'
+      preLoaderRoute: typeof AuthenticatedGSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/m/$conversationId': {
       id: '/_authenticated/m/$conversationId'
       path: '/m/$conversationId'
@@ -389,6 +408,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPagesRoute: typeof AuthenticatedPagesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedGSlugRoute: typeof AuthenticatedGSlugRoute
   AuthenticatedMConversationIdRoute: typeof AuthenticatedMConversationIdRoute
   AuthenticatedPPostIdRoute: typeof AuthenticatedPPostIdRoute
   AuthenticatedPgSlugRoute: typeof AuthenticatedPgSlugRoute
@@ -407,6 +427,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPagesRoute: AuthenticatedPagesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedGSlugRoute: AuthenticatedGSlugRoute,
   AuthenticatedMConversationIdRoute: AuthenticatedMConversationIdRoute,
   AuthenticatedPPostIdRoute: AuthenticatedPPostIdRoute,
   AuthenticatedPgSlugRoute: AuthenticatedPgSlugRoute,
