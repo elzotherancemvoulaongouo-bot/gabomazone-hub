@@ -1,15 +1,38 @@
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Media } from "@/components/Media";
 import { UserAvatar } from "@/components/Avatar";
 import { timeAgo } from "@/lib/media";
 import { cn } from "@/lib/utils";
+import { deletePost } from "@/lib/posts";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 export type FeedPost = {
   id: string;
   user_id: string;
+  page_id?: string | null;
+  group_id?: string | null;
+  page?: { name: string; slug: string; avatar_url: string | null } | null;
+  group?: { name: string; slug: string } | null;
   media_url: string | null;
   media_type: string | null;
   caption: string | null;
@@ -26,6 +49,8 @@ export type FeedPost = {
 
 export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserId: string }) {
   const queryClient = useQueryClient();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const isOwner = post.user_id === currentUserId;
   const liked = post.likes.some((l) => l.user_id === currentUserId);
   const likeCount = post.likes.length;
   const commentCount = post.comments[0]?.count ?? 0;
@@ -52,6 +77,15 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
     },
   });
 
+  const remove = useMutation({
+    mutationFn: () => deletePost(post.id),
+    onSuccess: async () => {
+      toast.success("Publication supprimée");
+      await queryClient.invalidateQueries();
+    },
+    onError: (err) => toast.error(err instanceof Error ? err.message : "Suppression impossible"),
+  });
+
   return (
     <article className="overflow-hidden rounded-2xl border border-border/70 brand-surface">
       <header className="flex items-center gap-3 px-4 py-3">
@@ -67,10 +101,64 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
             {post.author?.display_name || post.author?.username}
           </Link>
           <p className="truncate text-xs text-muted-foreground">
+            {post.page ? `${post.page.name} · ` : post.group ? `${post.group.name} · ` : ""}
             {post.location ? `${post.location} · ` : ""}
             {timeAgo(post.created_at)}
           </p>
         </div>
+
+        {isOwner ? (
+          <div className="ml-auto">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Options de la publication"
+                  className="rounded-full p-1.5 text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <MoreHorizontal className="size-5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/post-edit/$postId" params={{ postId: post.id }}>
+                    <Pencil className="mr-2 size-4" /> Modifier
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    setConfirmOpen(true);
+                  }}
+                >
+                  <Trash2 className="mr-2 size-4" /> Supprimer
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Supprimer cette publication ?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Cette action est définitive : la publication, ses j'aime et ses commentaires seront
+                    supprimés.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => remove.mutate()}
+                    disabled={remove.isPending}
+                  >
+                    Supprimer
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        ) : null}
       </header>
 
       {post.media_url ? (
