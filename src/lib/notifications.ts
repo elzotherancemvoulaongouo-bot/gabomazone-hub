@@ -64,6 +64,12 @@ export function useUnreadNotificationsCount(enabled: boolean) {
   return query.data?.filter((n) => !n.read_at).length ?? 0;
 }
 
+/** Unread count for a given notification type (e.g. new private messages). */
+export function useUnreadCountByType(type: NotificationType, enabled: boolean) {
+  const query = useNotifications(enabled);
+  return query.data?.filter((n) => !n.read_at && n.type === type).length ?? 0;
+}
+
 /** Subscribe once to realtime notification inserts for the signed-in user. */
 export function useNotificationsRealtime(userId: string | undefined) {
   const queryClient = useQueryClient();
