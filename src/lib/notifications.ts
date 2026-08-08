@@ -50,6 +50,16 @@ export async function markNotificationRead(id: string) {
     .is("read_at", null);
 }
 
+/** Mark all message notifications of a conversation as read. */
+export async function markConversationNotificationsRead(conversationId: string) {
+  await supabase
+    .from("notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("conversation_id", conversationId)
+    .eq("type", "message")
+    .is("read_at", null);
+}
+
 export function useNotifications(enabled: boolean) {
   return useQuery({
     queryKey: ["notifications"],
