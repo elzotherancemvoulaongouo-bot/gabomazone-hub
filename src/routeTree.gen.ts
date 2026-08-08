@@ -24,6 +24,7 @@ import { Route as AuthenticatedPagesRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMConversationIdRouteImport } from './routes/_authenticated/m.$conversationId'
 import { Route as AuthenticatedPPostIdRouteImport } from './routes/_authenticated/p.$postId'
+import { Route as AuthenticatedPgSlugRouteImport } from './routes/_authenticated/pg.$slug'
 import { Route as AuthenticatedPostEditPostIdRouteImport } from './routes/_authenticated/post-edit.$postId'
 import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated/u.$username'
 
@@ -103,6 +104,11 @@ const AuthenticatedPPostIdRoute = AuthenticatedPPostIdRouteImport.update({
   path: '/p/$postId',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPgSlugRoute = AuthenticatedPgSlugRouteImport.update({
+  id: '/pg/$slug',
+  path: '/pg/$slug',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPostEditPostIdRoute =
   AuthenticatedPostEditPostIdRouteImport.update({
     id: '/post-edit/$postId',
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/m/$conversationId': typeof AuthenticatedMConversationIdRoute
   '/p/$postId': typeof AuthenticatedPPostIdRoute
+  '/pg/$slug': typeof AuthenticatedPgSlugRoute
   '/post-edit/$postId': typeof AuthenticatedPostEditPostIdRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
 }
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/m/$conversationId': typeof AuthenticatedMConversationIdRoute
   '/p/$postId': typeof AuthenticatedPPostIdRoute
+  '/pg/$slug': typeof AuthenticatedPgSlugRoute
   '/post-edit/$postId': typeof AuthenticatedPostEditPostIdRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
 }
@@ -168,6 +176,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/m/$conversationId': typeof AuthenticatedMConversationIdRoute
   '/_authenticated/p/$postId': typeof AuthenticatedPPostIdRoute
+  '/_authenticated/pg/$slug': typeof AuthenticatedPgSlugRoute
   '/_authenticated/post-edit/$postId': typeof AuthenticatedPostEditPostIdRoute
   '/_authenticated/u/$username': typeof AuthenticatedUUsernameRoute
 }
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/m/$conversationId'
     | '/p/$postId'
+    | '/pg/$slug'
     | '/post-edit/$postId'
     | '/u/$username'
   fileRoutesByTo: FileRoutesByTo
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/m/$conversationId'
     | '/p/$postId'
+    | '/pg/$slug'
     | '/post-edit/$postId'
     | '/u/$username'
   id:
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/m/$conversationId'
     | '/_authenticated/p/$postId'
+    | '/_authenticated/pg/$slug'
     | '/_authenticated/post-edit/$postId'
     | '/_authenticated/u/$username'
   fileRoutesById: FileRoutesById
@@ -342,6 +354,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPPostIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/pg/$slug': {
+      id: '/_authenticated/pg/$slug'
+      path: '/pg/$slug'
+      fullPath: '/pg/$slug'
+      preLoaderRoute: typeof AuthenticatedPgSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/post-edit/$postId': {
       id: '/_authenticated/post-edit/$postId'
       path: '/post-edit/$postId'
@@ -372,6 +391,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedMConversationIdRoute: typeof AuthenticatedMConversationIdRoute
   AuthenticatedPPostIdRoute: typeof AuthenticatedPPostIdRoute
+  AuthenticatedPgSlugRoute: typeof AuthenticatedPgSlugRoute
   AuthenticatedPostEditPostIdRoute: typeof AuthenticatedPostEditPostIdRoute
   AuthenticatedUUsernameRoute: typeof AuthenticatedUUsernameRoute
 }
@@ -389,6 +409,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedMConversationIdRoute: AuthenticatedMConversationIdRoute,
   AuthenticatedPPostIdRoute: AuthenticatedPPostIdRoute,
+  AuthenticatedPgSlugRoute: AuthenticatedPgSlugRoute,
   AuthenticatedPostEditPostIdRoute: AuthenticatedPostEditPostIdRoute,
   AuthenticatedUUsernameRoute: AuthenticatedUUsernameRoute,
 }
