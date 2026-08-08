@@ -21,6 +21,7 @@ import {
   sendVoiceMessage,
 } from "@/lib/messages";
 import { cn } from "@/lib/utils";
+import { markConversationNotificationsRead } from "@/lib/notifications";
 
 export const Route = createFileRoute("/_authenticated/m/$conversationId")({
   head: () => ({
@@ -86,8 +87,13 @@ function ThreadPage() {
   }, [messages?.length]);
 
   useEffect(() => {
-    if (messages && messages.length > 0) void markConversationRead(conversationId, user.id);
-  }, [conversationId, messages, user.id]);
+    if (messages && messages.length > 0) {
+      void markConversationRead(conversationId, user.id);
+      void markConversationNotificationsRead(conversationId).then(() => {
+        queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      });
+    }
+  }, [conversationId, messages, user.id, queryClient]);
 
   const sendText = useMutation({
     mutationFn: () => sendTextMessage(conversationId, user.id, text),

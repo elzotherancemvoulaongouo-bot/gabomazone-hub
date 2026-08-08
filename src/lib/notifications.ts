@@ -50,6 +50,16 @@ export async function markNotificationRead(id: string) {
     .is("read_at", null);
 }
 
+/** Mark all message notifications of a conversation as read. */
+export async function markConversationNotificationsRead(conversationId: string) {
+  await supabase
+    .from("notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("conversation_id", conversationId)
+    .eq("type", "message")
+    .is("read_at", null);
+}
+
 export function useNotifications(enabled: boolean) {
   return useQuery({
     queryKey: ["notifications"],
@@ -62,6 +72,12 @@ export function useNotifications(enabled: boolean) {
 export function useUnreadNotificationsCount(enabled: boolean) {
   const query = useNotifications(enabled);
   return query.data?.filter((n) => !n.read_at).length ?? 0;
+}
+
+/** Unread count for a given notification type (e.g. new private messages). */
+export function useUnreadCountByType(type: NotificationType, enabled: boolean) {
+  const query = useNotifications(enabled);
+  return query.data?.filter((n) => !n.read_at && n.type === type).length ?? 0;
 }
 
 /** Subscribe once to realtime notification inserts for the signed-in user. */
