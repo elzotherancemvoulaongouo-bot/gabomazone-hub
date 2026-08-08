@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Bell, Compass, Home, LogOut, MessageCircle, PlusSquare, Settings, User, Users } from "lucide-react";
+import { Bell, Compass, Home, LogOut, MessageCircle, PlusSquare, Settings, Store, User, Users, UsersRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,16 @@ export function AppShell({ children }: { children: ReactNode }) {
                     {unread > 9 ? "9+" : unread}
                   </span>
                 ) : null}
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="icon" aria-label="Pages">
+              <Link to="/pages">
+                <Store className="size-5" />
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="icon" aria-label="Groupes">
+              <Link to="/groups">
+                <UsersRound className="size-5" />
               </Link>
             </Button>
             <Button asChild variant="ghost" size="icon" aria-label="Paramètres du profil">
