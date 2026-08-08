@@ -121,7 +121,7 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <Link to="/p/$postId/edit" params={{ postId: post.id }}>
+                  <Link to="/post-edit/$postId" params={{ postId: post.id }}>
                     <Pencil className="mr-2 size-4" /> Modifier
                   </Link>
                 </DropdownMenuItem>
