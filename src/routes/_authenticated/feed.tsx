@@ -3,6 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Camera } from "lucide-react";
 import { fetchFeed } from "@/lib/posts";
 import { PostCard } from "@/components/PostCard";
+import { FeedComposer } from "@/components/FeedComposer";
+import { useHiddenPostIds, useBlockedIds } from "@/lib/social";
+import { useSettings } from "@/lib/settings";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
@@ -26,17 +29,25 @@ export const Route = createFileRoute("/_authenticated/feed")({
 function FeedPage() {
   const { user } = Route.useRouteContext();
   const { data, isPending } = useQuery({ queryKey: ["feed"], queryFn: fetchFeed });
+  const { data: hidden } = useHiddenPostIds(user.id);
+  const { data: blocked } = useBlockedIds(user.id);
+  const { data: settings } = useSettings(user.id);
+
+  const posts = (data ?? []).filter(
+    (p) => !(hidden ?? []).includes(p.id) && !(blocked ?? []).includes(p.user_id),
+  );
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <h1 className="sr-only">Fil d'actualité Gabomazone</h1>
+      <FeedComposer userId={user.id} defaultVisibility={settings?.post_visibility ?? "public"} />
       {isPending ? (
         <>
           <Skeleton className="h-96 w-full rounded-2xl" />
           <Skeleton className="h-96 w-full rounded-2xl" />
         </>
-      ) : data && data.length > 0 ? (
-        data.map((post) => <PostCard key={post.id} post={post} currentUserId={user.id} />)
+      ) : posts.length > 0 ? (
+        posts.map((post) => <PostCard key={post.id} post={post} currentUserId={user.id} />)
       ) : (
         <div className="rounded-2xl border border-border/70 p-10 text-center brand-surface">
           <Camera className="mx-auto size-10 text-primary" />
