@@ -3,7 +3,48 @@ import type { FeedPost } from "@/components/PostCard";
 import { MEDIA_BUCKET } from "@/lib/media";
 
 export const POST_SELECT =
-  "id, user_id, page_id, group_id, media_url, media_type, caption, location, created_at, author:profiles!posts_author_profile_fkey(username, display_name, avatar_url), page:pages!posts_page_id_fkey(name, slug, avatar_url), group:groups!posts_group_id_fkey(name, slug), likes(user_id), comments(count)";
+  "id, user_id, page_id, group_id, media_url, media_type, caption, location, visibility, created_at, media:post_media(path, media_type, position), author:profiles!posts_author_profile_fkey(username, display_name, avatar_url), page:pages!posts_page_id_fkey(name, slug, avatar_url), group:groups!posts_group_id_fkey(name, slug), likes(user_id), comments(count)";
+
+export type NewPostMedia = { path: string; type: string };
+
+/** Crée une publication avec un ou plusieurs médias (le premier reste dans media_url). */
+export async function createPost(input: {
+  userId: string;
+  caption: string | null;
+  location?: string | null;
+  visibility?: string;
+  pageId?: string | null;
+  groupId?: string | null;
+  media: NewPostMedia[];
+}) {
+  const first = input.media[0] ?? null;
+  const { data, error } = await supabase
+    .from("posts")
+    .insert({
+      user_id: input.userId,
+      caption: input.caption,
+      location: input.location ?? null,
+      visibility: input.visibility ?? "public",
+      page_id: input.pageId ?? null,
+      group_id: input.groupId ?? null,
+      media_url: first?.path ?? null,
+      media_type: first?.type ?? null,
+    })
+    .select("id")
+    .single();
+  if (error) throw error;
+  if (input.media.length > 0) {
+    const rows = input.media.map((m, index) => ({
+      post_id: data.id,
+      path: m.path,
+      media_type: m.type,
+      position: index,
+    }));
+    const { error: mediaError } = await supabase.from("post_media").insert(rows);
+    if (mediaError) throw mediaError;
+  }
+  return data.id;
+}
 
 export async function fetchFeed() {
   const { data, error } = await supabase
