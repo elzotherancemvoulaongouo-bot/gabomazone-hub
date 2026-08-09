@@ -1,17 +1,30 @@
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Heart, MessageCircle, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import {
+  Bookmark,
+  EyeOff,
+  Flag,
+  Heart,
+  Link2,
+  MessageCircle,
+  MoreHorizontal,
+  Pencil,
+  Share2,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Media } from "@/components/Media";
+import { PostMediaGallery } from "@/components/PostMediaGallery";
 import { UserAvatar } from "@/components/Avatar";
 import { timeAgo } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import { deletePost } from "@/lib/posts";
+import { usePostActions, useSavedPostIds } from "@/lib/social";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -35,6 +48,8 @@ export type FeedPost = {
   group?: { name: string; slug: string } | null;
   media_url: string | null;
   media_type: string | null;
+  visibility?: string | null;
+  media?: { path: string; media_type: string | null; position: number }[] | null;
   caption: string | null;
   location: string | null;
   created_at: string;
@@ -54,6 +69,34 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
   const liked = post.likes.some((l) => l.user_id === currentUserId);
   const likeCount = post.likes.length;
   const commentCount = post.comments[0]?.count ?? 0;
+  const { data: savedIds } = useSavedPostIds(currentUserId);
+  const saved = (savedIds ?? []).includes(post.id);
+  const { toggleSave, hidePost, reportPost } = usePostActions(currentUserId);
+
+  const mediaItems =
+    post.media && post.media.length > 0
+      ? [...post.media]
+          .sort((a, b) => a.position - b.position)
+          .map((m) => ({ path: m.path, media_type: m.media_type }))
+      : post.media_url
+        ? [{ path: post.media_url, media_type: post.media_type }]
+        : [];
+
+  const postUrl =
+    typeof window !== "undefined" ? `${window.location.origin}/p/${post.id}` : `/p/${post.id}`;
+
+  async function share() {
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({ title: "Gabomazone", text: post.caption ?? "", url: postUrl });
+        return;
+      }
+      await navigator.clipboard.writeText(postUrl);
+      toast.success("Lien copié");
+    } catch {
+      /* partage annulé */
+    }
+  }
 
   const toggleLike = useMutation({
     mutationFn: async () => {
@@ -107,37 +150,69 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
           </p>
         </div>
 
-        {isOwner ? (
-          <div className="ml-auto">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  aria-label="Options de la publication"
-                  className="rounded-full p-1.5 text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <MoreHorizontal className="size-5" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link to="/post-edit/$postId" params={{ postId: post.id }}>
-                    <Pencil className="mr-2 size-4" /> Modifier
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    setConfirmOpen(true);
-                  }}
-                >
-                  <Trash2 className="mr-2 size-4" /> Supprimer
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+        <div className="ml-auto">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Options de la publication"
+                className="rounded-full p-2 text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <MoreHorizontal className="size-5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem
+                onSelect={() => toggleSave.mutate({ postId: post.id, saved })}
+              >
+                <Bookmark className={cn("mr-2 size-4", saved && "fill-primary text-primary")} />
+                {saved ? "Retirer des enregistrements" : "Enregistrer la publication"}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={async () => {
+                  await navigator.clipboard.writeText(postUrl);
+                  toast.success("Lien copié");
+                }}
+              >
+                <Link2 className="mr-2 size-4" /> Copier le lien
+              </DropdownMenuItem>
+              {!isOwner ? (
+                <>
+                  <DropdownMenuItem onSelect={() => hidePost.mutate(post.id)}>
+                    <EyeOff className="mr-2 size-4" /> Masquer la publication
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() =>
+                      reportPost.mutate({ postId: post.id, reason: "contenu_inapproprie" })
+                    }
+                  >
+                    <Flag className="mr-2 size-4" /> Signaler
+                  </DropdownMenuItem>
+                </>
+              ) : null}
+              {isOwner ? (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/post-edit/$postId" params={{ postId: post.id }}>
+                      <Pencil className="mr-2 size-4" /> Modifier la publication
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      setConfirmOpen(true);
+                    }}
+                  >
+                    <Trash2 className="mr-2 size-4" /> Supprimer
+                  </DropdownMenuItem>
+                </>
+              ) : null}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+          <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Supprimer cette publication ?</AlertDialogTitle>
@@ -157,50 +232,44 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
-          </div>
-        ) : null}
+        </div>
       </header>
 
-      {post.media_url ? (
-        <Media
-          path={post.media_url}
-          type={post.media_type ?? "image"}
-          alt={post.caption ?? "Publication"}
-          className="aspect-square w-full bg-muted object-cover"
-        />
-      ) : post.caption ? (
-        <p className="px-4 pb-1 text-base leading-relaxed">{post.caption}</p>
+      {post.caption ? (
+        <p className="px-4 pb-3 text-base leading-relaxed">{post.caption}</p>
       ) : null}
 
-      <div className="flex items-center gap-4 px-4 pt-3">
+      {mediaItems.length > 0 ? (
+        <PostMediaGallery items={mediaItems} alt={post.caption ?? "Publication"} />
+      ) : null}
+
+      <div className="mt-1 grid grid-cols-3 border-t border-border/60 px-1 py-1">
         <button
           type="button"
           onClick={() => toggleLike.mutate()}
           disabled={toggleLike.isPending}
           aria-label={liked ? "Je n'aime plus" : "J'aime"}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
+          className="flex h-11 items-center justify-center gap-2 rounded-lg text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
         >
-          <Heart className={cn("size-6", liked && "fill-primary text-primary")} />
-          {likeCount}
+          <Heart className={cn("size-5", liked && "fill-primary text-primary")} />
+          J'aime {likeCount > 0 ? likeCount : ""}
         </button>
         <Link
           to="/p/$postId"
           params={{ postId: post.id }}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
+          className="flex h-11 items-center justify-center gap-2 rounded-lg text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
         >
-          <MessageCircle className="size-6" />
-          {commentCount}
+          <MessageCircle className="size-5" />
+          Commenter {commentCount > 0 ? commentCount : ""}
         </Link>
+        <button
+          type="button"
+          onClick={share}
+          className="flex h-11 items-center justify-center gap-2 rounded-lg text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
+        >
+          <Share2 className="size-5" /> Partager
+        </button>
       </div>
-
-      {post.caption && post.media_url ? (
-        <p className="px-4 py-3 text-sm leading-relaxed">
-          <span className="mr-2 font-semibold">{post.author?.username}</span>
-          {post.caption}
-        </p>
-      ) : (
-        <div className="pb-3" />
-      )}
     </article>
   );
 }
