@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocked_users: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
@@ -198,6 +216,32 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      hidden_posts: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hidden_posts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       likes: {
         Row: {
@@ -433,6 +477,76 @@ export type Database = {
         }
         Relationships: []
       }
+      post_media: {
+        Row: {
+          created_at: string
+          id: string
+          media_type: string
+          path: string
+          position: number
+          post_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          media_type?: string
+          path: string
+          position?: number
+          post_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          media_type?: string
+          path?: string
+          position?: number
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_media_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          post_id: string
+          reason: string
+          reporter_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          post_id: string
+          reason: string
+          reporter_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          post_id?: string
+          reason?: string
+          reporter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_reports_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           caption: string | null
@@ -444,6 +558,7 @@ export type Database = {
           media_url: string | null
           page_id: string | null
           user_id: string
+          visibility: string
         }
         Insert: {
           caption?: string | null
@@ -455,6 +570,7 @@ export type Database = {
           media_url?: string | null
           page_id?: string | null
           user_id: string
+          visibility?: string
         }
         Update: {
           caption?: string | null
@@ -466,6 +582,7 @@ export type Database = {
           media_url?: string | null
           page_id?: string | null
           user_id?: string
+          visibility?: string
         }
         Relationships: [
           {
@@ -545,6 +662,95 @@ export type Database = {
           updated_at?: string
           username?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      saved_posts: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_posts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_settings: {
+        Row: {
+          autoplay_videos: boolean
+          created_at: string
+          data_saver: boolean
+          feed_sort: string
+          font_size: string
+          high_contrast: boolean
+          language: string
+          notif_comments: boolean
+          notif_friends: boolean
+          notif_likes: boolean
+          notif_messages: boolean
+          post_visibility: string
+          reduce_motion: boolean
+          theme: string
+          updated_at: string
+          user_id: string
+          who_can_friend_request: string
+          who_can_message: string
+        }
+        Insert: {
+          autoplay_videos?: boolean
+          created_at?: string
+          data_saver?: boolean
+          feed_sort?: string
+          font_size?: string
+          high_contrast?: boolean
+          language?: string
+          notif_comments?: boolean
+          notif_friends?: boolean
+          notif_likes?: boolean
+          notif_messages?: boolean
+          post_visibility?: string
+          reduce_motion?: boolean
+          theme?: string
+          updated_at?: string
+          user_id: string
+          who_can_friend_request?: string
+          who_can_message?: string
+        }
+        Update: {
+          autoplay_videos?: boolean
+          created_at?: string
+          data_saver?: boolean
+          feed_sort?: string
+          font_size?: string
+          high_contrast?: boolean
+          language?: string
+          notif_comments?: boolean
+          notif_friends?: boolean
+          notif_likes?: boolean
+          notif_messages?: boolean
+          post_visibility?: string
+          reduce_motion?: boolean
+          theme?: string
+          updated_at?: string
+          user_id?: string
+          who_can_friend_request?: string
+          who_can_message?: string
         }
         Relationships: []
       }
