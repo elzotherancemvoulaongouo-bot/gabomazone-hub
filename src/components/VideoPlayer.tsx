@@ -26,6 +26,7 @@ export function VideoPlayer({
   const ref = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(startMuted);
+  const userMuteChoice = useRef<boolean | null>(null);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
 
@@ -39,7 +40,15 @@ export function VideoPlayer({
         if (!entry) return;
         if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
           claimPlayback(el);
-          el.play().catch(() => undefined);
+          // Son activé automatiquement ; repli en muet si le navigateur le bloque.
+          const wantMuted = userMuteChoice.current ?? false;
+          el.muted = wantMuted;
+          setMuted(wantMuted);
+          el.play().catch(() => {
+            el.muted = true;
+            setMuted(true);
+            el.play().catch(() => undefined);
+          });
         } else if (!el.paused) {
           el.pause();
         }
@@ -71,6 +80,7 @@ export function VideoPlayer({
     const el = ref.current;
     if (!el) return;
     el.muted = !el.muted;
+    userMuteChoice.current = el.muted;
     setMuted(el.muted);
   }
 

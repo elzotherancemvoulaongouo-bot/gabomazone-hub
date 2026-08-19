@@ -691,6 +691,65 @@ export type Database = {
           },
         ]
       }
+      stories: {
+        Row: {
+          background: string | null
+          caption: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          media_path: string | null
+          media_type: string | null
+          user_id: string
+        }
+        Insert: {
+          background?: string | null
+          caption?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          media_path?: string | null
+          media_type?: string | null
+          user_id: string
+        }
+        Update: {
+          background?: string | null
+          caption?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          media_path?: string | null
+          media_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      story_views: {
+        Row: {
+          created_at: string
+          story_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          story_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          story_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_views_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_settings: {
         Row: {
           autoplay_videos: boolean
