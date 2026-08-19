@@ -18,7 +18,7 @@ export function VideoPlayer({
   startMuted = true,
 }: {
   src: string;
-  className?: string;
+  className?: string | undefined;
   autoPlayOnVisible?: boolean;
   onOpen?: () => void;
   startMuted?: boolean;
