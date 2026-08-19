@@ -10,10 +10,12 @@ export function PostMediaGallery({
   items,
   alt,
   className,
+  onOpenVideo,
 }: {
   items: PostMediaItem[];
   alt: string;
   className?: string;
+  onOpenVideo?: () => void;
 }) {
   const [viewer, setViewer] = useState<number | null>(null);
   if (items.length === 0) return null;
@@ -27,27 +29,44 @@ export function PostMediaGallery({
           className,
         )}
       >
-        {items.map((item, index) => (
-          <button
+        {items.map((item, index) => {
+          const isVideo = item.media_type === "video";
+          return (
+          <div
             key={`${item.path}-${index}`}
-            type="button"
-            onClick={() => item.media_type !== "video" && setViewer(index)}
             className={cn("relative shrink-0 snap-center", items.length > 1 ? "w-[86%]" : "w-full")}
-            aria-label={`Ouvrir le média ${index + 1}`}
           >
-            <Media
-              path={item.path}
-              type={item.media_type ?? "image"}
-              alt={alt}
-              className="aspect-square w-full bg-muted object-cover"
-            />
+            {isVideo ? (
+              <Media
+                path={item.path}
+                type="video"
+                alt={alt}
+                className="aspect-square w-full bg-black"
+                {...(onOpenVideo ? { onOpenVideo } : {})}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setViewer(index)}
+                className="block w-full"
+                aria-label={`Ouvrir le média ${index + 1}`}
+              >
+                <Media
+                  path={item.path}
+                  type={item.media_type ?? "image"}
+                  alt={alt}
+                  className="aspect-square w-full bg-muted object-cover"
+                />
+              </button>
+            )}
             {items.length > 1 ? (
               <span className="absolute right-2 top-2 rounded-full bg-background/80 px-2 py-0.5 text-[11px] font-medium">
                 {index + 1}/{items.length}
               </span>
             ) : null}
-          </button>
-        ))}
+          </div>
+          );
+        })}
       </div>
 
       {viewer !== null ? (
