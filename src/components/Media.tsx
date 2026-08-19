@@ -1,5 +1,6 @@
 import { useSignedUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
+import { VideoPlayer } from "@/components/VideoPlayer";
 
 export function Media({
   path,
@@ -7,12 +8,16 @@ export function Media({
   className,
   alt,
   fallbackText,
+  onOpenVideo,
+  autoPlay = true,
 }: {
   path: string | null;
   type: string | null;
   className?: string | undefined;
   alt: string;
   fallbackText?: string | null;
+  onOpenVideo?: () => void;
+  autoPlay?: boolean;
 }) {
   const { data: url, isPending } = useSignedUrl(path);
 
@@ -35,12 +40,11 @@ export function Media({
 
   if (type === "video") {
     return (
-      <video
+      <VideoPlayer
         src={url}
         className={className}
-        controls
-        playsInline
-        preload="metadata"
+        autoPlayOnVisible={autoPlay}
+        {...(onOpenVideo ? { onOpen: onOpenVideo } : {})}
       />
     );
   }
