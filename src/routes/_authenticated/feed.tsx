@@ -4,6 +4,7 @@ import { Camera } from "lucide-react";
 import { useInfiniteFeed } from "@/lib/feed";
 import { PostCard } from "@/components/PostCard";
 import { FeedComposer } from "@/components/FeedComposer";
+import { StoriesBar } from "@/components/StoriesBar";
 import { useHiddenPostIds, useBlockedIds } from "@/lib/social";
 import { useSettings } from "@/lib/settings";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -57,6 +58,7 @@ function FeedPage() {
   return (
     <div className="space-y-4">
       <h1 className="sr-only">Fil d'actualité Gabomazone</h1>
+      <StoriesBar userId={user.id} />
       <FeedComposer userId={user.id} defaultVisibility={settings?.post_visibility ?? "public"} />
       {isPending ? (
         <>

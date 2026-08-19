@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Plus } from "lucide-react";
 import { UserAvatar } from "@/components/Avatar";
 import { useStories } from "@/lib/stories";
@@ -16,6 +18,20 @@ export function StoriesBar({
   username?: string | null | undefined;
 }) {
   const { data: groups } = useStories(userId);
+  const { data: profile } = useQuery({
+    queryKey: ["profile", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("username, display_name, avatar_url")
+        .eq("id", userId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+  const myAvatar = avatarPath ?? profile?.avatar_url;
+  const myName = username ?? profile?.username;
   const [creating, setCreating] = useState(false);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
@@ -36,8 +52,8 @@ export function StoriesBar({
             aria-label="Ma story"
           >
             <UserAvatar
-              avatarPath={avatarPath}
-              name={username}
+              avatarPath={myAvatar}
+              name={myName}
               className={cn("size-16 ring-2", mine ? "ring-primary" : "ring-border")}
             />
             <span
