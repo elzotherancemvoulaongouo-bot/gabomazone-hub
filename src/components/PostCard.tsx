@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Bookmark,
@@ -64,6 +64,7 @@ export type FeedPost = {
 
 export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserId: string }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const isOwner = post.user_id === currentUserId;
   const liked = post.likes.some((l) => l.user_id === currentUserId);
@@ -240,7 +241,11 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
       ) : null}
 
       {mediaItems.length > 0 ? (
-        <PostMediaGallery items={mediaItems} alt={post.caption ?? "Publication"} />
+        <PostMediaGallery
+          items={mediaItems}
+          alt={post.caption ?? "Publication"}
+          onOpenVideo={() => navigate({ to: "/watch/$postId", params: { postId: post.id } })}
+        />
       ) : null}
 
       <div className="mt-1 grid grid-cols-3 border-t border-border/60 px-1 py-1">

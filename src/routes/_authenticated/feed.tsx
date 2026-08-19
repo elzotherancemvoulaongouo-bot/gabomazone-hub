@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { Camera } from "lucide-react";
-import { fetchFeed } from "@/lib/posts";
+import { useInfiniteFeed } from "@/lib/feed";
 import { PostCard } from "@/components/PostCard";
 import { FeedComposer } from "@/components/FeedComposer";
 import { useHiddenPostIds, useBlockedIds } from "@/lib/social";
@@ -28,14 +28,31 @@ export const Route = createFileRoute("/_authenticated/feed")({
 
 function FeedPage() {
   const { user } = Route.useRouteContext();
-  const { data, isPending } = useQuery({ queryKey: ["feed"], queryFn: fetchFeed });
+  const { posts: allPosts, isPending, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useInfiniteFeed();
   const { data: hidden } = useHiddenPostIds(user.id);
   const { data: blocked } = useBlockedIds(user.id);
   const { data: settings } = useSettings(user.id);
+  const sentinel = useRef<HTMLDivElement>(null);
 
-  const posts = (data ?? []).filter(
+  const posts = allPosts.filter(
     (p) => !(hidden ?? []).includes(p.id) && !(blocked ?? []).includes(p.user_id),
   );
+
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          void fetchNextPage();
+        }
+      },
+      { rootMargin: "600px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div className="space-y-4">
@@ -59,6 +76,9 @@ function FeedPage() {
           </Button>
         </div>
       )}
+
+      <div ref={sentinel} aria-hidden className="h-1" />
+      {isFetchingNextPage ? <Skeleton className="h-72 w-full rounded-2xl" /> : null}
     </div>
   );
 }

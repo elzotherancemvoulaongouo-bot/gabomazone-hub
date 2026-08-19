@@ -57,6 +57,22 @@ export async function fetchFeed() {
   return (data ?? []) as unknown as FeedPost[];
 }
 
+export const FEED_PAGE_SIZE = 10;
+
+/** Page de fil paginée par curseur (created_at), pour le défilement infini. */
+export async function fetchFeedPage(cursor?: string | null, limit = FEED_PAGE_SIZE) {
+  let query = supabase
+    .from("posts")
+    .select(POST_SELECT)
+    .is("group_id", null)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (cursor) query = query.lt("created_at", cursor);
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []) as unknown as FeedPost[];
+}
+
 export async function fetchPost(postId: string) {
   const { data, error } = await supabase
     .from("posts")

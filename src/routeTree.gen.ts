@@ -31,6 +31,7 @@ import { Route as AuthenticatedPgSlugRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedPostEditPostIdRouteImport } from './routes/_authenticated/post-edit.$postId'
 import { Route as AuthenticatedSettingsSectionRouteImport } from './routes/_authenticated/settings.$section'
 import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated/u.$username'
+import { Route as AuthenticatedWatchPostIdRouteImport } from './routes/_authenticated/watch.$postId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -147,6 +148,12 @@ const AuthenticatedUUsernameRoute = AuthenticatedUUsernameRouteImport.update({
   path: '/u/$username',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedWatchPostIdRoute =
+  AuthenticatedWatchPostIdRouteImport.update({
+    id: '/watch/$postId',
+    path: '/watch/$postId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/post-edit/$postId': typeof AuthenticatedPostEditPostIdRoute
   '/settings/$section': typeof AuthenticatedSettingsSectionRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
+  '/watch/$postId': typeof AuthenticatedWatchPostIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -193,6 +201,7 @@ export interface FileRoutesByTo {
   '/post-edit/$postId': typeof AuthenticatedPostEditPostIdRoute
   '/settings/$section': typeof AuthenticatedSettingsSectionRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
+  '/watch/$postId': typeof AuthenticatedWatchPostIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -218,6 +227,7 @@ export interface FileRoutesById {
   '/_authenticated/post-edit/$postId': typeof AuthenticatedPostEditPostIdRoute
   '/_authenticated/settings/$section': typeof AuthenticatedSettingsSectionRoute
   '/_authenticated/u/$username': typeof AuthenticatedUUsernameRoute
+  '/_authenticated/watch/$postId': typeof AuthenticatedWatchPostIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/post-edit/$postId'
     | '/settings/$section'
     | '/u/$username'
+    | '/watch/$postId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -266,6 +277,7 @@ export interface FileRouteTypes {
     | '/post-edit/$postId'
     | '/settings/$section'
     | '/u/$username'
+    | '/watch/$postId'
   id:
     | '__root__'
     | '/'
@@ -290,6 +302,7 @@ export interface FileRouteTypes {
     | '/_authenticated/post-edit/$postId'
     | '/_authenticated/settings/$section'
     | '/_authenticated/u/$username'
+    | '/_authenticated/watch/$postId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -454,6 +467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUUsernameRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/watch/$postId': {
+      id: '/_authenticated/watch/$postId'
+      path: '/watch/$postId'
+      fullPath: '/watch/$postId'
+      preLoaderRoute: typeof AuthenticatedWatchPostIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -489,6 +509,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPgSlugRoute: typeof AuthenticatedPgSlugRoute
   AuthenticatedPostEditPostIdRoute: typeof AuthenticatedPostEditPostIdRoute
   AuthenticatedUUsernameRoute: typeof AuthenticatedUUsernameRoute
+  AuthenticatedWatchPostIdRoute: typeof AuthenticatedWatchPostIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -510,6 +531,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPgSlugRoute: AuthenticatedPgSlugRoute,
   AuthenticatedPostEditPostIdRoute: AuthenticatedPostEditPostIdRoute,
   AuthenticatedUUsernameRoute: AuthenticatedUUsernameRoute,
+  AuthenticatedWatchPostIdRoute: AuthenticatedWatchPostIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -523,3 +545,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
