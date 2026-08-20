@@ -95,7 +95,12 @@ export function StoryViewer({
     const video = videoRef.current;
     if (!video) return;
     if (paused) video.pause();
-    else void video.play().catch(() => undefined);
+    else
+      void video.play().catch(() => {
+        // Autoplay avec son bloqué : on relance en muet.
+        video.muted = true;
+        void video.play().catch(() => undefined);
+      });
   }, [paused, mediaUrl]);
 
   // Clavier
