@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 export const MEDIA_BUCKET = "media";
 
 export async function getSignedUrl(path: string) {
+  // Les avatars issus d'un fournisseur externe (Google…) sont déjà des URLs publiques.
+  if (/^https?:\/\//i.test(path) || path.startsWith("data:")) return path;
   const { data, error } = await supabase.storage
     .from(MEDIA_BUCKET)
     .createSignedUrl(path, 60 * 60);
