@@ -1,0 +1,1 @@
+DELETE FROM public.stories WHERE caption LIKE 'Statut test auto%';
