@@ -31,6 +31,17 @@ export type StoryGroup = {
 const STORY_SELECT =
   "id, user_id, media_path, media_type, caption, background, created_at, expires_at";
 
+/** Fonds disponibles pour les statuts écrits. */
+export const STORY_BACKGROUNDS = [
+  { id: "sunset", label: "Coucher de soleil", className: "bg-gradient-to-br from-primary to-amber-500" },
+  { id: "night", label: "Nuit", className: "bg-gradient-to-br from-slate-900 to-slate-600" },
+  { id: "forest", label: "Forêt", className: "bg-gradient-to-br from-emerald-700 to-lime-500" },
+  { id: "ocean", label: "Océan", className: "bg-gradient-to-br from-sky-700 to-cyan-400" },
+  { id: "berry", label: "Baie", className: "bg-gradient-to-br from-rose-700 to-fuchsia-500" },
+] as const satisfies ReadonlyArray<{ id: string; label: string; className: string }>;
+
+export type StoryBackgroundId = (typeof STORY_BACKGROUNDS)[number]["id"];
+
 /** Stories actives (non expirées) visibles par l'utilisateur, groupées par auteur. */
 export function useStories(currentUserId: string) {
   const queryClient = useQueryClient();
