@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus } from "lucide-react";
-import { UserAvatar } from "@/components/Avatar";
+import { Plus, Type as TypeIcon } from "lucide-react";
 import { useStories } from "@/lib/stories";
+import { StoryThumb } from "@/components/StoryThumb";
 import { StoryViewer } from "@/components/StoryViewer";
-import { CreateStoryDialog } from "@/components/CreateStoryDialog";
+import { CreateStoryDialog, type StoryDraft } from "@/components/CreateStoryDialog";
 import { cn } from "@/lib/utils";
 
 export function StoriesBar({
@@ -32,38 +32,59 @@ export function StoriesBar({
   });
   const myAvatar = avatarPath ?? profile?.avatar_url;
   const myName = username ?? profile?.username;
-  const [creating, setCreating] = useState(false);
+  const [draft, setDraft] = useState<StoryDraft | null>(null);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const list = groups ?? [];
   const mine = list.find((g) => g.userId === userId);
+  const myLatest = mine?.stories.at(-1);
 
   return (
     <section className="rounded-2xl border border-border/70 brand-surface p-3">
-      <h2 className="sr-only">Stories</h2>
+      <h2 className="sr-only">Statuts</h2>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*,video/*"
+        hidden
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          e.target.value = "";
+          if (file) setDraft({ mode: "media", file });
+        }}
+      />
+
       <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div className="relative flex w-16 shrink-0 flex-col items-center gap-1">
           <button
             type="button"
-            onClick={() =>
-              mine ? setViewerIndex(list.indexOf(mine)) : setCreating(true)
-            }
-            className="relative"
-            aria-label="Ma story"
+            onClick={() => (mine ? setViewerIndex(list.indexOf(mine)) : inputRef.current?.click())}
+            aria-label={mine ? "Voir votre story" : "Créer un statut"}
           >
-            <UserAvatar
-              avatarPath={myAvatar}
-              name={myName}
-              className={cn("size-16 ring-2", mine ? "ring-primary" : "ring-border")}
+            <StoryThumb
+              story={myLatest}
+              fallbackAvatar={myAvatar}
+              fallbackName={myName}
+              className={cn("ring-2", mine ? "ring-primary" : "ring-border")}
             />
           </button>
           <button
             type="button"
-            aria-label="Ajouter une story"
-            onClick={() => setCreating(true)}
+            aria-label="Ajouter un statut photo ou vidéo"
+            onClick={() => inputRef.current?.click()}
             className="absolute right-0 top-[42px] flex size-6 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground"
           >
             <Plus className="size-4" />
+          </button>
+          <button
+            type="button"
+            aria-label="Créer un statut écrit"
+            onClick={() => setDraft({ mode: "text" })}
+            className="absolute left-0 top-[42px] flex size-6 items-center justify-center rounded-full border-2 border-background bg-secondary text-foreground"
+          >
+            <TypeIcon className="size-3.5" />
           </button>
           <span className="w-full truncate text-center text-[11px] text-muted-foreground">
             Votre story
@@ -79,11 +100,12 @@ export function StoriesBar({
                 onClick={() => setViewerIndex(list.indexOf(group))}
                 aria-label={`Story de ${group.displayName ?? group.username}`}
               >
-                <UserAvatar
-                  avatarPath={group.avatarUrl}
-                  name={group.username}
+                <StoryThumb
+                  story={group.stories[0]}
+                  fallbackAvatar={group.avatarUrl}
+                  fallbackName={group.username}
                   className={cn(
-                    "size-16 ring-2",
+                    "ring-2",
                     group.hasUnseen ? "ring-primary" : "ring-border/60 opacity-80",
                   )}
                 />
@@ -95,7 +117,7 @@ export function StoriesBar({
           ))}
       </div>
 
-      <CreateStoryDialog userId={userId} open={creating} onOpenChange={setCreating} />
+      <CreateStoryDialog userId={userId} draft={draft} onOpenChange={() => setDraft(null)} />
       {viewerIndex !== null && list[viewerIndex] ? (
         <StoryViewer
           groups={list}
