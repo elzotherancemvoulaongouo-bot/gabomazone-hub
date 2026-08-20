@@ -168,9 +168,13 @@ export function useCreateStory(userId: string) {
 }
 
 export async function markStorySeen(storyId: string, userId: string) {
+  // ON CONFLICT DO NOTHING : ne nécessite que le droit d'insertion.
   await supabase
     .from("story_views")
-    .upsert({ story_id: storyId, user_id: userId }, { onConflict: "story_id,user_id" });
+    .upsert(
+      { story_id: storyId, user_id: userId },
+      { onConflict: "story_id,user_id", ignoreDuplicates: true },
+    );
 }
 
 export async function deleteStory(storyId: string) {

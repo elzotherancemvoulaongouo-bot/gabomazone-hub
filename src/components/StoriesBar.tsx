@@ -42,7 +42,7 @@ export function StoriesBar({
     <section className="rounded-2xl border border-border/70 brand-surface p-3">
       <h2 className="sr-only">Stories</h2>
       <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div className="flex w-16 shrink-0 flex-col items-center gap-1">
+        <div className="relative flex w-16 shrink-0 flex-col items-center gap-1">
           <button
             type="button"
             onClick={() =>
@@ -56,15 +56,14 @@ export function StoriesBar({
               name={myName}
               className={cn("size-16 ring-2", mine ? "ring-primary" : "ring-border")}
             />
-            <span
-              onClick={(e) => {
-                e.stopPropagation();
-                setCreating(true);
-              }}
-              className="absolute -bottom-0.5 -right-0.5 flex size-6 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground"
-            >
-              <Plus className="size-4" />
-            </span>
+          </button>
+          <button
+            type="button"
+            aria-label="Ajouter une story"
+            onClick={() => setCreating(true)}
+            className="absolute right-0 top-[42px] flex size-6 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground"
+          >
+            <Plus className="size-4" />
           </button>
           <span className="w-full truncate text-center text-[11px] text-muted-foreground">
             Votre story
