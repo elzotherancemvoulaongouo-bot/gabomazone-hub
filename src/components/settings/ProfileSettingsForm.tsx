@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { MEDIA_BUCKET } from "@/lib/media";
+import { MEDIA_BUCKET, useSignedUrl } from "@/lib/media";
 import { UserAvatar } from "@/components/Avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +45,7 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<FormState>(EMPTY);
   const [avatarPath, setAvatarPath] = useState<string | null>(null);
+  const [coverPath, setCoverPath] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
   const { data, isPending } = useQuery({
@@ -77,24 +78,29 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
       bio: data.bio ?? "",
     });
     setAvatarPath(data.avatar_url ?? null);
+    setCoverPath((data as { cover_url?: string | null }).cover_url ?? null);
   }, [data]);
 
   function set<K extends keyof FormState>(key: K, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  async function onAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function uploadImage(
+    e: React.ChangeEvent<HTMLInputElement>,
+    kind: "avatar" | "cover",
+  ) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
     try {
       const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `${userId}/avatar-${crypto.randomUUID()}.${ext}`;
+      const path = `${userId}/${kind}-${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage
         .from(MEDIA_BUCKET)
         .upload(path, file, { contentType: file.type, upsert: false });
       if (error) throw error;
-      setAvatarPath(path);
+      if (kind === "avatar") setAvatarPath(path);
+      else setCoverPath(path);
       toast.success("Photo prête, n'oubliez pas d'enregistrer.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Échec du téléversement");
@@ -125,6 +131,7 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
           website: form.website.trim() || null,
           bio: form.bio.trim() || null,
           avatar_url: avatarPath,
+          cover_url: coverPath,
         })
         .eq("id", userId);
       if (error) throw error;
@@ -146,13 +153,37 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
         save.mutate();
       }}
     >
-      <div className="flex items-center gap-4">
-        <UserAvatar avatarPath={avatarPath} name={form.username} className="size-20" />
-        <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm">
-          <Camera className="size-4 text-primary" />
-          {uploading ? "Téléversement…" : "Changer la photo"}
-          <input type="file" accept="image/*" className="hidden" onChange={onAvatarChange} />
-        </label>
+      <div className="space-y-4">
+        <div className="relative h-32 overflow-hidden rounded-2xl border border-border/70 bg-secondary">
+          <CoverPreview path={coverPath} />
+          <label className="absolute bottom-2 right-2 inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-lg bg-background/85 px-3 py-1.5 text-xs font-medium backdrop-blur">
+            <Camera className="size-4 text-primary" />
+            {coverPath ? "Changer la couverture" : "Ajouter une couverture"}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => uploadImage(e, "cover")}
+            />
+          </label>
+        </div>
+        <div className="flex items-center gap-4">
+          <label className="relative cursor-pointer">
+            <UserAvatar avatarPath={avatarPath} name={form.username} className="size-20" />
+            <span className="absolute -bottom-1 -right-1 grid size-7 place-items-center rounded-full bg-primary text-primary-foreground">
+              <Camera className="size-4" />
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => uploadImage(e, "avatar")}
+            />
+          </label>
+          <p className="text-sm text-muted-foreground">
+            {uploading ? "Téléversement…" : "Touchez la photo pour la changer."}
+          </p>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -203,6 +234,12 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
       </Button>
     </form>
   );
+}
+
+function CoverPreview({ path }: { path: string | null }) {
+  const { data: url } = useSignedUrl(path);
+  if (!url) return <div className="size-full brand-surface" />;
+  return <img src={url} alt="Photo de couverture" className="size-full object-cover" />;
 }
 
 function Field({
