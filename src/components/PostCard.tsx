@@ -44,6 +44,8 @@ export type FeedPost = {
   user_id: string;
   page_id?: string | null;
   group_id?: string | null;
+  as_community?: boolean | null;
+
   page?: { name: string; slug: string; avatar_url: string | null } | null;
   group?: { name: string; slug: string; avatar_url?: string | null } | null;
   media_url: string | null;
