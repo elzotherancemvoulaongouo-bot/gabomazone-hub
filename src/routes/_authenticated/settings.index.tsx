@@ -41,7 +41,7 @@ const ICONS = {
   file: FileText,
 } as const;
 
-export const Route = createFileRoute("/_authenticated/settings")({
+export const Route = createFileRoute("/_authenticated/settings/")({
   head: () => ({
     meta: [
       { title: "Paramètres du profil — Gabomazone" },

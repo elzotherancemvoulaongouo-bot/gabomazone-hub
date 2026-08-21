@@ -21,7 +21,6 @@ import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedPagesRouteImport } from './routes/_authenticated/pages'
-import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedGSlugRouteImport } from './routes/_authenticated/g.$slug'
 import { Route as AuthenticatedGroupSettingsSlugRouteImport } from './routes/_authenticated/group-settings.$slug'
 import { Route as AuthenticatedMConversationIdRouteImport } from './routes/_authenticated/m.$conversationId'
@@ -29,6 +28,7 @@ import { Route as AuthenticatedPPostIdRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPageSettingsSlugRouteImport } from './routes/_authenticated/page-settings.$slug'
 import { Route as AuthenticatedPgSlugRouteImport } from './routes/_authenticated/pg.$slug'
 import { Route as AuthenticatedPostEditPostIdRouteImport } from './routes/_authenticated/post-edit.$postId'
+import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings.index'
 import { Route as AuthenticatedSettingsSectionRouteImport } from './routes/_authenticated/settings.$section'
 import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated/u.$username'
 import { Route as AuthenticatedWatchPostIdRouteImport } from './routes/_authenticated/watch.$postId'
@@ -93,11 +93,6 @@ const AuthenticatedPagesRoute = AuthenticatedPagesRouteImport.update({
   path: '/pages',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedGSlugRoute = AuthenticatedGSlugRouteImport.update({
   id: '/g/$slug',
   path: '/g/$slug',
@@ -137,11 +132,17 @@ const AuthenticatedPostEditPostIdRoute =
     path: '/post-edit/$postId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSettingsIndexRoute =
+  AuthenticatedSettingsIndexRouteImport.update({
+    id: '/settings/',
+    path: '/settings/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSettingsSectionRoute =
   AuthenticatedSettingsSectionRouteImport.update({
-    id: '/$section',
-    path: '/$section',
-    getParentRoute: () => AuthenticatedSettingsRoute,
+    id: '/settings/$section',
+    path: '/settings/$section',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedUUsernameRoute = AuthenticatedUUsernameRouteImport.update({
   id: '/u/$username',
@@ -167,7 +168,6 @@ export interface FileRoutesByFullPath {
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/pages': typeof AuthenticatedPagesRoute
-  '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/g/$slug': typeof AuthenticatedGSlugRoute
   '/group-settings/$slug': typeof AuthenticatedGroupSettingsSlugRoute
   '/m/$conversationId': typeof AuthenticatedMConversationIdRoute
@@ -178,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/settings/$section': typeof AuthenticatedSettingsSectionRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
   '/watch/$postId': typeof AuthenticatedWatchPostIdRoute
+  '/settings/': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -191,7 +192,6 @@ export interface FileRoutesByTo {
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/pages': typeof AuthenticatedPagesRoute
-  '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/g/$slug': typeof AuthenticatedGSlugRoute
   '/group-settings/$slug': typeof AuthenticatedGroupSettingsSlugRoute
   '/m/$conversationId': typeof AuthenticatedMConversationIdRoute
@@ -202,6 +202,7 @@ export interface FileRoutesByTo {
   '/settings/$section': typeof AuthenticatedSettingsSectionRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
   '/watch/$postId': typeof AuthenticatedWatchPostIdRoute
+  '/settings': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -217,7 +218,6 @@ export interface FileRoutesById {
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/pages': typeof AuthenticatedPagesRoute
-  '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/_authenticated/g/$slug': typeof AuthenticatedGSlugRoute
   '/_authenticated/group-settings/$slug': typeof AuthenticatedGroupSettingsSlugRoute
   '/_authenticated/m/$conversationId': typeof AuthenticatedMConversationIdRoute
@@ -228,6 +228,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/$section': typeof AuthenticatedSettingsSectionRoute
   '/_authenticated/u/$username': typeof AuthenticatedUUsernameRoute
   '/_authenticated/watch/$postId': typeof AuthenticatedWatchPostIdRoute
+  '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -243,7 +244,6 @@ export interface FileRouteTypes {
     | '/messages'
     | '/notifications'
     | '/pages'
-    | '/settings'
     | '/g/$slug'
     | '/group-settings/$slug'
     | '/m/$conversationId'
@@ -254,6 +254,7 @@ export interface FileRouteTypes {
     | '/settings/$section'
     | '/u/$username'
     | '/watch/$postId'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -267,7 +268,6 @@ export interface FileRouteTypes {
     | '/messages'
     | '/notifications'
     | '/pages'
-    | '/settings'
     | '/g/$slug'
     | '/group-settings/$slug'
     | '/m/$conversationId'
@@ -278,6 +278,7 @@ export interface FileRouteTypes {
     | '/settings/$section'
     | '/u/$username'
     | '/watch/$postId'
+    | '/settings'
   id:
     | '__root__'
     | '/'
@@ -292,7 +293,6 @@ export interface FileRouteTypes {
     | '/_authenticated/messages'
     | '/_authenticated/notifications'
     | '/_authenticated/pages'
-    | '/_authenticated/settings'
     | '/_authenticated/g/$slug'
     | '/_authenticated/group-settings/$slug'
     | '/_authenticated/m/$conversationId'
@@ -303,6 +303,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/$section'
     | '/_authenticated/u/$username'
     | '/_authenticated/watch/$postId'
+    | '/_authenticated/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -397,13 +398,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPagesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/g/$slug': {
       id: '/_authenticated/g/$slug'
       path: '/g/$slug'
@@ -453,12 +447,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPostEditPostIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/settings/': {
+      id: '/_authenticated/settings/'
+      path: '/settings'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof AuthenticatedSettingsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings/$section': {
       id: '/_authenticated/settings/$section'
-      path: '/$section'
+      path: '/settings/$section'
       fullPath: '/settings/$section'
       preLoaderRoute: typeof AuthenticatedSettingsSectionRouteImport
-      parentRoute: typeof AuthenticatedSettingsRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/u/$username': {
       id: '/_authenticated/u/$username'
@@ -477,19 +478,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthenticatedSettingsRouteChildren {
-  AuthenticatedSettingsSectionRoute: typeof AuthenticatedSettingsSectionRoute
-}
-
-const AuthenticatedSettingsRouteChildren: AuthenticatedSettingsRouteChildren = {
-  AuthenticatedSettingsSectionRoute: AuthenticatedSettingsSectionRoute,
-}
-
-const AuthenticatedSettingsRouteWithChildren =
-  AuthenticatedSettingsRoute._addFileChildren(
-    AuthenticatedSettingsRouteChildren,
-  )
-
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
   AuthenticatedExploreRoute: typeof AuthenticatedExploreRoute
@@ -500,7 +488,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPagesRoute: typeof AuthenticatedPagesRoute
-  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
   AuthenticatedGSlugRoute: typeof AuthenticatedGSlugRoute
   AuthenticatedGroupSettingsSlugRoute: typeof AuthenticatedGroupSettingsSlugRoute
   AuthenticatedMConversationIdRoute: typeof AuthenticatedMConversationIdRoute
@@ -508,8 +495,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPageSettingsSlugRoute: typeof AuthenticatedPageSettingsSlugRoute
   AuthenticatedPgSlugRoute: typeof AuthenticatedPgSlugRoute
   AuthenticatedPostEditPostIdRoute: typeof AuthenticatedPostEditPostIdRoute
+  AuthenticatedSettingsSectionRoute: typeof AuthenticatedSettingsSectionRoute
   AuthenticatedUUsernameRoute: typeof AuthenticatedUUsernameRoute
   AuthenticatedWatchPostIdRoute: typeof AuthenticatedWatchPostIdRoute
+  AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -522,7 +511,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPagesRoute: AuthenticatedPagesRoute,
-  AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
   AuthenticatedGSlugRoute: AuthenticatedGSlugRoute,
   AuthenticatedGroupSettingsSlugRoute: AuthenticatedGroupSettingsSlugRoute,
   AuthenticatedMConversationIdRoute: AuthenticatedMConversationIdRoute,
@@ -530,8 +518,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPageSettingsSlugRoute: AuthenticatedPageSettingsSlugRoute,
   AuthenticatedPgSlugRoute: AuthenticatedPgSlugRoute,
   AuthenticatedPostEditPostIdRoute: AuthenticatedPostEditPostIdRoute,
+  AuthenticatedSettingsSectionRoute: AuthenticatedSettingsSectionRoute,
   AuthenticatedUUsernameRoute: AuthenticatedUUsernameRoute,
   AuthenticatedWatchPostIdRoute: AuthenticatedWatchPostIdRoute,
+  AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
