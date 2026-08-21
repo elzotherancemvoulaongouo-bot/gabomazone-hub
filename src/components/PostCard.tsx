@@ -45,7 +45,7 @@ export type FeedPost = {
   page_id?: string | null;
   group_id?: string | null;
   page?: { name: string; slug: string; avatar_url: string | null } | null;
-  group?: { name: string; slug: string } | null;
+  group?: { name: string; slug: string; avatar_url?: string | null } | null;
   media_url: string | null;
   media_type: string | null;
   visibility?: string | null;
@@ -133,23 +133,64 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
   return (
     <article className="overflow-hidden rounded-2xl border border-border/70 brand-surface">
       <header className="flex items-center gap-3 px-4 py-3">
-        <Link to="/u/$username" params={{ username: post.author?.username ?? "" }}>
-          <UserAvatar avatarPath={post.author?.avatar_url} name={post.author?.username} />
-        </Link>
-        <div className="min-w-0">
-          <Link
-            to="/u/$username"
-            params={{ username: post.author?.username ?? "" }}
-            className="block truncate text-sm font-semibold"
-          >
-            {post.author?.display_name || post.author?.username}
+        {post.page ? (
+          <Link to="/pg/$slug" params={{ slug: post.page.slug }}>
+            <UserAvatar avatarPath={post.page.avatar_url} name={post.page.name} />
           </Link>
+        ) : post.group ? (
+          <Link to="/g/$slug" params={{ slug: post.group.slug }}>
+            <UserAvatar avatarPath={post.group.avatar_url ?? null} name={post.group.name} />
+          </Link>
+        ) : (
+          <Link to="/u/$username" params={{ username: post.author?.username ?? "" }}>
+            <UserAvatar avatarPath={post.author?.avatar_url} name={post.author?.username} />
+          </Link>
+        )}
+        <div className="min-w-0">
+          {post.page ? (
+            <Link
+              to="/pg/$slug"
+              params={{ slug: post.page.slug }}
+              className="block truncate text-sm font-semibold"
+            >
+              {post.page.name}
+            </Link>
+          ) : post.group ? (
+            <Link
+              to="/g/$slug"
+              params={{ slug: post.group.slug }}
+              className="block truncate text-sm font-semibold"
+            >
+              {post.group.name}
+            </Link>
+          ) : (
+            <Link
+              to="/u/$username"
+              params={{ username: post.author?.username ?? "" }}
+              className="block truncate text-sm font-semibold"
+            >
+              {post.author?.display_name || post.author?.username}
+            </Link>
+          )}
           <p className="truncate text-xs text-muted-foreground">
-            {post.page ? `${post.page.name} · ` : post.group ? `${post.group.name} · ` : ""}
+            {post.group ? (
+              <>
+                Publié par{" "}
+                <Link
+                  to="/u/$username"
+                  params={{ username: post.author?.username ?? "" }}
+                  className="font-medium text-foreground/80"
+                >
+                  {post.author?.display_name || post.author?.username}
+                </Link>
+                {" · "}
+              </>
+            ) : null}
             {post.location ? `${post.location} · ` : ""}
             {timeAgo(post.created_at)}
           </p>
         </div>
+
 
         <div className="ml-auto">
           <DropdownMenu>
