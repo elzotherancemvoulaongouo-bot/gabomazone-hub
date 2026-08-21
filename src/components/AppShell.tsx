@@ -16,7 +16,9 @@ import {
   UsersRound,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { UserAvatar } from "@/components/Avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { useApplyAppearance, useSettings } from "@/lib/settings";
@@ -54,6 +56,19 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { data: settings } = useSettings(user?.id);
   useApplyAppearance(settings);
   const [search, setSearch] = useState("");
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("username, display_name, avatar_url")
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: Boolean(user?.id),
+  });
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -111,7 +126,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Menu du compte">
-                  <User className="size-5" />
+                  <UserAvatar
+                    avatarPath={profile?.avatar_url}
+                    name={profile?.username ?? undefined}
+                    className="size-7 ring-1 ring-primary/40"
+                  />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">

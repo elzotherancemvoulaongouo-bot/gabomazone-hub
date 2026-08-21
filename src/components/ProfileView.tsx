@@ -9,6 +9,7 @@ import { FriendButton } from "@/components/FriendButton";
 import { MessageButton } from "@/components/MessageButton";
 import { useAuth } from "@/lib/auth";
 import { MapPin, Cake, Mail, Phone, Globe } from "lucide-react";
+import { useSignedUrl } from "@/lib/media";
 
 export type ProfileRow = {
   id: string;
@@ -25,7 +26,19 @@ export type ProfileRow = {
   phone?: string | null;
   contact_email?: string | null;
   website?: string | null;
+  cover_url?: string | null;
 };
+
+function ProfileCover({ path }: { path: string | null }) {
+  const { data: url } = useSignedUrl(path);
+  return (
+    <div className="h-36 overflow-hidden rounded-2xl border border-border/70 brand-surface sm:h-44">
+      {url ? (
+        <img src={url} alt="Photo de couverture" className="size-full object-cover" />
+      ) : null}
+    </div>
+  );
+}
 
 function age(birthdate?: string | null) {
   if (!birthdate) return null;
@@ -52,8 +65,13 @@ export function ProfileView({ profile }: { profile: ProfileRow }) {
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center gap-4">
-        <UserAvatar avatarPath={profile.avatar_url} name={profile.username} className="size-20" />
+      <ProfileCover path={profile.cover_url ?? null} />
+      <header className="-mt-12 flex items-end gap-4 px-1">
+        <UserAvatar
+          avatarPath={profile.avatar_url}
+          name={profile.username}
+          className="size-20 ring-4 ring-background"
+        />
         <div className="min-w-0">
           <h1 className="font-display text-xl font-bold">
             {profile.display_name || profile.username}
