@@ -16,6 +16,8 @@ export async function createPost(input: {
   visibility?: string;
   pageId?: string | null;
   groupId?: string | null;
+  /** true = publication officielle au nom de la Page / du Groupe */
+  asCommunity?: boolean;
   media: NewPostMedia[];
 }) {
   const first = input.media[0] ?? null;
@@ -28,6 +30,7 @@ export async function createPost(input: {
       visibility: input.visibility ?? "public",
       page_id: input.pageId ?? null,
       group_id: input.groupId ?? null,
+      as_community: input.asCommunity ?? Boolean(input.pageId),
       media_url: first?.path ?? null,
       media_type: first?.type ?? null,
     })
