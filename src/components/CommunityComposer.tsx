@@ -62,19 +62,9 @@ export function CommunityComposer({
         location: location.trim() || null,
         pageId: pageId ?? null,
         groupId: groupId ?? null,
+        asCommunity,
         media: uploaded,
       });
-      if (asCommunity) {
-        // marque la publication comme officielle (identité de la Page/du Groupe)
-        const { data } = await supabase
-          .from("posts")
-          .select("id")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (data) await supabase.from("posts").update({ as_community: true }).eq("id", data.id);
-      }
     },
     onSuccess: async () => {
       setCaption("");
