@@ -62,7 +62,18 @@ export type FeedPost = {
   comments: { count: number }[];
 };
 
+export type PostIdentity = "page" | "group" | "member" | "profile";
+
+/** Identité affichée en tête de publication : Page, Groupe officiel, membre dans un groupe, ou profil. */
+export function postIdentity(post: FeedPost): PostIdentity {
+  if (post.page) return "page";
+  if (post.group) return post.as_community ? "group" : "member";
+  return "profile";
+}
+
 export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserId: string }) {
+  const identity = postIdentity(post);
+
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [confirmOpen, setConfirmOpen] = useState(false);
