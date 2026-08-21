@@ -45,7 +45,7 @@ export type FeedPost = {
   page_id?: string | null;
   group_id?: string | null;
   page?: { name: string; slug: string; avatar_url: string | null } | null;
-  group?: { name: string; slug: string } | null;
+  group?: { name: string; slug: string; avatar_url?: string | null } | null;
   media_url: string | null;
   media_type: string | null;
   visibility?: string | null;
