@@ -181,6 +181,7 @@ export type Database = {
       groups: {
         Row: {
           avatar_url: string | null
+          category: string | null
           cover_url: string | null
           created_at: string
           description: string | null
@@ -193,6 +194,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          category?: string | null
           cover_url?: string | null
           created_at?: string
           description?: string | null
@@ -205,6 +207,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          category?: string | null
           cover_url?: string | null
           created_at?: string
           description?: string | null
@@ -549,6 +552,7 @@ export type Database = {
       }
       posts: {
         Row: {
+          as_community: boolean
           caption: string | null
           created_at: string
           group_id: string | null
@@ -561,6 +565,7 @@ export type Database = {
           visibility: string
         }
         Insert: {
+          as_community?: boolean
           caption?: string | null
           created_at?: string
           group_id?: string | null
@@ -573,6 +578,7 @@ export type Database = {
           visibility?: string
         }
         Update: {
+          as_community?: boolean
           caption?: string | null
           created_at?: string
           group_id?: string | null
