@@ -3,7 +3,8 @@ import type { FeedPost } from "@/components/PostCard";
 import { MEDIA_BUCKET } from "@/lib/media";
 
 export const POST_SELECT =
-  "id, user_id, page_id, group_id, media_url, media_type, caption, location, visibility, created_at, media:post_media(path, media_type, position), author:profiles!posts_author_profile_fkey(username, display_name, avatar_url), page:pages!posts_page_id_fkey(name, slug, avatar_url), group:groups!posts_group_id_fkey(name, slug, avatar_url), likes(user_id), comments(count)";
+  "id, user_id, page_id, group_id, as_community, media_url, media_type, caption, location, visibility, created_at, media:post_media(path, media_type, position), author:profiles!posts_author_profile_fkey(username, display_name, avatar_url), page:pages!posts_page_id_fkey(name, slug, avatar_url), group:groups!posts_group_id_fkey(name, slug, avatar_url), likes(user_id), comments(count)";
+
 
 export type NewPostMedia = { path: string; type: string };
 
@@ -15,6 +16,8 @@ export async function createPost(input: {
   visibility?: string;
   pageId?: string | null;
   groupId?: string | null;
+  /** true = publication officielle au nom de la Page / du Groupe */
+  asCommunity?: boolean;
   media: NewPostMedia[];
 }) {
   const first = input.media[0] ?? null;
@@ -27,6 +30,7 @@ export async function createPost(input: {
       visibility: input.visibility ?? "public",
       page_id: input.pageId ?? null,
       group_id: input.groupId ?? null,
+      as_community: input.asCommunity ?? Boolean(input.pageId),
       media_url: first?.path ?? null,
       media_type: first?.type ?? null,
     })
