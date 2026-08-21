@@ -616,6 +616,7 @@ export type Database = {
           city: string | null
           contact_email: string | null
           country: string | null
+          cover_url: string | null
           created_at: string
           display_name: string | null
           first_name: string | null
@@ -634,6 +635,7 @@ export type Database = {
           city?: string | null
           contact_email?: string | null
           country?: string | null
+          cover_url?: string | null
           created_at?: string
           display_name?: string | null
           first_name?: string | null
@@ -652,6 +654,7 @@ export type Database = {
           city?: string | null
           contact_email?: string | null
           country?: string | null
+          cover_url?: string | null
           created_at?: string
           display_name?: string | null
           first_name?: string | null
