@@ -133,11 +133,11 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
   return (
     <article className="overflow-hidden rounded-2xl border border-border/70 brand-surface">
       <header className="flex items-center gap-3 px-4 py-3">
-        {post.page ? (
+        {identity === "page" && post.page ? (
           <Link to="/pg/$slug" params={{ slug: post.page.slug }}>
             <UserAvatar avatarPath={post.page.avatar_url} name={post.page.name} />
           </Link>
-        ) : post.group ? (
+        ) : identity === "group" && post.group ? (
           <Link to="/g/$slug" params={{ slug: post.group.slug }}>
             <UserAvatar avatarPath={post.group.avatar_url ?? null} name={post.group.name} />
           </Link>
@@ -147,7 +147,7 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
           </Link>
         )}
         <div className="min-w-0">
-          {post.page ? (
+          {identity === "page" && post.page ? (
             <Link
               to="/pg/$slug"
               params={{ slug: post.page.slug }}
@@ -155,7 +155,7 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
             >
               {post.page.name}
             </Link>
-          ) : post.group ? (
+          ) : identity === "group" && post.group ? (
             <Link
               to="/g/$slug"
               params={{ slug: post.group.slug }}
@@ -172,24 +172,29 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
               {post.author?.display_name || post.author?.username}
             </Link>
           )}
+          {identity === "member" && post.group ? (
+            <p className="truncate text-xs text-muted-foreground">
+              dans{" "}
+              <Link
+                to="/g/$slug"
+                params={{ slug: post.group.slug }}
+                className="font-medium text-foreground/80"
+              >
+                {post.group.name}
+              </Link>
+            </p>
+          ) : null}
           <p className="truncate text-xs text-muted-foreground">
-            {post.group ? (
+            {identity === "group" && post.group ? (
               <>
-                Publié par{" "}
-                <Link
-                  to="/u/$username"
-                  params={{ username: post.author?.username ?? "" }}
-                  className="font-medium text-foreground/80"
-                >
-                  {post.author?.display_name || post.author?.username}
-                </Link>
-                {" · "}
+                Publication officielle du groupe{" · "}
               </>
             ) : null}
             {post.location ? `${post.location} · ` : ""}
             {timeAgo(post.created_at)}
           </p>
         </div>
+
 
 
         <div className="ml-auto">
