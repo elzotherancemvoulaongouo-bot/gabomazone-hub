@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Globe, Mail, MapPin, Phone, Settings, Store } from "lucide-react";
+import { Globe, Mail, MapPin, Phone, Settings, Share2, Store, ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,12 +8,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserAvatar } from "@/components/Avatar";
 import { CommunityCover } from "@/components/CommunityCover";
+import { MediaGrid } from "@/components/MediaGrid";
 import { PostCard } from "@/components/PostCard";
 import { CommunityComposer } from "@/components/CommunityComposer";
 import {
   fetchPageAdmins,
   fetchPageBySlug,
-  fetchPageFollowers,
+  fetchPageFollowerProfiles,
   followPage,
   unfollowPage,
 } from "@/lib/communities";
@@ -41,7 +42,7 @@ function PageDetail() {
   const { data: page, isPending } = useQuery({ queryKey: ["page", slug], queryFn: () => fetchPageBySlug(slug) });
   const followers = useQuery({
     queryKey: ["page-followers", page?.id],
-    queryFn: () => fetchPageFollowers(page!.id),
+    queryFn: () => fetchPageFollowerProfiles(page!.id),
     enabled: Boolean(page),
   });
   const admins = useQuery({
@@ -67,7 +68,8 @@ function PageDetail() {
     },
   });
 
-  const isFollowing = (followers.data ?? []).includes(user.id);
+  const followerList = followers.data ?? [];
+  const isFollowing = followerList.some((f) => f.user_id === user.id);
   const isAdmin =
     Boolean(page && (page.owner_id === user.id || (admins.data ?? []).some((a) => a.user_id === user.id)));
 
@@ -78,31 +80,48 @@ function PageDetail() {
     onError: (err) => toast.error(err instanceof Error ? err.message : "Action impossible"),
   });
 
+  async function share() {
+    const url = typeof window !== "undefined" ? `${window.location.origin}/pg/${slug}` : `/pg/${slug}`;
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({ title: page?.name ?? "Gabomazone", url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      toast.success("Lien de la page copié");
+    } catch {
+      /* partage annulé */
+    }
+  }
+
   if (isPending) return <Skeleton className="h-64 w-full rounded-2xl" />;
   if (!page) return <p className="text-sm text-muted-foreground">Page introuvable.</p>;
+
+  const allPosts = posts.data ?? [];
+  const photos = allPosts.filter((p) => p.media_url && p.media_type !== "video");
+  const videos = allPosts.filter((p) => p.media_type === "video");
 
   return (
     <section className="space-y-5">
       <CommunityCover path={page.cover_url ?? null} />
 
-      <header className="-mt-12 space-y-3 px-1">
-        <div className="flex items-end gap-3">
+      <header className="-mt-14 space-y-3 px-1 sm:-mt-16">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           {page.avatar_url ? (
             <UserAvatar
               avatarPath={page.avatar_url}
               name={page.name}
-              className="size-20 ring-4 ring-background"
+              className="size-24 ring-4 ring-background sm:size-28"
             />
           ) : (
-            <span className="flex size-20 items-center justify-center rounded-full bg-secondary ring-4 ring-background">
-              <Store className="size-8 text-primary" />
+            <span className="flex size-24 items-center justify-center rounded-full bg-secondary ring-4 ring-background sm:size-28">
+              <Store className="size-10 text-primary" />
             </span>
           )}
           <div className="min-w-0 flex-1">
-            <h1 className="truncate font-display text-xl font-bold">{page.name}</h1>
+            <h1 className="truncate font-display text-2xl font-bold">{page.name}</h1>
             <p className="text-xs text-muted-foreground">
-              {page.category ? `${page.category} · ` : ""}@{page.slug} ·{" "}
-              {(followers.data ?? []).length} abonné(s)
+              {page.category ? `${page.category} · ` : ""}@{page.slug} · {followerList.length} abonné(s)
             </p>
           </div>
           {isAdmin ? (
@@ -114,14 +133,18 @@ function PageDetail() {
           ) : null}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant={isFollowing ? "secondary" : "default"}
             className="flex-1"
             onClick={() => toggleFollow.mutate()}
             disabled={toggleFollow.isPending}
           >
-            {isFollowing ? "Abonné" : "S'abonner"}
+            <ThumbsUp className="mr-2 size-4" />
+            {isFollowing ? "Abonné" : "Suivre"}
+          </Button>
+          <Button variant="secondary" className="flex-1" onClick={share}>
+            <Share2 className="mr-2 size-4" /> Partager
           </Button>
           {page.contact_email ? (
             <Button asChild variant="secondary" className="flex-1">
@@ -131,10 +154,15 @@ function PageDetail() {
         </div>
       </header>
 
+      {page.description ? <p className="px-1 text-sm leading-relaxed">{page.description}</p> : null}
+
       <Tabs defaultValue="posts">
-        <TabsList className="w-full justify-start">
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="posts">Publications</TabsTrigger>
           <TabsTrigger value="about">À propos</TabsTrigger>
+          <TabsTrigger value="photos">Photos</TabsTrigger>
+          <TabsTrigger value="videos">Vidéos</TabsTrigger>
+          <TabsTrigger value="followers">Abonnés</TabsTrigger>
         </TabsList>
 
         <TabsContent value="posts" className="space-y-5 pt-4">
@@ -152,10 +180,10 @@ function PageDetail() {
 
           {posts.isPending ? (
             <Skeleton className="h-64 w-full rounded-2xl" />
-          ) : (posts.data ?? []).length === 0 ? (
+          ) : allPosts.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucune publication pour le moment.</p>
           ) : (
-            (posts.data ?? []).map((p) => <PostCard key={p.id} post={p} currentUserId={user.id} />)
+            allPosts.map((p) => <PostCard key={p.id} post={p} currentUserId={user.id} />)
           )}
         </TabsContent>
 
@@ -185,6 +213,39 @@ function PageDetail() {
               ) : null}
             </ul>
           </div>
+        </TabsContent>
+
+        <TabsContent value="photos" className="pt-4">
+          <MediaGrid items={photos} empty="Aucune photo." />
+        </TabsContent>
+
+        <TabsContent value="videos" className="pt-4">
+          <MediaGrid items={videos} empty="Aucune vidéo." />
+        </TabsContent>
+
+        <TabsContent value="followers" className="space-y-2 pt-4">
+          {followerList.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Aucun abonné pour le moment.</p>
+          ) : (
+            followerList.map((f) => (
+              <Link
+                key={f.user_id}
+                to="/u/$username"
+                params={{ username: f.profile?.username ?? "" }}
+                className="flex items-center gap-3 rounded-2xl border border-border/70 brand-surface px-4 py-3"
+              >
+                <UserAvatar avatarPath={f.profile?.avatar_url ?? null} name={f.profile?.username} />
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium">
+                    {f.profile?.display_name || f.profile?.username || "Membre"}
+                  </span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    @{f.profile?.username}
+                  </span>
+                </span>
+              </Link>
+            ))
+          )}
         </TabsContent>
       </Tabs>
     </section>

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Lock, Settings, Users } from "lucide-react";
+import { Lock, Settings, Share2, UserPlus, Users } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserAvatar } from "@/components/Avatar";
 import { CommunityCover } from "@/components/CommunityCover";
+import { MediaGrid } from "@/components/MediaGrid";
 import { PostCard } from "@/components/PostCard";
 import { CommunityComposer } from "@/components/CommunityComposer";
 import { fetchGroupBySlug, fetchGroupMembers, joinGroup, leaveGroup } from "@/lib/communities";
@@ -60,7 +61,8 @@ function GroupDetail() {
   const isOwner = group?.owner_id === user.id;
   const isMember = isOwner || membership?.status === "approved";
   const isAdmin = isOwner || (membership?.status === "approved" && membership?.role === "admin");
-  const approvedCount = (members.data ?? []).filter((m) => m.status === "approved").length;
+  const approvedMembers = (members.data ?? []).filter((m) => m.status === "approved");
+  const approvedCount = approvedMembers.length;
 
   const toggleMembership = useMutation({
     mutationFn: () => (membership ? leaveGroup(group!.id, user.id) : joinGroup(group!, user.id)),
@@ -68,28 +70,51 @@ function GroupDetail() {
     onError: (err) => toast.error(err instanceof Error ? err.message : "Action impossible"),
   });
 
+  async function share(invite = false) {
+    const url = typeof window !== "undefined" ? `${window.location.origin}/g/${slug}` : `/g/${slug}`;
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({
+          title: group?.name ?? "Gabomazone",
+          text: invite ? `Rejoins le groupe ${group?.name} sur Gabomazone` : "",
+          url,
+        });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      toast.success(invite ? "Lien d'invitation copié" : "Lien du groupe copié");
+    } catch {
+      /* partage annulé */
+    }
+  }
+
   if (isPending) return <Skeleton className="h-64 w-full rounded-2xl" />;
   if (!group) return <p className="text-sm text-muted-foreground">Groupe introuvable.</p>;
+
+  const canSeeContent = isMember || !group.is_private;
+  const allPosts = posts.data ?? [];
+  const photos = allPosts.filter((p) => p.media_url && p.media_type !== "video");
+  const videos = allPosts.filter((p) => p.media_type === "video");
 
   return (
     <section className="space-y-5">
       <CommunityCover path={group.cover_url ?? null} />
 
-      <header className="-mt-12 space-y-3 px-1">
-        <div className="flex items-end gap-3">
+      <header className="-mt-14 space-y-3 px-1 sm:-mt-16">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           {group.avatar_url ? (
             <UserAvatar
               avatarPath={group.avatar_url}
               name={group.name}
-              className="size-20 ring-4 ring-background"
+              className="size-24 ring-4 ring-background sm:size-28"
             />
           ) : (
-            <span className="flex size-20 items-center justify-center rounded-full bg-secondary ring-4 ring-background">
-              {group.is_private ? <Lock className="size-8 text-primary" /> : <Users className="size-8 text-primary" />}
+            <span className="flex size-24 items-center justify-center rounded-full bg-secondary ring-4 ring-background sm:size-28">
+              {group.is_private ? <Lock className="size-10 text-primary" /> : <Users className="size-10 text-primary" />}
             </span>
           )}
           <div className="min-w-0 flex-1">
-            <h1 className="truncate font-display text-xl font-bold">{group.name}</h1>
+            <h1 className="truncate font-display text-2xl font-bold">{group.name}</h1>
             <p className="text-xs text-muted-foreground">
               {group.category ? `${group.category} · ` : ""}
               {group.is_private ? "Groupe privé" : "Groupe public"} · {approvedCount} membre(s)
@@ -104,28 +129,41 @@ function GroupDetail() {
           ) : null}
         </div>
 
-        {isOwner ? null : (
-          <Button
-            variant={membership ? "secondary" : "default"}
-            className="w-full"
-            onClick={() => toggleMembership.mutate()}
-            disabled={toggleMembership.isPending}
-          >
-            {membership?.status === "approved"
-              ? "Quitter le groupe"
-              : membership?.status === "pending"
-                ? "Demande en attente — annuler"
-                : group.is_private
-                  ? "Demander à rejoindre"
-                  : "Rejoindre"}
+        <div className="flex flex-wrap gap-2">
+          {isOwner ? null : (
+            <Button
+              variant={membership ? "secondary" : "default"}
+              className="flex-1"
+              onClick={() => toggleMembership.mutate()}
+              disabled={toggleMembership.isPending}
+            >
+              {membership?.status === "approved"
+                ? "Quitter le groupe"
+                : membership?.status === "pending"
+                  ? "Demande en attente — annuler"
+                  : group.is_private
+                    ? "Demander à rejoindre"
+                    : "Rejoindre"}
+            </Button>
+          )}
+          <Button variant="secondary" className="flex-1" onClick={() => share(true)}>
+            <UserPlus className="mr-2 size-4" /> Inviter
           </Button>
-        )}
+          <Button variant="secondary" className="flex-1" onClick={() => share(false)}>
+            <Share2 className="mr-2 size-4" /> Partager
+          </Button>
+        </div>
       </header>
 
+      {group.description ? <p className="px-1 text-sm leading-relaxed">{group.description}</p> : null}
+
       <Tabs defaultValue="posts">
-        <TabsList className="w-full justify-start">
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="posts">Publications</TabsTrigger>
           <TabsTrigger value="about">À propos</TabsTrigger>
+          <TabsTrigger value="photos">Photos</TabsTrigger>
+          <TabsTrigger value="videos">Vidéos</TabsTrigger>
+          <TabsTrigger value="members">Membres</TabsTrigger>
         </TabsList>
 
         <TabsContent value="posts" className="space-y-5 pt-4">
@@ -142,16 +180,16 @@ function GroupDetail() {
             />
           ) : null}
 
-          {group.is_private && !isMember ? (
+          {!canSeeContent ? (
             <p className="rounded-2xl border border-border/70 brand-surface px-4 py-8 text-center text-sm text-muted-foreground">
               Ce groupe est privé. Rejoignez-le pour voir les publications.
             </p>
           ) : posts.isPending ? (
             <Skeleton className="h-64 w-full rounded-2xl" />
-          ) : (posts.data ?? []).length === 0 ? (
+          ) : allPosts.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucune publication pour le moment.</p>
           ) : (
-            (posts.data ?? []).map((p) => <PostCard key={p.id} post={p} currentUserId={user.id} />)
+            allPosts.map((p) => <PostCard key={p.id} post={p} currentUserId={user.id} />)
           )}
         </TabsContent>
 
@@ -162,6 +200,44 @@ function GroupDetail() {
               {group.is_private ? "Groupe privé" : "Groupe public"} · {approvedCount} membre(s)
             </p>
           </div>
+        </TabsContent>
+
+        <TabsContent value="photos" className="pt-4">
+          <MediaGrid items={canSeeContent ? photos : []} empty="Aucune photo." />
+        </TabsContent>
+
+        <TabsContent value="videos" className="pt-4">
+          <MediaGrid items={canSeeContent ? videos : []} empty="Aucune vidéo." />
+        </TabsContent>
+
+        <TabsContent value="members" className="space-y-2 pt-4">
+          {approvedMembers.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Aucun membre pour le moment.</p>
+          ) : (
+            approvedMembers.map((m) => (
+              <Link
+                key={m.user_id}
+                to="/u/$username"
+                params={{ username: m.profile?.username ?? "" }}
+                className="flex items-center gap-3 rounded-2xl border border-border/70 brand-surface px-4 py-3"
+              >
+                <UserAvatar avatarPath={m.profile?.avatar_url ?? null} name={m.profile?.username} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium">
+                    {m.profile?.display_name || m.profile?.username || "Membre"}
+                  </span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    @{m.profile?.username}
+                  </span>
+                </span>
+                {m.role === "admin" ? (
+                  <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+                    Admin
+                  </span>
+                ) : null}
+              </Link>
+            ))
+          )}
         </TabsContent>
       </Tabs>
     </section>
