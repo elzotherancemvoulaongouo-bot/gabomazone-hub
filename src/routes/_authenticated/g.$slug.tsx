@@ -76,7 +76,7 @@ function GroupDetail() {
       if (typeof navigator !== "undefined" && navigator.share) {
         await navigator.share({
           title: group?.name ?? "Gabomazone",
-          text: invite ? `Rejoins le groupe ${group?.name} sur Gabomazone` : undefined,
+          text: invite ? `Rejoins le groupe ${group?.name} sur Gabomazone` : "",
           url,
         });
         return;
