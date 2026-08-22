@@ -24,8 +24,11 @@ export type GroupRow = {
   name: string;
   description: string | null;
   avatar_url: string | null;
+  cover_url: string | null;
+  category: string | null;
   is_private: boolean;
   created_at: string;
+
 };
 
 export type GroupMemberRow = {

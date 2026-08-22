@@ -2,8 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Lock, Settings, Users } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UserAvatar } from "@/components/Avatar";
+import { CommunityCover } from "@/components/CommunityCover";
 import { PostCard } from "@/components/PostCard";
 import { CommunityComposer } from "@/components/CommunityComposer";
 import { fetchGroupBySlug, fetchGroupMembers, joinGroup, leaveGroup } from "@/lib/communities";
@@ -39,15 +43,27 @@ function GroupDetail() {
     queryFn: () => fetchGroupPosts(group!.id),
     enabled: Boolean(group),
   });
+  const me = useQuery({
+    queryKey: ["profile", user.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("username, display_name, avatar_url")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
 
-  const me = (members.data ?? []).find((m) => m.user_id === user.id);
+  const membership = (members.data ?? []).find((m) => m.user_id === user.id);
   const isOwner = group?.owner_id === user.id;
-  const isMember = isOwner || me?.status === "approved";
-  const isAdmin = isOwner || (me?.status === "approved" && me?.role === "admin");
+  const isMember = isOwner || membership?.status === "approved";
+  const isAdmin = isOwner || (membership?.status === "approved" && membership?.role === "admin");
   const approvedCount = (members.data ?? []).filter((m) => m.status === "approved").length;
 
   const toggleMembership = useMutation({
-    mutationFn: () => (me ? leaveGroup(group!.id, user.id) : joinGroup(group!, user.id)),
+    mutationFn: () => (membership ? leaveGroup(group!.id, user.id) : joinGroup(group!, user.id)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["group-members", group?.id] }),
     onError: (err) => toast.error(err instanceof Error ? err.message : "Action impossible"),
   });
@@ -57,14 +73,25 @@ function GroupDetail() {
 
   return (
     <section className="space-y-5">
-      <header className="space-y-3 rounded-2xl border border-border/70 brand-surface p-4">
-        <div className="flex items-center gap-3">
-          <span className="flex size-12 items-center justify-center rounded-full bg-secondary">
-            {group.is_private ? <Lock className="size-6 text-primary" /> : <Users className="size-6 text-primary" />}
-          </span>
+      <CommunityCover path={group.cover_url ?? null} />
+
+      <header className="-mt-12 space-y-3 px-1">
+        <div className="flex items-end gap-3">
+          {group.avatar_url ? (
+            <UserAvatar
+              avatarPath={group.avatar_url}
+              name={group.name}
+              className="size-20 ring-4 ring-background"
+            />
+          ) : (
+            <span className="flex size-20 items-center justify-center rounded-full bg-secondary ring-4 ring-background">
+              {group.is_private ? <Lock className="size-8 text-primary" /> : <Users className="size-8 text-primary" />}
+            </span>
+          )}
           <div className="min-w-0 flex-1">
             <h1 className="truncate font-display text-xl font-bold">{group.name}</h1>
             <p className="text-xs text-muted-foreground">
+              {group.category ? `${group.category} · ` : ""}
               {group.is_private ? "Groupe privé" : "Groupe public"} · {approvedCount} membre(s)
             </p>
           </div>
@@ -77,18 +104,16 @@ function GroupDetail() {
           ) : null}
         </div>
 
-        {group.description ? <p className="text-sm">{group.description}</p> : null}
-
         {isOwner ? null : (
           <Button
-            variant={me ? "secondary" : "default"}
+            variant={membership ? "secondary" : "default"}
             className="w-full"
             onClick={() => toggleMembership.mutate()}
             disabled={toggleMembership.isPending}
           >
-            {me?.status === "approved"
+            {membership?.status === "approved"
               ? "Quitter le groupe"
-              : me?.status === "pending"
+              : membership?.status === "pending"
                 ? "Demande en attente — annuler"
                 : group.is_private
                   ? "Demander à rejoindre"
@@ -97,25 +122,48 @@ function GroupDetail() {
         )}
       </header>
 
-      {isMember ? (
-        <CommunityComposer userId={user.id} groupId={group.id} placeholder={`Publier dans ${group.name}…`} />
-      ) : null}
+      <Tabs defaultValue="posts">
+        <TabsList className="w-full justify-start">
+          <TabsTrigger value="posts">Publications</TabsTrigger>
+          <TabsTrigger value="about">À propos</TabsTrigger>
+        </TabsList>
 
-      {group.is_private && !isMember ? (
-        <p className="rounded-2xl border border-border/70 brand-surface px-4 py-8 text-center text-sm text-muted-foreground">
-          Ce groupe est privé. Rejoignez-le pour voir les publications.
-        </p>
-      ) : posts.isPending ? (
-        <Skeleton className="h-64 w-full rounded-2xl" />
-      ) : (posts.data ?? []).length === 0 ? (
-        <p className="text-sm text-muted-foreground">Aucune publication pour le moment.</p>
-      ) : (
-        <div className="space-y-5">
-          {(posts.data ?? []).map((p) => (
-            <PostCard key={p.id} post={p} currentUserId={user.id} />
-          ))}
-        </div>
-      )}
+        <TabsContent value="posts" className="space-y-5 pt-4">
+          {isMember ? (
+            <CommunityComposer
+              userId={user.id}
+              groupId={group.id}
+              placeholder={`Publier dans ${group.name}…`}
+              communityName={group.name}
+              communityAvatar={group.avatar_url}
+              memberName={me.data?.display_name ?? me.data?.username ?? null}
+              memberAvatar={me.data?.avatar_url ?? null}
+              canPostAsCommunity={isAdmin}
+            />
+          ) : null}
+
+          {group.is_private && !isMember ? (
+            <p className="rounded-2xl border border-border/70 brand-surface px-4 py-8 text-center text-sm text-muted-foreground">
+              Ce groupe est privé. Rejoignez-le pour voir les publications.
+            </p>
+          ) : posts.isPending ? (
+            <Skeleton className="h-64 w-full rounded-2xl" />
+          ) : (posts.data ?? []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">Aucune publication pour le moment.</p>
+          ) : (
+            (posts.data ?? []).map((p) => <PostCard key={p.id} post={p} currentUserId={user.id} />)
+          )}
+        </TabsContent>
+
+        <TabsContent value="about" className="pt-4">
+          <div className="space-y-2 rounded-2xl border border-border/70 brand-surface p-4 text-sm">
+            {group.description ? <p>{group.description}</p> : <p className="text-muted-foreground">Aucune description.</p>}
+            <p className="text-xs text-muted-foreground">
+              {group.is_private ? "Groupe privé" : "Groupe public"} · {approvedCount} membre(s)
+            </p>
+          </div>
+        </TabsContent>
+      </Tabs>
     </section>
   );
 }
