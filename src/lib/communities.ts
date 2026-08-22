@@ -116,6 +116,24 @@ export async function fetchPageFollowers(pageId: string) {
   return (data ?? []).map((r) => r.user_id as string);
 }
 
+export type FollowerProfile = {
+  user_id: string;
+  profile: { username: string; display_name: string | null; avatar_url: string | null } | null;
+};
+
+export async function fetchPageFollowerProfiles(pageId: string) {
+  const ids = await fetchPageFollowers(pageId);
+  if (ids.length === 0) return [] as FollowerProfile[];
+  const profiles = await supabase
+    .from("profiles")
+    .select("id, username, display_name, avatar_url")
+    .in("id", ids);
+  if (profiles.error) throw profiles.error;
+  const byId = new Map((profiles.data ?? []).map((p) => [p.id, p]));
+  return ids.map((id) => ({ user_id: id, profile: byId.get(id) ?? null })) as FollowerProfile[];
+}
+
+
 export async function followPage(pageId: string, userId: string) {
   const { error } = await supabase.from("page_followers").insert({ page_id: pageId, user_id: userId });
   if (error) throw error;
