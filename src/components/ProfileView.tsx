@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchUserPosts } from "@/lib/posts";
 import { Media } from "@/components/Media";
 import { UserAvatar } from "@/components/Avatar";
@@ -13,7 +13,8 @@ import { MessageButton } from "@/components/MessageButton";
 import { useAuth } from "@/lib/auth";
 import { fetchMyRequests } from "@/lib/friends";
 import { MapPin, Cake, Mail, Phone, Globe, Users } from "lucide-react";
-import { useSignedUrl } from "@/lib/media";
+import { CoverPhoto } from "@/components/CoverPhoto";
+import { supabase } from "@/integrations/supabase/client";
 
 export type ProfileRow = {
   id: string;
@@ -33,19 +34,6 @@ export type ProfileRow = {
   cover_url?: string | null;
 };
 
-function ProfileCover({ path }: { path: string | null }) {
-  const { data: url } = useSignedUrl(path);
-  return (
-    <div className="h-36 overflow-hidden rounded-2xl border border-border/70 brand-surface sm:h-52">
-      {url ? (
-        <img src={url} alt="Photo de couverture" className="size-full object-cover" />
-      ) : (
-        <div className="size-full bg-gradient-to-br from-primary/25 via-secondary to-background" />
-      )}
-    </div>
-  );
-}
-
 function age(birthdate?: string | null) {
   if (!birthdate) return null;
   const d = new Date(birthdate);
@@ -59,7 +47,9 @@ function age(birthdate?: string | null) {
 
 export function ProfileView({ profile }: { profile: ProfileRow }) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const isMe = user?.id === profile.id;
+  if (typeof window !== "undefined") console.log("PROBE isMe", user?.id, profile.id);
   const { data, isPending } = useQuery({
     queryKey: ["user-posts", profile.id],
     queryFn: () => fetchUserPosts(profile.id),
@@ -81,7 +71,19 @@ export function ProfileView({ profile }: { profile: ProfileRow }) {
 
   return (
     <div className="space-y-5">
-      <ProfileCover path={profile.cover_url ?? null} />
+      <CoverPhoto
+        path={profile.cover_url ?? null}
+        editable={isMe}
+        userId={user?.id}
+        onSave={async (value) => {
+          const { error } = await supabase
+            .from("profiles")
+            .update({ cover_url: value })
+            .eq("id", profile.id);
+          if (error) throw error;
+          await queryClient.invalidateQueries({ queryKey: ["profile"] });
+        }}
+      />
 
       <header className="-mt-14 flex flex-col gap-3 px-1 sm:-mt-16 sm:flex-row sm:items-end">
         <UserAvatar
