@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserAvatar } from "@/components/Avatar";
-import { CommunityCover } from "@/components/CommunityCover";
+import { CoverPhoto } from "@/components/CoverPhoto";
 import { MediaGrid } from "@/components/MediaGrid";
 import { PostCard } from "@/components/PostCard";
 import { CommunityComposer } from "@/components/CommunityComposer";
@@ -103,7 +103,19 @@ function PageDetail() {
 
   return (
     <section className="space-y-5">
-      <CommunityCover path={page.cover_url ?? null} />
+      <CoverPhoto
+        path={page.cover_url ?? null}
+        editable={isAdmin}
+        userId={user.id}
+        onSave={async (value) => {
+          const { error } = await supabase
+            .from("pages")
+            .update({ cover_url: value })
+            .eq("id", page.id);
+          if (error) throw error;
+          await queryClient.invalidateQueries({ queryKey: ["page", slug] });
+        }}
+      />
 
       <header className="-mt-14 space-y-3 px-1 sm:-mt-16">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">

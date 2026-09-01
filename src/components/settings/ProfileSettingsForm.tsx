@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { MEDIA_BUCKET, useSignedUrl } from "@/lib/media";
+import { MEDIA_BUCKET } from "@/lib/media";
+import { useCoverUrl } from "@/lib/covers";
 import { UserAvatar } from "@/components/Avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -237,7 +238,7 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
 }
 
 function CoverPreview({ path }: { path: string | null }) {
-  const { data: url } = useSignedUrl(path);
+  const { data: url } = useCoverUrl(path);
   if (!url) return <div className="size-full brand-surface" />;
   return <img src={url} alt="Photo de couverture" className="size-full object-cover" />;
 }
