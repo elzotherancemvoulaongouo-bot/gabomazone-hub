@@ -24,7 +24,7 @@ type Props = {
   path: string | null;
   editable?: boolean;
   /** Propriétaire du fichier (dossier de stockage) — l'utilisateur connecté. */
-  userId?: string;
+  userId?: string | undefined;
   /** Persiste la nouvelle valeur cover_url puis rafraîchit l'affichage. */
   onSave?: (coverValue: string) => Promise<void> | void;
   className?: string;
