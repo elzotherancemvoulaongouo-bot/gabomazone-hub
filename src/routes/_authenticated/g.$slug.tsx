@@ -45,7 +45,7 @@ function GroupDetail() {
     enabled: Boolean(group),
   });
   const me = useQuery({
-    queryKey: ["profile", user.id],
+    queryKey: ["profile-brief", user.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
