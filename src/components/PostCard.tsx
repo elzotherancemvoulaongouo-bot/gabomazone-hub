@@ -314,31 +314,39 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
         />
       ) : null}
 
-      <div className="mt-1 grid grid-cols-3 border-t border-border/60 px-1 py-1">
+      <div className="mt-1 grid grid-cols-4 border-t border-border/60 px-1 py-1">
         <button
           type="button"
-          onClick={() => toggleLike.mutate()}
-          disabled={toggleLike.isPending}
-          aria-label={liked ? "Je n'aime plus" : "J'aime"}
-          className="flex h-11 items-center justify-center gap-2 rounded-lg text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
+          onClick={() => toggleLike.mutate(!effectiveLiked)}
+          aria-label={effectiveLiked ? "Je n'aime plus" : "J'aime"}
+          className="flex h-11 items-center justify-center gap-1.5 rounded-lg text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-primary sm:text-sm"
         >
-          <Heart className={cn("size-5", liked && "fill-primary text-primary")} />
-          J'aime {likeCount > 0 ? likeCount : ""}
+          <Heart className={cn("size-5", effectiveLiked && "fill-primary text-primary")} />
+          J'aime {effectiveLikeCount > 0 ? effectiveLikeCount : ""}
         </button>
         <Link
           to="/p/$postId"
           params={{ postId: post.id }}
-          className="flex h-11 items-center justify-center gap-2 rounded-lg text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
+          className="flex h-11 items-center justify-center gap-1.5 rounded-lg text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-primary sm:text-sm"
         >
           <MessageCircle className="size-5" />
-          Commenter {commentCount > 0 ? commentCount : ""}
+          {commentCount > 0 ? commentCount : ""} Commenter
         </Link>
         <button
           type="button"
           onClick={share}
-          className="flex h-11 items-center justify-center gap-2 rounded-lg text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-primary"
+          className="flex h-11 items-center justify-center gap-1.5 rounded-lg text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-primary sm:text-sm"
         >
           <Share2 className="size-5" /> Partager
+        </button>
+        <button
+          type="button"
+          onClick={() => toggleSave.mutate({ postId: post.id, saved })}
+          aria-label={saved ? "Retirer des enregistrements" : "Enregistrer"}
+          className="flex h-11 items-center justify-center gap-1.5 rounded-lg text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-primary sm:text-sm"
+        >
+          <Bookmark className={cn("size-5", saved && "fill-primary text-primary")} />
+          {saved ? "Enregistré" : "Enregistrer"}
         </button>
       </div>
     </article>
