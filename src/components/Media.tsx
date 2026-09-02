@@ -65,7 +65,7 @@ export function Media({
         src={url}
         className={className}
         autoPlayOnVisible={autoPlay}
-        {...(onOpenVideo ? { onOpenVideo: onOpenVideo, onOpen: onOpenVideo } : {})}
+        {...(onOpenVideo ? { onOpen: onOpenVideo } : {})}
       />
     );
   }

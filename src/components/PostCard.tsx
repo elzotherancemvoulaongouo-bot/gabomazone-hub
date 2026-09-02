@@ -112,9 +112,14 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
     }
   }
 
+  // Mise à jour optimiste : le compteur bouge immédiatement, sans recharger le fil.
+  const [likeOverride, setLikeOverride] = useState<boolean | null>(null);
+  const effectiveLiked = likeOverride ?? liked;
+  const effectiveLikeCount = likeCount + (likeOverride === null ? 0 : likeOverride === liked ? 0 : likeOverride ? 1 : -1);
+
   const toggleLike = useMutation({
-    mutationFn: async () => {
-      if (liked) {
+    mutationFn: async (next: boolean) => {
+      if (!next) {
         const { error } = await supabase
           .from("likes")
           .delete()
@@ -128,6 +133,8 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
         if (error) throw error;
       }
     },
+    onMutate: (next) => setLikeOverride(next),
+    onError: () => setLikeOverride(null),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["feed"] });
       queryClient.invalidateQueries({ queryKey: ["post", post.id] });
