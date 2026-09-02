@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { Camera } from "lucide-react";
 import { useInfiniteFeed } from "@/lib/feed";
 import { PostCard } from "@/components/PostCard";
+import { LazyMount } from "@/components/LazyMount";
 import { FeedComposer } from "@/components/FeedComposer";
 import { StoriesBar } from "@/components/StoriesBar";
 import { useHiddenPostIds, useBlockedIds } from "@/lib/social";
@@ -66,7 +67,11 @@ function FeedPage() {
           <Skeleton className="h-96 w-full rounded-2xl" />
         </>
       ) : posts.length > 0 ? (
-        posts.map((post) => <PostCard key={post.id} post={post} currentUserId={user.id} />)
+        posts.map((post, index) => (
+          <LazyMount key={post.id} keepMounted={index < 3} placeholderHeight={post.media_url ? 520 : 200}>
+            <PostCard post={post} currentUserId={user.id} />
+          </LazyMount>
+        ))
       ) : (
         <div className="rounded-2xl border border-border/70 p-10 text-center brand-surface">
           <Camera className="mx-auto size-10 text-primary" />

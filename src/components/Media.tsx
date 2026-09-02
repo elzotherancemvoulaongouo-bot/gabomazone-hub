@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { useSignedUrl } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import { VideoPlayer } from "@/components/VideoPlayer";
@@ -10,6 +11,7 @@ export function Media({
   fallbackText,
   onOpenVideo,
   autoPlay = true,
+  eager = false,
 }: {
   path: string | null;
   type: string | null;
@@ -18,8 +20,27 @@ export function Media({
   fallbackText?: string | null;
   onOpenVideo?: () => void;
   autoPlay?: boolean;
+  /** Charge le média immédiatement (visionneuse plein écran) au lieu d'attendre la visibilité. */
+  eager?: boolean;
 }) {
-  const { data: url, isPending } = useSignedUrl(path);
+  const holder = useRef<HTMLDivElement>(null);
+  const [near, setNear] = useState(eager);
+
+  useEffect(() => {
+    if (eager || near) return;
+    const el = holder.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) setNear(true);
+      },
+      { rootMargin: "800px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [eager, near]);
+
+  const { data: url, isPending } = useSignedUrl(near ? path : null);
 
   if (!path) {
     return (
@@ -34,8 +55,8 @@ export function Media({
     );
   }
 
-  if (isPending || !url) {
-    return <div className={cn("animate-pulse bg-muted", className)} />;
+  if (!near || isPending || !url) {
+    return <div ref={holder} className={cn("animate-pulse bg-muted", className)} />;
   }
 
   if (type === "video") {
@@ -49,5 +70,13 @@ export function Media({
     );
   }
 
-  return <img src={url} alt={alt} loading="lazy" className={className} />;
+  return (
+    <img
+      src={url}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      className={className}
+    />
+  );
 }
