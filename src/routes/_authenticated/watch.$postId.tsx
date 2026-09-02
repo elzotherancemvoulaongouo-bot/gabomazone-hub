@@ -67,8 +67,9 @@ function WatchPage() {
 
       {isPending && !current ? <Skeleton className="h-[60vh] w-full rounded-2xl" /> : null}
 
-      {ordered.map((post) => (
-        <article key={post.id} className="overflow-hidden rounded-2xl border border-border/70 brand-surface">
+      {ordered.map((post, index) => (
+        <LazyMount key={post.id} keepMounted={index < 2} placeholderHeight={520}>
+        <article className="overflow-hidden rounded-2xl border border-border/70 brand-surface">
           <PostMediaGallery items={mediaOf(post)} alt={post.caption ?? "Média"} />
           <div className="flex items-center gap-3 px-4 py-3">
             <UserAvatar avatarPath={post.author?.avatar_url} name={post.author?.username} />
