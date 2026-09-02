@@ -15,7 +15,7 @@ export function FeedComposer({
   const [mode, setMode] = useState<null | "text" | "media" | "camera">(null);
 
   const { data: profile } = useQuery({
-    queryKey: ["profile", userId],
+    queryKey: ["profile-brief", userId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
