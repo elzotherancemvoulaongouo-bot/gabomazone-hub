@@ -49,7 +49,7 @@ export function ProfileView({ profile }: { profile: ProfileRow }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isMe = user?.id === profile.id;
-  if (typeof window !== "undefined") console.log("PROBE isMe", user?.id, profile.id);
+  
   const { data, isPending } = useQuery({
     queryKey: ["user-posts", profile.id],
     queryFn: () => fetchUserPosts(profile.id),

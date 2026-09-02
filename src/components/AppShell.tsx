@@ -57,7 +57,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   useApplyAppearance(settings);
   const [search, setSearch] = useState("");
   const { data: profile } = useQuery({
-    queryKey: ["profile", user?.id],
+    queryKey: ["profile-brief", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")

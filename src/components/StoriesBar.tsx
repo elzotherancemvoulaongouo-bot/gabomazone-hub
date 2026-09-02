@@ -19,7 +19,7 @@ export function StoriesBar({
 }) {
   const { data: groups } = useStories(userId);
   const { data: profile } = useQuery({
-    queryKey: ["profile", userId],
+    queryKey: ["profile-brief", userId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")

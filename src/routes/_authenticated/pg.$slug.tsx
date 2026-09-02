@@ -56,7 +56,7 @@ function PageDetail() {
     enabled: Boolean(page),
   });
   const me = useQuery({
-    queryKey: ["profile", user.id],
+    queryKey: ["profile-brief", user.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
