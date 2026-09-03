@@ -9,6 +9,7 @@ import { UserAvatar } from "@/components/Avatar";
 import { timeAgo } from "@/lib/media";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { LazyMount } from "@/components/LazyMount";
 import type { FeedPost } from "@/components/PostCard";
 
 export const Route = createFileRoute("/_authenticated/watch/$postId")({
