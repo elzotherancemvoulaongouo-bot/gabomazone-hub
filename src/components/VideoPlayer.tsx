@@ -104,7 +104,13 @@ export function VideoPlayer({
   }
 
   return (
-    <div className={cn("relative w-full bg-black", className)}>
+    <div
+      className={cn("relative w-full overflow-hidden bg-black", className)}
+      style={{
+        aspectRatio: ratio ? `${ratio}` : "16 / 9",
+        maxHeight: "80dvh",
+      }}
+    >
       <video
         ref={ref}
         src={src}
@@ -112,11 +118,17 @@ export function VideoPlayer({
         loop
         playsInline
         preload="metadata"
-        className="h-full w-full object-contain"
+        className="absolute inset-0 h-full w-full object-contain"
         onClick={() => (onOpen ? onOpen() : toggle())}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
-        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 0)}
+        onLoadedMetadata={(e) => {
+          const el = e.currentTarget;
+          setDuration(el.duration || 0);
+          if (el.videoWidth && el.videoHeight) {
+            setRatio(el.videoWidth / el.videoHeight);
+          }
+        }}
         onTimeUpdate={(e) => {
           const el = e.currentTarget;
           setProgress(el.duration ? (el.currentTime / el.duration) * 100 : 0);
