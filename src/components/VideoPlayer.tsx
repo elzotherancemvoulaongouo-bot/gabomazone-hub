@@ -29,6 +29,7 @@ export function VideoPlayer({
   const userMuteChoice = useRef<boolean | null>(null);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [ratio, setRatio] = useState<number | null>(null);
 
   // Autoplay / pause selon la visibilité
   useEffect(() => {

@@ -41,7 +41,7 @@ export function PostMediaGallery({
                 path={item.path}
                 type="video"
                 alt={alt}
-                className="aspect-square w-full bg-black"
+                className="w-full bg-black"
                 {...(onOpenVideo ? { onOpenVideo } : {})}
               />
             ) : (
