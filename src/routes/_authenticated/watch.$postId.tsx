@@ -70,21 +70,22 @@ function WatchPage() {
 
       {ordered.map((post, index) => (
         <LazyMount key={post.id} keepMounted={index < 2} placeholderHeight={520}>
-        <article className="overflow-hidden rounded-2xl border border-border/70 brand-surface">
-          <PostMediaGallery items={mediaOf(post)} alt={post.caption ?? "Média"} />
-          <div className="flex items-center gap-3 px-4 py-3">
-            <UserAvatar avatarPath={post.author?.avatar_url} name={post.author?.username} />
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">
-                {post.author?.display_name || post.author?.username}
-              </p>
-              <p className="truncate text-xs text-muted-foreground">{timeAgo(post.created_at)}</p>
+          <article className="overflow-hidden rounded-2xl border border-border/70 brand-surface">
+            <PostMediaGallery items={mediaOf(post)} alt={post.caption ?? "Média"} />
+            <div className="flex items-center gap-3 px-4 py-3">
+              <UserAvatar avatarPath={post.author?.avatar_url} name={post.author?.username} />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">
+                  {post.author?.display_name || post.author?.username}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">{timeAgo(post.created_at)}</p>
+              </div>
             </div>
-          </div>
-          {post.caption ? (
-            <p className="px-4 pb-4 text-sm leading-relaxed">{post.caption}</p>
-          ) : null}
-        </article>
+            {post.caption ? (
+              <p className="px-4 pb-4 text-sm leading-relaxed">{post.caption}</p>
+            ) : null}
+          </article>
+        </LazyMount>
       ))}
 
       <div ref={sentinel} aria-hidden className="h-1" />
