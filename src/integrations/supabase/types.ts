@@ -764,19 +764,28 @@ export type Database = {
           autoplay_videos: boolean
           created_at: string
           data_saver: boolean
+          feed_algorithm: string
           feed_sort: string
           font_size: string
+          friend_list_visibility: string
           high_contrast: boolean
           language: string
+          muted_keywords: string[]
           notif_comments: boolean
+          notif_email: boolean
           notif_friends: boolean
+          notif_groups: boolean
           notif_likes: boolean
+          notif_mentions: boolean
           notif_messages: boolean
+          notif_push: boolean
           post_visibility: string
           reduce_motion: boolean
           theme: string
+          two_factor_enabled: boolean
           updated_at: string
           user_id: string
+          who_can_comment: string
           who_can_friend_request: string
           who_can_message: string
         }
@@ -784,19 +793,28 @@ export type Database = {
           autoplay_videos?: boolean
           created_at?: string
           data_saver?: boolean
+          feed_algorithm?: string
           feed_sort?: string
           font_size?: string
+          friend_list_visibility?: string
           high_contrast?: boolean
           language?: string
+          muted_keywords?: string[]
           notif_comments?: boolean
+          notif_email?: boolean
           notif_friends?: boolean
+          notif_groups?: boolean
           notif_likes?: boolean
+          notif_mentions?: boolean
           notif_messages?: boolean
+          notif_push?: boolean
           post_visibility?: string
           reduce_motion?: boolean
           theme?: string
+          two_factor_enabled?: boolean
           updated_at?: string
           user_id: string
+          who_can_comment?: string
           who_can_friend_request?: string
           who_can_message?: string
         }
@@ -804,19 +822,28 @@ export type Database = {
           autoplay_videos?: boolean
           created_at?: string
           data_saver?: boolean
+          feed_algorithm?: string
           feed_sort?: string
           font_size?: string
+          friend_list_visibility?: string
           high_contrast?: boolean
           language?: string
+          muted_keywords?: string[]
           notif_comments?: boolean
+          notif_email?: boolean
           notif_friends?: boolean
+          notif_groups?: boolean
           notif_likes?: boolean
+          notif_mentions?: boolean
           notif_messages?: boolean
+          notif_push?: boolean
           post_visibility?: string
           reduce_motion?: boolean
           theme?: string
+          two_factor_enabled?: boolean
           updated_at?: string
           user_id?: string
+          who_can_comment?: string
           who_can_friend_request?: string
           who_can_message?: string
         }

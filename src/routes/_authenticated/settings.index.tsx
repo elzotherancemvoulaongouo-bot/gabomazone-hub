@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { SETTINGS_SECTIONS } from "@/lib/settings-sections";
+import { MAIN_SECTIONS } from "@/lib/settings-sections";
 
 const ICONS = {
   "user-circle": UserCircle,
@@ -71,11 +71,9 @@ function SettingsHub() {
   }
 
   const groups = [
-    { title: "Compte", keys: ["profile", "security", "activity"] },
-    { title: "Confidentialité", keys: ["privacy", "contact", "blocks"] },
-    { title: "Préférences", keys: ["notifications", "feed", "media", "language", "saved"] },
-    { title: "Affichage", keys: ["appearance", "accessibility"] },
-    { title: "Assistance", keys: ["help", "legal"] },
+    { title: "Votre compte", keys: ["account", "privacy", "security"] },
+    { title: "Préférences", keys: ["notifications", "personalization", "feed"] },
+    { title: "Contenu et aide", keys: ["moderation", "support"] },
   ];
 
   return (
@@ -87,7 +85,7 @@ function SettingsHub() {
           <h2 className="px-1 text-sm font-semibold text-muted-foreground">{group.title}</h2>
           <div className="overflow-hidden rounded-2xl border border-border/70 brand-surface">
             {group.keys.map((key) => {
-              const section = SETTINGS_SECTIONS[key];
+              const section = MAIN_SECTIONS[key];
               if (!section) return null;
               const Icon = ICONS[section.icon as keyof typeof ICONS] ?? UserCircle;
               return (

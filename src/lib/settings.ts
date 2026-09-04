@@ -19,6 +19,15 @@ export type UserSettings = {
   font_size: "small" | "normal" | "large";
   reduce_motion: boolean;
   high_contrast: boolean;
+  friend_list_visibility: "public" | "friends" | "only_me";
+  who_can_comment: "everyone" | "friends";
+  notif_push: boolean;
+  notif_email: boolean;
+  notif_mentions: boolean;
+  notif_groups: boolean;
+  two_factor_enabled: boolean;
+  muted_keywords: string[];
+  feed_algorithm: "chronological" | "personalized";
 };
 
 export const DEFAULT_SETTINGS: Omit<UserSettings, "user_id"> = {
@@ -37,6 +46,15 @@ export const DEFAULT_SETTINGS: Omit<UserSettings, "user_id"> = {
   font_size: "normal",
   reduce_motion: false,
   high_contrast: false,
+  friend_list_visibility: "friends",
+  who_can_comment: "everyone",
+  notif_push: true,
+  notif_email: false,
+  notif_mentions: true,
+  notif_groups: true,
+  two_factor_enabled: false,
+  muted_keywords: [],
+  feed_algorithm: "chronological",
 };
 
 export async function fetchSettings(userId: string): Promise<UserSettings> {
