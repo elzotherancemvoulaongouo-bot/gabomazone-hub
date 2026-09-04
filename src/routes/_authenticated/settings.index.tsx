@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { SETTINGS_SECTIONS } from "@/lib/settings-sections";
+import { MAIN_SECTIONS } from "@/lib/settings-sections";
 
 const ICONS = {
   "user-circle": UserCircle,
