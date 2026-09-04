@@ -85,7 +85,7 @@ function SettingsHub() {
           <h2 className="px-1 text-sm font-semibold text-muted-foreground">{group.title}</h2>
           <div className="overflow-hidden rounded-2xl border border-border/70 brand-surface">
             {group.keys.map((key) => {
-              const section = SETTINGS_SECTIONS[key];
+              const section = MAIN_SECTIONS[key];
               if (!section) return null;
               const Icon = ICONS[section.icon as keyof typeof ICONS] ?? UserCircle;
               return (
