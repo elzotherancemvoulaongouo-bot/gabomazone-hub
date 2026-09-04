@@ -46,6 +46,15 @@ export const DEFAULT_SETTINGS: Omit<UserSettings, "user_id"> = {
   font_size: "normal",
   reduce_motion: false,
   high_contrast: false,
+  friend_list_visibility: "friends",
+  who_can_comment: "everyone",
+  notif_push: true,
+  notif_email: false,
+  notif_mentions: true,
+  notif_groups: true,
+  two_factor_enabled: false,
+  muted_keywords: [],
+  feed_algorithm: "chronological",
 };
 
 export async function fetchSettings(userId: string): Promise<UserSettings> {
