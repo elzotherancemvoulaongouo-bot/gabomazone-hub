@@ -71,11 +71,9 @@ function SettingsHub() {
   }
 
   const groups = [
-    { title: "Compte", keys: ["profile", "security", "activity"] },
-    { title: "Confidentialité", keys: ["privacy", "contact", "blocks"] },
-    { title: "Préférences", keys: ["notifications", "feed", "media", "language", "saved"] },
-    { title: "Affichage", keys: ["appearance", "accessibility"] },
-    { title: "Assistance", keys: ["help", "legal"] },
+    { title: "Votre compte", keys: ["account", "privacy", "security"] },
+    { title: "Préférences", keys: ["notifications", "personalization", "feed"] },
+    { title: "Contenu et aide", keys: ["moderation", "support"] },
   ];
 
   return (
