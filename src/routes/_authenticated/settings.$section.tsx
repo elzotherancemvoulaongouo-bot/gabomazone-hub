@@ -1,13 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserAvatar } from "@/components/Avatar";
 import { PostCard } from "@/components/PostCard";
@@ -765,28 +772,29 @@ function HiddenPostsPanel({ userId }: { userId: string }) {
   );
 }
 
-function BlocksPanel({ userId }: { userId: string }) {
+function BlocksPanel({ userId, flush }: { userId: string; flush?: boolean }) {
   const { data, isPending } = useBlockedUsers(userId);
   const { unblock } = useBlockActions(userId);
 
   if (isPending) return <Skeleton className="h-32 w-full rounded-2xl" />;
   if (!data || data.length === 0)
-    return <p className="text-sm text-muted-foreground">Vous n'avez bloqué personne.</p>;
+    return (
+      <p className={cn("text-sm text-muted-foreground", flush && "p-4")}>
+        Vous n'avez bloqué personne.
+      </p>
+    );
 
-  return (
-    <Card>
-      {data.map((row) => (
-        <Row key={row.blocked_id} label={row.profile?.display_name || row.profile?.username || "Membre"}>
-          <div className="flex items-center gap-2">
-            <UserAvatar avatarPath={row.profile?.avatar_url} name={row.profile?.username} />
-            <Button size="sm" variant="secondary" onClick={() => unblock.mutate(row.blocked_id)}>
-              Débloquer
-            </Button>
-          </div>
-        </Row>
-      ))}
-    </Card>
-  );
+  const list = data.map((row) => (
+    <Row key={row.blocked_id} label={row.profile?.display_name || row.profile?.username || "Membre"}>
+      <div className="flex items-center gap-2">
+        <UserAvatar avatarPath={row.profile?.avatar_url} name={row.profile?.username} />
+        <Button size="sm" variant="secondary" onClick={() => unblock.mutate(row.blocked_id)}>
+          Débloquer
+        </Button>
+      </div>
+    </Row>
+  ));
+  return flush ? <>{list}</> : <Card>{list}</Card>;
 }
 
 function SavedPanel({ userId }: { userId: string }) {
@@ -849,17 +857,60 @@ function ActivityPanel({ userId }: { userId: string }) {
   );
 }
 
-function HelpPanel() {
+function SupportPanel() {
+  const faqs = [
+    {
+      q: "Comment publier une photo ou une vidéo ?",
+      a: "Depuis l'accueil, touchez « Publier » (icône +), écrivez votre texte puis ajoutez une photo ou une vidéo. Vous pouvez aussi publier du texte seul.",
+    },
+    {
+      q: "Comment discuter en privé avec un ami ?",
+      a: "Envoyez d'abord une demande d'ami. Une fois acceptée, ouvrez son profil et touchez « Message » : vous pouvez échanger du texte et des notes vocales.",
+    },
+    {
+      q: "Comment créer une page ou un groupe ?",
+      a: "Ouvrez le menu de votre compte (rond de profil en haut à droite) puis « Pages » ou « Groupes », et touchez le bouton de création.",
+    },
+    {
+      q: "Comment signaler une publication ?",
+      a: "Touchez le menu « … » en haut d'une publication puis « Signaler ». Notre équipe examine chaque signalement.",
+    },
+    {
+      q: "Comment masquer ou enregistrer une publication ?",
+      a: "Le menu « … » permet de masquer une publication de votre fil ; l'icône en forme de marque-page l'enregistre dans « Publications enregistrées ».",
+    },
+  ];
   return (
-    <div className="space-y-3 rounded-2xl border border-border/70 brand-surface p-4 text-sm leading-relaxed">
-      <p className="font-medium">Besoin d'aide ?</p>
-      <p className="text-muted-foreground">
-        Publiez du texte, des photos ou des vidéos depuis l'accueil, discutez en privé avec vos amis et
-        rejoignez des pages ou des groupes. Pour signaler un problème ou un contenu, utilisez le menu « … »
-        d'une publication.
-      </p>
-      <p className="text-muted-foreground">Contact : support@gabomazone.app</p>
-    </div>
+    <Groups first="FAQ">
+      <Group title="FAQ">
+        <Accordion type="multiple" className="px-4">
+          {faqs.map((f) => (
+            <AccordionItem key={f.q} value={f.q} className="border-border/50">
+              <AccordionTrigger className="text-left text-sm hover:no-underline">
+                {f.q}
+              </AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground">{f.a}</AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </Group>
+      <Group title="Contacter le support">
+        <div className="space-y-3 p-4 text-sm">
+          <p className="text-muted-foreground">
+            Une question ou un problème non résolu ? Écrivez-nous, l'équipe Gabomazone vous répond
+            sous 48 h.
+          </p>
+          <Button asChild className="h-11 w-full">
+            <a href="mailto:support@gabomazone.app">support@gabomazone.app</a>
+          </Button>
+        </div>
+      </Group>
+      <Group title="Conditions d'utilisation">
+        <div className="p-4">
+          <LegalPanel />
+        </div>
+      </Group>
+    </Groups>
   );
 }
 
