@@ -123,6 +123,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                 ) : null}
               </Link>
             </Button>
+            <Button asChild variant="ghost" size="icon" aria-label="Paramètres">
+              <Link to="/settings">
+                <Settings className="size-5" />
+              </Link>
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Menu du compte">
@@ -153,11 +158,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <DropdownMenuItem asChild>
                   <Link to="/groups">
                     <UsersRound className="mr-2 size-4" /> Groupes
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/settings">
-                    <Settings className="mr-2 size-4" /> Paramètres
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
