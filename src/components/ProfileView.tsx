@@ -85,11 +85,11 @@ export function ProfileView({ profile }: { profile: ProfileRow }) {
         }}
       />
 
-      <header className="-mt-14 flex flex-col gap-3 px-1 sm:-mt-16 sm:flex-row sm:items-end">
+      <header className="relative z-10 -mt-12 flex flex-col gap-3 px-2 sm:-mt-14 sm:flex-row sm:items-end">
         <UserAvatar
           avatarPath={profile.avatar_url}
           name={profile.username}
-          className="size-24 ring-4 ring-background sm:size-28"
+          className="relative z-10 size-24 shrink-0 rounded-full ring-4 ring-background shadow-md sm:size-28"
         />
         <div className="min-w-0 flex-1">
           <h1 className="font-display text-2xl font-bold leading-tight">
