@@ -66,7 +66,7 @@ function Row({
   children,
 }: {
   label: string;
-  hint?: string;
+  hint?: string | undefined;
   children: React.ReactNode;
 }) {
   return (
@@ -595,7 +595,7 @@ function SecurityPanel({
   settings: UserSettings;
   set: (patch: Partial<Omit<UserSettings, "user_id">>) => void;
 }) {
-  const [session, setSession] = useState<{ at?: string; agent: string } | null>(null);
+  const [session, setSession] = useState<{ at: string | undefined; agent: string } | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
