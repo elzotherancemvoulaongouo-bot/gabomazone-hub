@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ImageIcon, RotateCcw, SwitchCamera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -93,6 +94,27 @@ export function CameraCapture({
     };
   }, [open, facing, shot, attempt, stop]);
 
+  // Plein écran exclusif : masque toute l'application et ferme le Picture-in-Picture.
+  const [portalHost, setPortalHost] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!open || typeof document === "undefined") return;
+    const host = document.createElement("div");
+    host.id = "gabomazone-camera-root";
+    document.body.appendChild(host);
+    document.body.setAttribute("data-camera-open", "true");
+    setPortalHost(host);
+    const doc = document as Document & {
+      pictureInPictureElement?: Element | null;
+      exitPictureInPicture?: () => Promise<void>;
+    };
+    if (doc.pictureInPictureElement) void doc.exitPictureInPicture?.().catch(() => {});
+    return () => {
+      document.body.removeAttribute("data-camera-open");
+      host.remove();
+      setPortalHost(null);
+    };
+  }, [open]);
+
   useEffect(() => {
     if (!open) {
       stop();
@@ -126,10 +148,10 @@ export function CameraCapture({
     );
   }
 
-  if (!open) return null;
+  if (!open || !portalHost) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background">
+  return createPortal(
+    <div className="fixed inset-0 flex h-[100dvh] w-screen flex-col bg-black text-white">
       <div className="flex items-center justify-between px-4 py-3">
         <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fermer la caméra">
           <X className="size-6" />
@@ -149,11 +171,11 @@ export function CameraCapture({
         )}
       </div>
 
-      <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-black/60">
+      <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-black">
         {shot ? (
           <img src={shot.url} alt="Aperçu de la photo" className="max-h-full w-full object-contain" />
         ) : error ? (
-          <p className="px-8 text-center text-sm text-muted-foreground">{error}</p>
+          <p className="px-8 text-center text-sm text-white/80">{error}</p>
         ) : (
           <>
             <video
@@ -233,6 +255,7 @@ export function CameraCapture({
           }
         }}
       />
-    </div>
+    </div>,
+    portalHost,
   );
 }
