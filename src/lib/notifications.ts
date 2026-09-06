@@ -28,11 +28,13 @@ export async function fetchNotifications() {
   const { data, error } = await supabase
     .from("notifications")
     .select(SELECT)
+    .neq("type", "message")
     .order("created_at", { ascending: false })
     .limit(60);
   if (error) throw error;
   return (data ?? []) as unknown as NotificationRow[];
 }
+
 
 export async function markAllNotificationsRead() {
   const { error } = await supabase
