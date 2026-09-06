@@ -33,9 +33,10 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   useNotificationsRealtime,
-  useUnreadCountByType,
+  useUnreadMessagesCount,
   useUnreadNotificationsCount,
 } from "@/lib/notifications";
+
 
 const navItems = [
   { to: "/feed", label: "Accueil", icon: Home },
@@ -52,7 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   useNotificationsRealtime(user?.id);
   const unread = useUnreadNotificationsCount(Boolean(user));
-  const unreadMessages = useUnreadCountByType("message", Boolean(user));
+  const unreadMessages = useUnreadMessagesCount(user?.id);
   const { data: settings } = useSettings(user?.id);
   useApplyAppearance(settings);
   const [search, setSearch] = useState("");

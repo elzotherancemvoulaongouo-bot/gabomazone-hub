@@ -112,16 +112,16 @@ function GroupDetail() {
         }}
       />
 
-      <header className="-mt-14 space-y-3 px-1 sm:-mt-16">
+      <header className="relative z-10 -mt-12 space-y-3 px-2 sm:-mt-14">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           {group.avatar_url ? (
             <UserAvatar
               avatarPath={group.avatar_url}
               name={group.name}
-              className="size-24 ring-4 ring-background sm:size-28"
+              className="relative z-10 size-24 shrink-0 rounded-full ring-4 ring-background shadow-md sm:size-28"
             />
           ) : (
-            <span className="flex size-24 items-center justify-center rounded-full bg-secondary ring-4 ring-background sm:size-28">
+            <span className="relative z-10 flex size-24 shrink-0 items-center justify-center rounded-full bg-secondary ring-4 ring-background shadow-md sm:size-28">
               {group.is_private ? <Lock className="size-10 text-primary" /> : <Users className="size-10 text-primary" />}
             </span>
           )}

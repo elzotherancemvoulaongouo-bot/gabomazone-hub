@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Camera, ImageIcon, RotateCcw, SwitchCamera, X } from "lucide-react";
+import { ImageIcon, RotateCcw, SwitchCamera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -20,47 +20,78 @@ export function CameraCapture({
   const fallbackInputRef = useRef<HTMLInputElement | null>(null);
   const [facing, setFacing] = useState<"user" | "environment">("environment");
   const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [shot, setShot] = useState<{ url: string; file: File } | null>(null);
 
   const stop = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setReady(false);
   }, []);
 
   useEffect(() => {
     if (!open || shot) return;
     let cancelled = false;
+
     async function start() {
       setError(null);
-      try {
-        if (!navigator.mediaDevices?.getUserMedia) throw new Error("unsupported");
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: facing },
-          audio: false,
-        });
-        if (cancelled) {
-          stream.getTracks().forEach((t) => t.stop());
-          return;
-        }
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play().catch(() => undefined);
-        }
-      } catch {
-        if (!cancelled) {
-          setError(
-            "Caméra indisponible ou autorisation refusée. Vous pouvez choisir une photo depuis votre appareil.",
-          );
+      setReady(false);
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setError("La caméra n'est pas disponible sur cet appareil ou ce navigateur.");
+        return;
+      }
+      // Certains navigateurs refusent une contrainte exacte : on retente en mode libre.
+      const attempts: MediaStreamConstraints[] = [
+        { video: { facingMode: { ideal: facing } }, audio: false },
+        { video: true, audio: false },
+      ];
+      let stream: MediaStream | null = null;
+      let lastError: unknown = null;
+      for (const constraints of attempts) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          break;
+        } catch (err) {
+          lastError = err;
         }
       }
+      if (cancelled) {
+        stream?.getTracks().forEach((t) => t.stop());
+        return;
+      }
+      if (!stream) {
+        const name = (lastError as { name?: string } | null)?.name;
+        setError(
+          name === "NotAllowedError"
+            ? "Accès à la caméra refusé. Autorisez la caméra dans votre navigateur, puis réessayez."
+            : name === "NotFoundError"
+              ? "Aucune caméra détectée sur cet appareil."
+              : "Caméra indisponible. Vous pouvez choisir une photo depuis votre appareil.",
+        );
+        return;
+      }
+      streamRef.current = stream;
+      const video = videoRef.current;
+      if (video) {
+        video.srcObject = stream;
+        video.muted = true;
+        try {
+          await video.play();
+        } catch {
+          /* la lecture démarre au premier geste utilisateur */
+        }
+        if (!cancelled) setReady(true);
+      }
     }
-    start();
+
+    void start();
     return () => {
       cancelled = true;
       stop();
     };
-  }, [open, facing, shot, stop]);
+  }, [open, facing, shot, attempt, stop]);
 
   useEffect(() => {
     if (!open) {
@@ -72,12 +103,16 @@ export function CameraCapture({
 
   function takePhoto() {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !video.videoWidth) return;
     const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth || 720;
-    canvas.height = video.videoHeight || 1280;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    if (facing === "user") {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     canvas.toBlob(
       (blob) => {
@@ -120,7 +155,18 @@ export function CameraCapture({
         ) : error ? (
           <p className="px-8 text-center text-sm text-muted-foreground">{error}</p>
         ) : (
-          <video ref={videoRef} playsInline muted className="size-full object-cover" />
+          <>
+            <video
+              ref={videoRef}
+              playsInline
+              muted
+              autoPlay
+              className={`size-full object-cover ${facing === "user" ? "-scale-x-100" : ""}`}
+            />
+            {!ready ? (
+              <p className="absolute bottom-4 text-xs text-white/80">Démarrage de la caméra…</p>
+            ) : null}
+          </>
         )}
       </div>
 
@@ -142,18 +188,35 @@ export function CameraCapture({
             </Button>
           </>
         ) : error ? (
-          <Button size="lg" onClick={() => fallbackInputRef.current?.click()}>
-            <ImageIcon className="mr-2 size-5" /> Choisir une photo
-          </Button>
+          <>
+            <Button variant="secondary" size="lg" onClick={() => setAttempt((a) => a + 1)}>
+              <RotateCcw className="mr-2 size-5" /> Réessayer
+            </Button>
+            <Button size="lg" onClick={() => fallbackInputRef.current?.click()}>
+              <ImageIcon className="mr-2 size-5" /> Choisir une photo
+            </Button>
+          </>
         ) : (
-          <button
-            type="button"
-            onClick={takePhoto}
-            aria-label="Prendre la photo"
-            className="size-18 rounded-full border-4 border-primary p-1 transition-transform active:scale-95"
-          >
-            <span className="block size-14 rounded-full bg-primary" />
-          </button>
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Choisir une photo existante"
+              onClick={() => fallbackInputRef.current?.click()}
+            >
+              <ImageIcon className="size-6" />
+            </Button>
+            <button
+              type="button"
+              onClick={takePhoto}
+              disabled={!ready}
+              aria-label="Prendre la photo"
+              className="size-20 rounded-full border-4 border-primary p-1 transition-transform active:scale-95 disabled:opacity-50"
+            >
+              <span className="block size-full rounded-full bg-primary" />
+            </button>
+            <span className="size-10" />
+          </>
         )}
       </div>
 
@@ -161,7 +224,6 @@ export function CameraCapture({
         ref={fallbackInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];

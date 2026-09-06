@@ -153,3 +153,22 @@ export function formatDuration(seconds: number) {
   const s = Math.floor(seconds % 60);
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
+
+/** Nombre de messages privés non lus reçus par l'utilisateur. */
+export async function fetchUnreadMessagesCount(me: string) {
+  const convs = await supabase
+    .from("conversations")
+    .select("id")
+    .or(`user_a.eq.${me},user_b.eq.${me}`);
+  if (convs.error) throw convs.error;
+  const ids = (convs.data ?? []).map((c) => c.id as string);
+  if (ids.length === 0) return 0;
+  const { count, error } = await supabase
+    .from("messages")
+    .select("id", { count: "exact", head: true })
+    .in("conversation_id", ids)
+    .neq("sender_id", me)
+    .is("read_at", null);
+  if (error) throw error;
+  return count ?? 0;
+}
