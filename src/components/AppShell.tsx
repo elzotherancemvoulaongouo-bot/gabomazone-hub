@@ -33,9 +33,10 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   useNotificationsRealtime,
-  useUnreadCountByType,
+  useUnreadMessagesCount,
   useUnreadNotificationsCount,
 } from "@/lib/notifications";
+
 
 const navItems = [
   { to: "/feed", label: "Accueil", icon: Home },
