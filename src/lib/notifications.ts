@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchUnreadMessagesCount } from "@/lib/messages";
 
 export type NotificationType = "message" | "friend_accepted" | "like" | "comment";
 
@@ -117,4 +118,33 @@ export function notificationLabel(n: NotificationRow) {
     default:
       return who;
   }
+}
+
+/**
+ * Compteur INDÉPENDANT des messages privés non lus (icône 💬).
+ * Il ne dépend pas des notifications générales (icône 🔔).
+ */
+export function useUnreadMessagesCount(userId: string | undefined) {
+  const queryClient = useQueryClient();
+  const query = useQuery({
+    queryKey: ["unread-messages", userId],
+    queryFn: () => fetchUnreadMessagesCount(userId!),
+    enabled: Boolean(userId),
+    refetchOnWindowFocus: true,
+  });
+
+  useEffect(() => {
+    if (!userId) return;
+    const channel = supabase
+      .channel(`unread-messages:${userId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["unread-messages", userId] });
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId, queryClient]);
+
+  return query.data ?? 0;
 }
