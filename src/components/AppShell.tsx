@@ -53,7 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   useNotificationsRealtime(user?.id);
   const unread = useUnreadNotificationsCount(Boolean(user));
-  const unreadMessages = useUnreadCountByType("message", Boolean(user));
+  const unreadMessages = useUnreadMessagesCount(user?.id);
   const { data: settings } = useSettings(user?.id);
   useApplyAppearance(settings);
   const [search, setSearch] = useState("");
