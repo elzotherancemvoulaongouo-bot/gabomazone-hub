@@ -207,3 +207,18 @@
   --border: oklch(0.45 0.02 70);
   --muted-foreground: oklch(0.28 0.014 60);
 }
+
+/* Mode caméra plein écran : rien ne peut se superposer à la caméra. */
+body[data-camera-open="true"] {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+body[data-camera-open="true"] > *:not(#gabomazone-camera-root) {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+#gabomazone-camera-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+}
