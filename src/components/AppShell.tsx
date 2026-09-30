@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     queryFn: async () => {
       const term = `%${search.trim().replace(/[%,()]/g, "")}%`;
       const [people, groups, pages] = await Promise.all([
-        supabase.from("profiles").select("username, display_name").ilike("display_name", term).limit(3),
+        supabase.from("profiles").select("username, display_name").or(`username.ilike.${term},display_name.ilike.${term}`).limit(3),
         supabase.from("groups").select("slug, name").ilike("name", term).limit(2),
         supabase.from("pages").select("slug, name").ilike("name", term).limit(2),
       ]);

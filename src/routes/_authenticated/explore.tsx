@@ -47,8 +47,16 @@ function ExplorePage() {
       return data ?? [];
     },
   });
-  const { data: groups, isPending: loadingGroups } = useQuery({ queryKey: ["groups"], queryFn: fetchGroups, enabled: term.length > 0 });
-  const { data: pages, isPending: loadingPages } = useQuery({ queryKey: ["pages"], queryFn: fetchPages, enabled: term.length > 0 });
+  const { data: groups, isPending: loadingGroups } = useQuery({ queryKey: ["search-groups", term], queryFn: async () => {
+    const { data, error } = await supabase.from("groups").select("id, slug, name, avatar_url").ilike("name", matching).limit(30);
+    if (error) throw error;
+    return data ?? [];
+  }, enabled: term.length > 0 });
+  const { data: pages, isPending: loadingPages } = useQuery({ queryKey: ["search-pages", term], queryFn: async () => {
+    const { data, error } = await supabase.from("pages").select("id, slug, name, avatar_url").ilike("name", matching).limit(30);
+    if (error) throw error;
+    return data ?? [];
+  }, enabled: term.length > 0 });
   const foundGroups = (groups ?? []).filter((g) => g.name.toLocaleLowerCase().includes(term.toLocaleLowerCase()));
   const foundPages = (pages ?? []).filter((p) => p.name.toLocaleLowerCase().includes(term.toLocaleLowerCase()));
   const posts = term ? searchedPosts ?? [] : feed ?? [];
