@@ -100,7 +100,10 @@ export function PageActionButtons({
               className="flex-1"
               disabled={openChat.isPending}
               onClick={() => {
-                if (ownerId === meId) return toast.info("Vous êtes l'administrateur de cette page");
+                if (ownerId === meId) {
+                  toast.info("Vous êtes l'administrateur de cette page");
+                  return;
+                }
                 openChat.mutate();
               }}
             >

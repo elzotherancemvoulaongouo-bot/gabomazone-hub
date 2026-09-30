@@ -29,7 +29,7 @@ export const ACTION_BUTTON_OPTIONS: { type: ActionButtonType; label: string; nee
 ];
 
 export function actionOption(type: ActionButtonType) {
-  return ACTION_BUTTON_OPTIONS.find((o) => o.type === type) ?? ACTION_BUTTON_OPTIONS[0];
+  return ACTION_BUTTON_OPTIONS.find((o) => o.type === type) ?? ACTION_BUTTON_OPTIONS[0]!;
 }
 
 export function parseActionButtons(raw: unknown): ActionButton[] {
