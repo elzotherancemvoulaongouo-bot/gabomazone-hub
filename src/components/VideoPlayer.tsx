@@ -38,6 +38,7 @@ export function VideoPlayer({
       (entries) => {
         const entry = entries[0];
         if (!entry) return;
+        if (document.querySelector('[data-media-viewer="true"]')) { el.pause(); return; }
         if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
           claimPlayback(el);
           // La lecture automatique commence toujours en muet.
