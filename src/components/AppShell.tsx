@@ -28,6 +28,7 @@ import { UserAvatar } from "@/components/Avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
+import { useIsModerator } from "@/lib/moderation";
 import { useApplyAppearance, useSettings } from "@/lib/settings";
 import { MAIN_SECTIONS } from "@/lib/settings-sections";
 import {
@@ -96,6 +97,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     else navigate({ to: "/feed" });
   }
   const { user } = useAuth();
+  const { data: isModerator } = useIsModerator(user?.id);
   useNotificationsRealtime(user?.id);
   const unread = useUnreadNotificationsCount(Boolean(user));
   const unreadMessages = useUnreadMessagesCount(user?.id);
@@ -482,6 +484,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </Button>
               ))}
             </div>
+            {isModerator ? (
+              <Button asChild variant="outline" className="mt-3 h-12 w-full justify-start px-4">
+                <Link to="/moderation" onClick={() => setMenuOpen(false)}>
+                  Modération
+                </Link>
+              </Button>
+            ) : null}
             <div className="mt-6 border-t border-border">
               <Button
                 variant="ghost"
