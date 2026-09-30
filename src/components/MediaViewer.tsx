@@ -89,9 +89,9 @@ export function MediaViewer({ post, posts, kind, index, userId, onClose }: Props
     return () => { document.body.style.overflow = old; document.removeEventListener("play", pauseBackground, true); document.querySelectorAll('[data-media-viewer="true"] video').forEach((video) => (video as HTMLVideoElement).pause()); };
   }, []);
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { if (commentsId) setCommentsId(null); else onClose(); } };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { if (commentsId) { event.stopImmediatePropagation(); setCommentsId(null); } else onClose(); } };
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
   }, [onClose, commentsId]);
   const { data: comments } = useQuery({ queryKey: ["comments", commentsId], enabled: Boolean(commentsId), queryFn: async () => {
     const { data, error } = await supabase.from("comments").select("id, content, created_at, author:profiles!comments_author_profile_fkey(username, avatar_url)").eq("post_id", commentsId ?? "").order("created_at", { ascending: true });
