@@ -184,6 +184,13 @@ function AuthPage() {
           >
             {mode === "signin" ? "Pas encore de compte ? S'inscrire" : "Déjà membre ? Se connecter"}
           </button>
+          <p className="text-center text-xs text-muted-foreground">
+            En continuant, vous acceptez les{" "}
+            <Link to="/regles" className="underline hover:text-primary">
+              règles de la communauté
+            </Link>
+            .
+          </p>
         </form>
       </div>
     </div>

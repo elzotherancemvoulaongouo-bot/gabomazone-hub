@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FriendButton } from "@/components/FriendButton";
 import { MessageButton } from "@/components/MessageButton";
+import { ProfileSafetyMenu } from "@/components/ProfileSafetyMenu";
 import { useAuth } from "@/lib/auth";
 import { fetchMyRequests } from "@/lib/friends";
 import { MapPin, Cake, Mail, Phone, Globe, Users } from "lucide-react";
@@ -118,6 +119,13 @@ export function ProfileView({ profile }: { profile: ProfileRow }) {
             <>
               <FriendButton profileId={profile.id} />
               <MessageButton profileId={profile.id} />
+              {user ? (
+                <ProfileSafetyMenu
+                  userId={user.id}
+                  profileId={profile.id}
+                  name={profile.display_name || profile.username}
+                />
+              ) : null}
             </>
           )}
           <Button
