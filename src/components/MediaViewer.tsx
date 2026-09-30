@@ -14,7 +14,7 @@ import { getSignedUrl, timeAgo, useSignedUrl } from "@/lib/media";
 import { usePostActions, useSavedPostIds } from "@/lib/social";
 import type { FeedPost } from "@/components/PostCard";
 
-type Props = { post: FeedPost; posts?: FeedPost[]; kind: "video" | "image"; index: number; userId: string; onClose: () => void };
+type Props = { post: FeedPost; posts?: FeedPost[] | undefined; kind: "video" | "image"; index: number; userId: string; onClose: () => void };
 type CommentRow = { id: string; content: string; created_at: string; author: { username: string; avatar_url: string | null } | null };
 const mediaOf = (post: FeedPost) => post.media?.length ? [...post.media].sort((a, b) => a.position - b.position) : post.media_url ? [{ path: post.media_url, media_type: post.media_type, position: 0 }] : [];
 const isVideo = (post: FeedPost) => mediaOf(post).some((media) => media.media_type === "video");
