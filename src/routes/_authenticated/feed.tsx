@@ -69,7 +69,7 @@ function FeedPage() {
       ) : posts.length > 0 ? (
         posts.map((post, index) => (
           <LazyMount key={post.id} keepMounted={index < 3} placeholderHeight={post.media_url ? 520 : 200}>
-            <PostCard post={post} currentUserId={user.id} />
+            <PostCard post={post} currentUserId={user.id} contextPosts={posts} />
           </LazyMount>
         ))
       ) : (

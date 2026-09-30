@@ -73,7 +73,7 @@ export function postIdentity(post: FeedPost): PostIdentity {
   return "profile";
 }
 
-export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserId: string }) {
+export function PostCard({ post, currentUserId, contextPosts }: { post: FeedPost; currentUserId: string; contextPosts?: FeedPost[] }) {
   const identity = postIdentity(post);
 
   const queryClient = useQueryClient();
@@ -310,6 +310,8 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
         <PostMediaGallery
           items={mediaItems}
           alt={post.caption ?? "Publication"}
+          post={post}
+          posts={contextPosts}
         />
       ) : null}
 

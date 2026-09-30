@@ -195,7 +195,7 @@ function PageDetail() {
           ) : allPosts.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucune publication pour le moment.</p>
           ) : (
-            allPosts.map((p) => <PostCard key={p.id} post={p} currentUserId={user.id} />)
+            allPosts.map((p) => <PostCard key={p.id} post={p} currentUserId={user.id} contextPosts={allPosts} />)
           )}
         </TabsContent>
 

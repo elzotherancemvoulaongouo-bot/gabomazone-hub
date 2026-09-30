@@ -15,6 +15,7 @@ import { fetchMyRequests } from "@/lib/friends";
 import { MapPin, Cake, Mail, Phone, Globe, Users } from "lucide-react";
 import { CoverPhoto } from "@/components/CoverPhoto";
 import { supabase } from "@/integrations/supabase/client";
+import { useMediaViewer } from "@/components/MediaViewerContext";
 
 export type ProfileRow = {
   id: string;
@@ -138,7 +139,7 @@ export function ProfileView({ profile }: { profile: ProfileRow }) {
             <p className="text-center text-sm text-muted-foreground">Aucune publication.</p>
           ) : (
             posts.map((post) => (
-              <PostCard key={post.id} post={post} currentUserId={user?.id ?? ""} />
+              <PostCard key={post.id} post={post} currentUserId={user?.id ?? ""} contextPosts={posts} />
             ))
           )}
         </TabsContent>
@@ -198,6 +199,7 @@ function MediaGrid({
   items: { id: string; media_url: string | null; media_type: string | null; caption: string | null }[];
   empty: string;
 }) {
+  const viewer = useMediaViewer();
   if (items.length === 0)
     return <p className="text-center text-sm text-muted-foreground">{empty}</p>;
   return (
@@ -207,6 +209,7 @@ function MediaGrid({
           key={post.id}
           to="/p/$postId"
           params={{ postId: post.id }}
+          onClick={async (event) => { if (!post.media_url || !viewer || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); const selected = await fetchPost(post.id); if (selected) viewer.open({ post: selected, posts: (await fetchUserPosts(selected.user_id)), kind: post.media_type === "video" ? "video" : "image", index: 0 }); }}
           className="aspect-square overflow-hidden rounded-md"
         >
           <Media
