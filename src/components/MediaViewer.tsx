@@ -73,7 +73,7 @@ export function MediaViewer({ post, posts, kind, index, userId, onClose }: Props
     const old = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     document.querySelectorAll("video").forEach((video) => { if (!video.closest('[data-media-viewer="true"]')) video.pause(); });
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape" && !commentsId) onClose(); };
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { if (commentsId) setCommentsId(null); else onClose(); } };
     document.addEventListener("keydown", onKey);
     return () => { document.body.style.overflow = old; document.removeEventListener("keydown", onKey); document.querySelectorAll('[data-media-viewer="true"] video').forEach((video) => (video as HTMLVideoElement).pause()); };
   }, [onClose, commentsId]);
@@ -172,7 +172,7 @@ function ViewerSlide({ post, kind, initialIndex, active, preload, userId, saved,
       </div>}
     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-viewer/90 to-transparent" />
     {kind === "image" && media.length > 1 && <><span className="absolute left-1/2 top-[max(1rem,env(safe-area-inset-top))] z-10 -translate-x-1/2 text-sm">{index + 1}/{media.length}</span><Button variant="ghost" size="icon" disabled={index === 0} aria-label="Photo précédente" onClick={() => changeImage(index - 1)} className="absolute left-2 top-1/2 z-10 text-viewer-foreground hover:bg-viewer-foreground/20">‹</Button><Button variant="ghost" size="icon" disabled={index === media.length - 1} aria-label="Photo suivante" onClick={() => changeImage(index + 1)} className="absolute right-2 top-1/2 z-10 text-viewer-foreground hover:bg-viewer-foreground/20">›</Button></>}
-    <div className="absolute bottom-[max(3.75rem,env(safe-area-inset-bottom))] left-3 right-18 z-10 min-w-0 space-y-1 text-viewer-foreground sm:left-5">
+    <div className="absolute bottom-[max(3.75rem,env(safe-area-inset-bottom))] left-3 right-20 z-10 min-w-0 space-y-1 text-viewer-foreground sm:left-5">
       {profile ? <Link to="/u/$username" params={{ username: profile }} onClick={onClose} className="block truncate font-semibold">{post.author?.display_name || profile}</Link> : <span className="block truncate font-semibold">Créateur</span>}
       <p className="text-xs opacity-80">{timeAgo(post.created_at)}</p>
       {post.caption && <p className={`${expanded ? "max-h-[25dvh] overflow-y-auto" : "line-clamp-2"} break-words text-sm`}>{post.caption}</p>}
