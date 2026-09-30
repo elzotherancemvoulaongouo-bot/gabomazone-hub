@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell, Heart, MessageCircle, MessageSquare, UserCheck } from "lucide-react";
+import { Flag, Users, Bell, Heart, MessageCircle, MessageSquare, UserCheck } from "lucide-react";
 import { UserAvatar } from "@/components/Avatar";
+import { InviteNotificationItem } from "@/components/InviteNotificationItem";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { timeAgo } from "@/lib/media";
@@ -37,6 +38,8 @@ const ICONS = {
   friend_accepted: UserCheck,
   like: Heart,
   comment: MessageCircle,
+  page_invite: Flag,
+  group_invite: Users,
 } as const;
 
 function NotificationsPage() {
@@ -126,6 +129,9 @@ function NotificationItem({ notification: n }: { notification: NotificationRow }
         </Link>
       </li>
     );
+  }
+  if (n.type === "page_invite" || n.type === "group_invite") {
+    return <InviteNotificationItem notification={n} body={body} onOpen={onOpen} />;
   }
   if (n.type === "friend_accepted" && n.actor?.username) {
     return (

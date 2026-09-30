@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchUnreadMessagesCount } from "@/lib/messages";
 
-export type NotificationType = "message" | "friend_accepted" | "like" | "comment";
+export type NotificationType = "message" | "friend_accepted" | "like" | "comment" | "page_invite" | "group_invite";
 
 export type NotificationRow = {
   id: string;
@@ -12,6 +12,8 @@ export type NotificationRow = {
   type: NotificationType;
   post_id: string | null;
   conversation_id: string | null;
+  page_id?: string | null;
+  group_id?: string | null;
   preview: string | null;
   read_at: string | null;
   created_at: string;
@@ -23,7 +25,7 @@ export type NotificationRow = {
 };
 
 const SELECT =
-  "id, user_id, actor_id, type, post_id, conversation_id, preview, read_at, created_at, actor:profiles!notifications_actor_profile_fkey(username, display_name, avatar_url)";
+  "id, user_id, actor_id, type, post_id, conversation_id, page_id, group_id, preview, read_at, created_at, actor:profiles!notifications_actor_profile_fkey(username, display_name, avatar_url)";
 
 export async function fetchNotifications() {
   const { data, error } = await supabase
@@ -115,6 +117,10 @@ export function notificationLabel(n: NotificationRow) {
       return `${who} a aimé votre publication`;
     case "comment":
       return `${who} a commenté votre publication`;
+    case "page_invite":
+      return `${who} vous invite à suivre la page ${n.preview ?? ""}`.trim();
+    case "group_invite":
+      return `${who} vous invite à rejoindre le groupe ${n.preview ?? ""}`.trim();
     default:
       return who;
   }
