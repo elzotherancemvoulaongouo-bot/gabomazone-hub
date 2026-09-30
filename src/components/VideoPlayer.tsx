@@ -2,30 +2,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Maximize2, Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-/** Gestionnaire global : une seule vidéo en lecture automatique à la fois. */
-let currentVideo: HTMLVideoElement | null = null;
-
-function claimPlayback(el: HTMLVideoElement) {
-  if (currentVideo && currentVideo !== el) currentVideo.pause();
-  currentVideo = el;
-}
+import { claimPlayback, playWithSound, releasePlayback, useSound } from "@/lib/sound";
 
 export function VideoPlayer({
   src,
   className,
   autoPlayOnVisible = true,
-  startMuted = true,
 }: {
   src: string;
   className?: string | undefined;
   autoPlayOnVisible?: boolean;
-  startMuted?: boolean;
+  startMuted?: boolean | undefined;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(startMuted);
-  const userMuteChoice = useRef<boolean | null>(null);
+  const { muted, blocked, toggle: toggleMute } = useSound();
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [ratio, setRatio] = useState<number | null>(null);
@@ -41,15 +32,7 @@ export function VideoPlayer({
         if (document.querySelector('[data-media-viewer="true"]')) { el.pause(); return; }
         if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
           claimPlayback(el);
-          // La lecture automatique commence toujours en muet.
-          const wantMuted = userMuteChoice.current ?? true;
-          el.muted = wantMuted;
-          setMuted(wantMuted);
-          el.play().catch(() => {
-            el.muted = true;
-            setMuted(true);
-            el.play().catch(() => undefined);
-          });
+          void playWithSound(el);
         } else if (!el.paused) {
           el.pause();
         }
@@ -62,7 +45,7 @@ export function VideoPlayer({
 
   useEffect(() => {
     return () => {
-      if (currentVideo === ref.current) currentVideo = null;
+      releasePlayback(ref.current);
     };
   }, []);
 
@@ -71,19 +54,13 @@ export function VideoPlayer({
     if (!el) return;
     if (el.paused) {
       claimPlayback(el);
-      el.play().catch(() => undefined);
+      void playWithSound(el);
     } else {
       el.pause();
     }
   }, []);
 
-  function toggleMute() {
-    const el = ref.current;
-    if (!el) return;
-    el.muted = !el.muted;
-    userMuteChoice.current = el.muted;
-    setMuted(el.muted);
-  }
+  useEffect(() => { if (ref.current) ref.current.muted = muted; }, [muted]);
 
   async function fullscreen() {
     const el = ref.current as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | null;
@@ -113,7 +90,7 @@ export function VideoPlayer({
       <video
         ref={ref}
         src={src}
-        muted={startMuted}
+        data-app-video
         loop
         playsInline
         preload="metadata"
@@ -134,6 +111,7 @@ export function VideoPlayer({
         }}
       />
 
+      {blocked && playing && <button type="button" onClick={toggleMute} className="absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-full bg-foreground/80 px-4 py-2 text-sm font-semibold text-background">🔇 Touchez pour activer le son</button>}
        <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-foreground/75 px-2 pb-2 pt-3 text-background">
           <Button variant="ghost" size="icon"
           type="button"
