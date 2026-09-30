@@ -71,6 +71,132 @@ export type Database = {
           },
         ]
       }
+      community_invites: {
+        Row: {
+          created_at: string
+          group_id: string | null
+          id: string
+          invitee_id: string
+          inviter_id: string
+          page_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          invitee_id: string
+          inviter_id: string
+          page_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          invitee_id?: string
+          inviter_id?: string
+          page_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_invites_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_invites_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_reports: {
+        Row: {
+          created_at: string
+          group_id: string | null
+          id: string
+          page_id: string | null
+          reason: string
+          reporter_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          page_id?: string | null
+          reason: string
+          reporter_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          page_id?: string | null
+          reason?: string
+          reporter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_reports_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_reports_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_user_flags: {
+        Row: {
+          created_at: string
+          flag: string
+          group_id: string | null
+          id: string
+          page_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          flag: string
+          group_id?: string | null
+          id?: string
+          page_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          flag?: string
+          group_id?: string | null
+          id?: string
+          page_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_user_flags_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_user_flags_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           created_at: string
@@ -362,7 +488,9 @@ export type Database = {
           actor_id: string | null
           conversation_id: string | null
           created_at: string
+          group_id: string | null
           id: string
+          page_id: string | null
           post_id: string | null
           preview: string | null
           read_at: string | null
@@ -373,7 +501,9 @@ export type Database = {
           actor_id?: string | null
           conversation_id?: string | null
           created_at?: string
+          group_id?: string | null
           id?: string
+          page_id?: string | null
           post_id?: string | null
           preview?: string | null
           read_at?: string | null
@@ -384,7 +514,9 @@ export type Database = {
           actor_id?: string | null
           conversation_id?: string | null
           created_at?: string
+          group_id?: string | null
           id?: string
+          page_id?: string | null
           post_id?: string | null
           preview?: string | null
           read_at?: string | null
@@ -404,6 +536,20 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
             referencedColumns: ["id"]
           },
           {
@@ -469,6 +615,7 @@ export type Database = {
       }
       pages: {
         Row: {
+          action_buttons: Json
           avatar_url: string | null
           category: string | null
           city: string | null
@@ -486,6 +633,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          action_buttons?: Json
           avatar_url?: string | null
           category?: string | null
           city?: string | null
@@ -503,6 +651,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          action_buttons?: Json
           avatar_url?: string | null
           category?: string | null
           city?: string | null
