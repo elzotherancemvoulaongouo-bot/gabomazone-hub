@@ -1,18 +1,17 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
-import { PostCard } from "@/components/PostCard";
-import { Button } from "@/components/ui/button";
+import { ReelsViewer } from "@/components/ReelsViewer";
+import type { FeedPost } from "@/components/PostCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchPost } from "@/lib/posts";
+import { POST_SELECT, fetchPost } from "@/lib/posts";
+import { supabase } from "@/integrations/supabase/client";
 
-// Keep old shared links usable, without restoring a vertical full-screen feed.
 export const Route = createFileRoute("/_authenticated/watch/$postId")({
   head: () => ({ meta: [
-    { title: "Publication — Gabomazone" },
-    { name: "description", content: "Découvrez cette publication photo ou vidéo Gabomazone." },
-    { property: "og:title", content: "Publication — Gabomazone" },
-    { property: "og:description", content: "Découvrez cette publication photo ou vidéo Gabomazone." },
+    { title: "Vidéos en défilement — Gabomazone" },
+    { name: "description", content: "Regardez les vidéos de la communauté Gabomazone en défilement vertical." },
+    { property: "og:title", content: "Vidéos en défilement — Gabomazone" },
+    { property: "og:description", content: "Les vidéos de la communauté Gabomazone." },
     { property: "og:type", content: "article" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
@@ -22,10 +21,18 @@ export const Route = createFileRoute("/_authenticated/watch/$postId")({
 function WatchPost() {
   const { postId } = Route.useParams();
   const { user } = Route.useRouteContext();
-  const navigate = useNavigate();
-  const { data: post, isPending } = useQuery({ queryKey: ["post", postId], queryFn: () => fetchPost(postId) });
-  return <div className="space-y-3">
-    <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/explore", search: { q: "" } })}><ArrowLeft className="mr-2 size-4" />Explorer</Button>
-    {isPending ? <Skeleton className="h-72 w-full" /> : post ? <PostCard post={post} currentUserId={user.id} /> : <p className="text-sm text-muted-foreground">Publication introuvable.</p>}
-  </div>;
+  const { data, isPending, error } = useQuery({ queryKey: ["reels-posts", postId], queryFn: async () => {
+    const [selected, list] = await Promise.all([
+      fetchPost(postId),
+      supabase.from("posts").select(POST_SELECT).eq("visibility", "public").eq("media_type", "video").order("created_at", { ascending: false }).limit(60),
+    ]);
+    if (list.error) throw list.error;
+    const videos = (list.data ?? []) as unknown as FeedPost[];
+    if (selected?.media_type === "video" && !videos.some((post) => post.id === selected.id)) videos.unshift(selected);
+    return selected?.media_type === "video" ? videos : [];
+  } });
+  if (isPending) return <Skeleton className="h-[70dvh] w-full" />;
+  if (error) return <p className="text-destructive">Impossible de charger les vidéos.</p>;
+  if (!data?.length) return <p className="text-muted-foreground">Vidéo introuvable.</p>;
+  return <ReelsViewer posts={data} initialId={postId} userId={user.id} />;
 }
