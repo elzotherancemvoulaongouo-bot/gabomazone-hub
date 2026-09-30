@@ -10,9 +10,11 @@ import { timeAgo } from "@/lib/media";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ReportDialog } from "@/components/ReportDialog";
 
 type CommentRow = {
   id: string;
+  user_id: string;
   content: string;
   created_at: string;
   author: { username: string; display_name: string | null; avatar_url: string | null } | null;
@@ -40,6 +42,7 @@ function PostPage() {
   const { user } = Route.useRouteContext();
   const queryClient = useQueryClient();
   const [content, setContent] = useState("");
+  const [reportId, setReportId] = useState<string | null>(null);
 
   const postQuery = useQuery({ queryKey: ["post", postId], queryFn: () => fetchPost(postId) });
 
@@ -49,7 +52,7 @@ function PostPage() {
       const { data, error } = await supabase
         .from("comments")
         .select(
-          "id, content, created_at, author:profiles!comments_author_profile_fkey(username, display_name, avatar_url)",
+          "id, user_id, content, created_at, author:profiles!comments_author_profile_fkey(username, display_name, avatar_url)",
         )
         .eq("post_id", postId)
         .order("created_at", { ascending: true });
@@ -95,10 +98,28 @@ function PostPage() {
                 <span className="mr-2 font-semibold">{c.author?.username}</span>
                 {c.content}
               </p>
-              <p className="text-xs text-muted-foreground">{timeAgo(c.created_at)}</p>
+              <p className="text-xs text-muted-foreground">
+                {timeAgo(c.created_at)}
+                {c.user_id !== user.id ? (
+                  <button
+                    type="button"
+                    className="ml-3 font-medium hover:text-primary"
+                    onClick={() => setReportId(c.id)}
+                  >
+                    Signaler
+                  </button>
+                ) : null}
+              </p>
             </div>
           </div>
         ))}
+        <ReportDialog
+          open={Boolean(reportId)}
+          onOpenChange={(o) => !o && setReportId(null)}
+          userId={user.id}
+          targetType="comment"
+          targetId={reportId ?? ""}
+        />
         {commentsQuery.data?.length === 0 && (
           <p className="text-sm text-muted-foreground">Soyez le premier à commenter.</p>
         )}

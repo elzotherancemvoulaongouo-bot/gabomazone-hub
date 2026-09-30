@@ -151,11 +151,11 @@ export async function setFlag(
 }
 
 export async function reportCommunity(userId: string, target: Target, reason: string) {
-  const { error } = await supabase.from("community_reports" as never).insert({
-    reporter_id: userId,
-    page_id: target.pageId ?? null,
-    group_id: target.groupId ?? null,
+  const { reportContent } = await import("@/lib/moderation");
+  await reportContent(
+    userId,
+    target.pageId ? "page" : "group",
+    (target.pageId ?? target.groupId)!,
     reason,
-  } as never);
-  if (error) throw error;
+  );
 }

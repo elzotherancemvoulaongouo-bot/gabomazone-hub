@@ -69,10 +69,8 @@ export function usePostActions(userId: string) {
 
   const reportPost = useMutation({
     mutationFn: async ({ postId, reason }: { postId: string; reason: string }) => {
-      const { error } = await supabase
-        .from("post_reports")
-        .insert({ post_id: postId, reporter_id: userId, reason });
-      if (error) throw error;
+      const { reportContent } = await import("@/lib/moderation");
+      await reportContent(userId, "post", postId, reason);
     },
     onSuccess: () => toast.success("Merci, votre signalement a été transmis."),
     onError: (err) => toast.error(err instanceof Error ? err.message : "Signalement impossible"),

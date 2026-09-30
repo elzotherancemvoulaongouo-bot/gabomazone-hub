@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Ban, Flag, MoreHorizontal, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { reportContent } from "@/lib/moderation";
 import { useBlockActions } from "@/lib/social";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,12 +48,13 @@ export function ProfileSafetyMenu({
   const [blockOpen, setBlockOpen] = useState(false);
 
   async function report(reason: string) {
-    const { error } = await supabase
-      .from("user_reports" as never)
-      .insert({ reporter_id: userId, reported_id: profileId, reason } as never);
     setReportOpen(false);
-    if (error) toast.error("Signalement impossible");
-    else toast.success("Merci, votre signalement a été transmis.");
+    try {
+      await reportContent(userId, "profile", profileId, reason);
+      toast.success("Merci, votre signalement a été transmis.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Signalement impossible");
+    }
   }
 
   return (
