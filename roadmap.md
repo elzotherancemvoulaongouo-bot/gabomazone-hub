@@ -1,6 +1,6 @@
 - [x] En-tête, menu, recherche et messagerie mobile (travail précédent).
 - [x] Explorer et visionneuse verticale (travail précédent).
-- [ ] Caméra : permissions, caméra arrière, bascule avant/arrière, photo et vidéo, aperçu Reprendre/Utiliser.
-- [ ] Publication : caméra et galerie ajoutent plusieurs miniatures retirable avec légende et bouton actif.
-- [ ] Vérifier qu’une nouvelle publication apparaît dans le fil.
-- [ ] Vérifier petits écrans et navigation sans erreur.
+- [x] Caméra : permissions, caméra arrière, bascule avant/arrière, photo et vidéo, aperçu Reprendre/Utiliser.
+- [x] Publication : caméra et galerie ajoutent plusieurs miniatures retirables avec légende et bouton actif.
+- [x] Vérifier qu’une nouvelle publication apparaît dans le fil.
+- [x] Vérifier petits écrans et navigation sans erreur.
