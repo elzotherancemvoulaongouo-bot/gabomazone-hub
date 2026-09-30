@@ -9,7 +9,6 @@ export function Media({
   className,
   alt,
   fallbackText,
-  onOpenVideo,
   autoPlay = true,
   eager = false,
   onImageLoad,
@@ -19,7 +18,6 @@ export function Media({
   className?: string | undefined;
   alt: string;
   fallbackText?: string | null;
-  onOpenVideo?: () => void;
   autoPlay?: boolean;
   /** Charge le média immédiatement (visionneuse plein écran) au lieu d'attendre la visibilité. */
   eager?: boolean;
@@ -67,7 +65,6 @@ export function Media({
         src={url}
         className={className}
         autoPlayOnVisible={autoPlay}
-        {...(onOpenVideo ? { onOpen: onOpenVideo } : {})}
       />
     );
   }

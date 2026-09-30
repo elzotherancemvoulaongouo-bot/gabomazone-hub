@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 export type PostMediaItem = { path: string; media_type: string | null };
 
-export function PostMediaGallery({ items, alt, className }: { items: PostMediaItem[]; alt: string; className?: string; onOpenVideo?: () => void }) {
+export function PostMediaGallery({ items, alt, className }: { items: PostMediaItem[]; alt: string; className?: string }) {
   const [viewer, setViewer] = useState<number | null>(null);
   const [singleRatio, setSingleRatio] = useState(1);
   if (!items.length) return null;
