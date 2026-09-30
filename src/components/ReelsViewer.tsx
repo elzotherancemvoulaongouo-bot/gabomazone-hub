@@ -94,6 +94,7 @@ function Reel({ post, userId, active, saved, onSave, onComments }: { post: FeedP
   const video = useRef<HTMLVideoElement>(null);
   const [paused, setPaused] = useState(false);
   const [muted, setMuted] = useState(true);
+  const [mediaError, setMediaError] = useState(false);
   const [likeOverride, setLikeOverride] = useState<boolean | null>(null);
   const queryClient = useQueryClient();
   const liked = likeOverride ?? post.likes.some((like) => like.user_id === userId);
@@ -127,7 +128,7 @@ function Reel({ post, userId, active, saved, onSave, onComments }: { post: FeedP
   }
 
   return <>
-    {src ? <video ref={video} src={src} loop muted={muted} playsInline preload={active ? "auto" : "metadata"} onClick={playPause} onDoubleClick={() => { if (!liked) like.mutate(true); }} className="absolute inset-0 size-full object-contain" aria-label="Lire ou mettre en pause la vidéo" /> : <div className="absolute inset-0 flex items-center justify-center"><Play className="size-10" /></div>}
+    {src && !mediaError ? <video ref={video} src={src} loop muted={muted} playsInline preload={active ? "auto" : "metadata"} onError={() => setMediaError(true)} onClick={playPause} onDoubleClick={() => { if (!liked) like.mutate(true); }} className="absolute inset-0 size-full object-contain" aria-label="Lire ou mettre en pause la vidéo" /> : <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center"><Play className="size-10" /><p className="text-sm">{mediaError ? "Cette ancienne vidéo ne peut pas être lue sur cet appareil." : "Chargement de la vidéo…"}</p></div>}
     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-foreground/80 to-transparent" />
     <div className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-4 right-20 z-10 min-w-0 space-y-2">
       <Link to="/u/$username" params={{ username: profile }} className="flex min-w-0 items-center gap-2 font-semibold"><UserAvatar avatarPath={post.author?.avatar_url} name={profile} className="size-8" /><span className="truncate">{post.author?.display_name || profile}</span></Link>
