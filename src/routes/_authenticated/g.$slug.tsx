@@ -216,11 +216,11 @@ function GroupDetail() {
         </TabsContent>
 
         <TabsContent value="photos" className="pt-4">
-          <MediaGrid items={canSeeContent ? photos : []} empty="Aucune photo." />
+          <MediaGrid items={canSeeContent ? photos : []} posts={allPosts} empty="Aucune photo." />
         </TabsContent>
 
         <TabsContent value="videos" className="pt-4">
-          <MediaGrid items={canSeeContent ? videos : []} empty="Aucune vidéo." />
+          <MediaGrid items={canSeeContent ? videos : []} posts={allPosts} empty="Aucune vidéo." />
         </TabsContent>
 
         <TabsContent value="members" className="space-y-2 pt-4">

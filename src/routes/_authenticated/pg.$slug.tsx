@@ -228,11 +228,11 @@ function PageDetail() {
         </TabsContent>
 
         <TabsContent value="photos" className="pt-4">
-          <MediaGrid items={photos} empty="Aucune photo." />
+          <MediaGrid items={photos} posts={allPosts} empty="Aucune photo." />
         </TabsContent>
 
         <TabsContent value="videos" className="pt-4">
-          <MediaGrid items={videos} empty="Aucune vidéo." />
+          <MediaGrid items={videos} posts={allPosts} empty="Aucune vidéo." />
         </TabsContent>
 
         <TabsContent value="followers" className="space-y-2 pt-4">
