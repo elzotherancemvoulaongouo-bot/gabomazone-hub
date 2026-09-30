@@ -310,7 +310,6 @@ export function PostCard({ post, currentUserId }: { post: FeedPost; currentUserI
         <PostMediaGallery
           items={mediaItems}
           alt={post.caption ?? "Publication"}
-          onOpenVideo={() => navigate({ to: "/watch/$postId", params: { postId: post.id } })}
         />
       ) : null}
 
