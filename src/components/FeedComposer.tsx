@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Camera, ImagePlus, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/Avatar";
 import { CreatePostDialog } from "@/components/CreatePostDialog";
 
@@ -12,7 +13,7 @@ export function FeedComposer({
   userId: string;
   defaultVisibility?: string;
 }) {
-  const [mode, setMode] = useState<null | "text" | "media" | "camera">(null);
+  const [mode, setMode] = useState<null | "text" | "photo" | "video" | "camera">(null);
 
   const { data: profile } = useQuery({
     queryKey: ["profile-brief", userId],
@@ -29,40 +30,44 @@ export function FeedComposer({
 
   return (
     <section className="rounded-2xl border border-border/70 brand-surface p-3">
-      <div className="flex items-center gap-3">
+      {mode ? null : <div className="flex items-center gap-3">
         <UserAvatar avatarPath={profile?.avatar_url} name={profile?.username} />
-        <button
+        <Button
           type="button"
           onClick={() => setMode("text")}
-          className="h-11 flex-1 rounded-full bg-secondary px-4 text-left text-sm text-muted-foreground"
+          variant="secondary" className="h-11 min-w-0 flex-1 justify-start rounded-full px-4 text-left text-sm text-muted-foreground"
         >
           Que voulez-vous publier ?
-        </button>
+        </Button>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-1 border-t border-border/60 pt-2">
-        <button
+      </div>}
+
+      {mode ? null : <div className="mt-3 grid grid-cols-3 gap-1 border-t border-border/60 pt-2">
+        <Button
           type="button"
-          onClick={() => setMode("media")}
-          className="flex h-11 items-center justify-center gap-2 rounded-lg text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary"
+          onClick={() => setMode("photo")}
+          variant="ghost" className="h-11 min-w-0 gap-1 px-1 text-xs font-medium text-muted-foreground"
         >
           <ImagePlus className="size-5 text-primary" /> Photo
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          onClick={() => setMode("media")}
-          className="flex h-11 items-center justify-center gap-2 rounded-lg text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary"
+          onClick={() => setMode("video")}
+          variant="ghost" className="h-11 min-w-0 gap-1 px-1 text-xs font-medium text-muted-foreground"
         >
           <Video className="size-5 text-primary" /> Vidéo
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() => setMode("camera")}
-          className="flex h-11 items-center justify-center gap-2 rounded-lg text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary"
+          variant="ghost" className="h-11 min-w-0 gap-1 px-1 text-xs font-medium text-muted-foreground"
         >
           <Camera className="size-5 text-primary" /> Caméra
-        </button>
+        </Button>
       </div>
+
+      </div>}
 
       {mode ? (
         <CreatePostDialog
@@ -73,7 +78,9 @@ export function FeedComposer({
           displayName={profile?.display_name ?? profile?.username ?? null}
           defaultVisibility={defaultVisibility}
           startWithCamera={mode === "camera"}
-          startWithPicker={mode === "media"}
+          startWithPicker={mode === "photo" || mode === "video"}
+          pickerAccept={mode === "photo" ? "image/*" : mode === "video" ? "video/*" : "image/*,video/*"}
+          inline
         />
       ) : null}
     </section>

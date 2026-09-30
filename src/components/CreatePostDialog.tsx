@@ -167,7 +167,7 @@ export function CreatePostDialog({
                   ) : (
                     <img src={draft.url} alt="Média sélectionné" className="aspect-square w-full object-cover" />
                   )}
-                  <button
+                  <Button
                     type="button"
                     aria-label="Retirer ce média"
                     onClick={() => { URL.revokeObjectURL(draft.url); setDrafts((prev) => prev.filter((d) => d.id !== draft.id)); }}
@@ -180,7 +180,7 @@ export function CreatePostDialog({
                       type="button"
                       aria-label="Déplacer vers la gauche"
                       onClick={() => move(index, -1)}
-                      className="rounded-full bg-background/85 p-1.5"
+                      variant="secondary" size="icon" className="size-8 rounded-full"
                     >
                       <ArrowLeft className="size-4" />
                     </Button>
@@ -188,7 +188,7 @@ export function CreatePostDialog({
                       type="button"
                       aria-label="Déplacer vers la droite"
                       onClick={() => move(index, 1)}
-                      className="rounded-full bg-background/85 p-1.5"
+                      variant="secondary" size="icon" className="size-8 rounded-full"
                     >
                       <ArrowRight className="size-4" />
                     </Button>
@@ -253,9 +253,6 @@ export function CreatePostDialog({
           {editor}
         </DialogContent>
       </Dialog>}
-
-        </DialogContent>
-      </Dialog>
 
       <CameraCapture
         open={cameraOpen}
