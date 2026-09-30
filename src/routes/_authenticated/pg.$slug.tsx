@@ -1,6 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Globe, Mail, MapPin, Phone, Settings, Share2, Store, ThumbsUp } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { Input } from "@/components/ui/input";
+import { ActionButtonEditor, AdminIcons, CommunityMoreButton, InviteFriendsDialog, PageActionButtons } from "@/components/CommunityActions";
+import { parseActionButtons } from "@/lib/community-actions";
+import { Globe, Mail, MapPin, Phone, Settings, Store, ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -38,6 +43,11 @@ function PageDetail() {
   const { slug } = Route.useParams();
   const { user } = Route.useRouteContext();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [term, setTerm] = useState("");
 
   const { data: page, isPending } = useQuery({ queryKey: ["page", slug], queryFn: () => fetchPageBySlug(slug) });
   const followers = useQuery({
@@ -97,7 +107,10 @@ function PageDetail() {
   if (isPending) return <Skeleton className="h-64 w-full rounded-2xl" />;
   if (!page) return <p className="text-sm text-muted-foreground">Page introuvable.</p>;
 
-  const allPosts = posts.data ?? [];
+  const actionButtons = parseActionButtons(page.action_buttons);
+  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/pg/${slug}` : `/pg/${slug}`;
+  const needle = term.trim().toLowerCase();
+  const allPosts = (posts.data ?? []).filter((p) => !needle || (p.caption ?? "").toLowerCase().includes(needle));
   const photos = allPosts.filter((p) => p.media_url && p.media_type !== "video");
   const videos = allPosts.filter((p) => p.media_type === "video");
 
@@ -155,16 +168,59 @@ function PageDetail() {
             <ThumbsUp className="mr-2 size-4" />
             {isFollowing ? "Abonné" : "Suivre"}
           </Button>
-          <Button variant="secondary" className="flex-1" onClick={share}>
-            <Share2 className="mr-2 size-4" /> Partager
-          </Button>
+          <PageActionButtons buttons={actionButtons} ownerId={page.owner_id} meId={user.id} />
           {page.contact_email ? (
             <Button asChild variant="secondary" className="flex-1">
               <a href={`mailto:${page.contact_email}`}>Contacter</a>
             </Button>
           ) : null}
+          <CommunityMoreButton
+            userId={user.id}
+            target={{ pageId: page.id }}
+            kind="page"
+            name={page.name}
+            shareUrl={shareUrl}
+            isAdmin={isAdmin}
+            isMember={isFollowing}
+            onInvite={() => setInviteOpen(true)}
+            onSearch={() => setSearchOpen(true)}
+            onLeave={() => toggleFollow.mutate()}
+            adminItems={[
+              { key: "edit", label: "Modifier la page", icon: AdminIcons.Pencil, onClick: () => navigate({ to: "/page-settings/$slug", params: { slug: page.slug } }) },
+              { key: "action", label: "Modifier le bouton d'action", icon: AdminIcons.MousePointerClick, onClick: () => setEditorOpen(true) },
+              { key: "settings", label: "Paramètres", icon: AdminIcons.Settings, onClick: () => navigate({ to: "/page-settings/$slug", params: { slug: page.slug } }) },
+              { key: "roles", label: "Gérer les rôles", icon: AdminIcons.Shield, onClick: () => navigate({ to: "/page-settings/$slug", params: { slug: page.slug } }) },
+            ]}
+          />
         </div>
+        {searchOpen ? (
+          <div className="flex gap-2">
+            <Input autoFocus value={term} onChange={(e) => setTerm(e.target.value)} placeholder="Rechercher dans la page" aria-label="Rechercher dans la page" />
+            <Button variant="ghost" onClick={() => { setTerm(""); setSearchOpen(false); }}>Fermer</Button>
+          </div>
+        ) : null}
       </header>
+      <InviteFriendsDialog
+        open={inviteOpen}
+        onOpenChange={setInviteOpen}
+        userId={user.id}
+        target={{ pageId: page.id }}
+        kind="page"
+        excludeIds={followerList.map((f) => f.user_id)}
+        shareUrl={shareUrl}
+        name={page.name}
+      />
+      {isAdmin ? (
+        <ActionButtonEditor
+          open={editorOpen}
+          onOpenChange={setEditorOpen}
+          pageId={page.id}
+          initial={actionButtons}
+          ownerId={page.owner_id}
+          meId={user.id}
+          onSaved={() => queryClient.invalidateQueries({ queryKey: ["page", slug] })}
+        />
+      ) : null}
 
       {page.description ? <p className="px-1 text-sm leading-relaxed">{page.description}</p> : null}
 
