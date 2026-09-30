@@ -60,6 +60,8 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-primary-glow: var(--primary-glow);
+  --color-viewer: var(--viewer);
+  --color-viewer-foreground: var(--viewer-foreground);
   --font-display: var(--font-display);
   --font-sans: var(--font-body);
 }
@@ -69,6 +71,8 @@
   --background: oklch(0.985 0.004 150);
   --foreground: oklch(0.24 0.03 155);
   --card: oklch(1 0 0);
+  --viewer: oklch(0 0 0);
+  --viewer-foreground: oklch(1 0 0);
   --card-foreground: oklch(0.24 0.03 155);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.24 0.03 155);
@@ -111,6 +115,8 @@
   --background: oklch(0.129 0.042 264.695);
   --foreground: oklch(0.984 0.003 247.858);
   --card: oklch(0.208 0.042 265.755);
+  --viewer: oklch(0 0 0);
+  --viewer-foreground: oklch(1 0 0);
   --card-foreground: oklch(0.984 0.003 247.858);
   --popover: oklch(0.208 0.042 265.755);
   --popover-foreground: oklch(0.984 0.003 247.858);

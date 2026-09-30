@@ -195,7 +195,7 @@ function PageDetail() {
           ) : allPosts.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucune publication pour le moment.</p>
           ) : (
-            allPosts.map((p) => <PostCard key={p.id} post={p} currentUserId={user.id} />)
+            allPosts.map((p) => <PostCard key={p.id} post={p} currentUserId={user.id} contextPosts={allPosts} />)
           )}
         </TabsContent>
 
@@ -228,11 +228,11 @@ function PageDetail() {
         </TabsContent>
 
         <TabsContent value="photos" className="pt-4">
-          <MediaGrid items={photos} empty="Aucune photo." />
+          <MediaGrid items={photos} posts={allPosts} empty="Aucune photo." />
         </TabsContent>
 
         <TabsContent value="videos" className="pt-4">
-          <MediaGrid items={videos} empty="Aucune vidéo." />
+          <MediaGrid items={videos} posts={allPosts} empty="Aucune vidéo." />
         </TabsContent>
 
         <TabsContent value="followers" className="space-y-2 pt-4">

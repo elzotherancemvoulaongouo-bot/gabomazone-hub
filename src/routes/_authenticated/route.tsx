@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
+import { MediaViewerProvider } from "@/components/MediaViewerContext";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -9,9 +10,10 @@ export const Route = createFileRoute("/_authenticated")({
     if (error || !data.user) throw redirect({ to: "/auth" });
     return { user: data.user };
   },
-  component: () => (
-    <AppShell>
-      <Outlet />
-    </AppShell>
-  ),
+  component: AuthenticatedLayout,
 });
+
+function AuthenticatedLayout() {
+  const { user } = Route.useRouteContext();
+  return <MediaViewerProvider userId={user.id}><AppShell><Outlet /></AppShell></MediaViewerProvider>;
+}

@@ -202,7 +202,7 @@ function GroupDetail() {
           ) : allPosts.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucune publication pour le moment.</p>
           ) : (
-            allPosts.map((p) => <PostCard key={p.id} post={p} currentUserId={user.id} />)
+            allPosts.map((p) => <PostCard key={p.id} post={p} currentUserId={user.id} contextPosts={allPosts} />)
           )}
         </TabsContent>
 
@@ -216,11 +216,11 @@ function GroupDetail() {
         </TabsContent>
 
         <TabsContent value="photos" className="pt-4">
-          <MediaGrid items={canSeeContent ? photos : []} empty="Aucune photo." />
+          <MediaGrid items={canSeeContent ? photos : []} posts={allPosts} empty="Aucune photo." />
         </TabsContent>
 
         <TabsContent value="videos" className="pt-4">
-          <MediaGrid items={canSeeContent ? videos : []} empty="Aucune vidéo." />
+          <MediaGrid items={canSeeContent ? videos : []} posts={allPosts} empty="Aucune vidéo." />
         </TabsContent>
 
         <TabsContent value="members" className="space-y-2 pt-4">

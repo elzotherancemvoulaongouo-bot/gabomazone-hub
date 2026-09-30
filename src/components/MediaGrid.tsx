@@ -1,5 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { Media } from "@/components/Media";
+import { useMediaViewer } from "@/components/MediaViewerContext";
+import { fetchPost } from "@/lib/posts";
+import type { FeedPost } from "@/components/PostCard";
 
 export type MediaGridItem = {
   id: string;
@@ -9,7 +12,8 @@ export type MediaGridItem = {
 };
 
 /** Grille 3 colonnes de médias, partagée entre profils, pages et groupes. */
-export function MediaGrid({ items, empty }: { items: MediaGridItem[]; empty: string }) {
+export function MediaGrid({ items, empty, posts }: { items: MediaGridItem[]; empty: string; posts?: FeedPost[] | undefined }) {
+  const viewer = useMediaViewer();
   if (items.length === 0)
     return <p className="text-center text-sm text-muted-foreground">{empty}</p>;
   return (
@@ -19,6 +23,7 @@ export function MediaGrid({ items, empty }: { items: MediaGridItem[]; empty: str
           key={post.id}
           to="/p/$postId"
           params={{ postId: post.id }}
+          onClick={async (event) => { if (!post.media_url || !viewer || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); const selected = posts?.find((item) => item.id === post.id) ?? await fetchPost(post.id); if (selected) viewer.open({ post: selected, posts, kind: post.media_type === "video" ? "video" : "image", index: 0 }); }}
           className="aspect-square overflow-hidden rounded-md transition-opacity hover:opacity-90"
         >
           <Media
