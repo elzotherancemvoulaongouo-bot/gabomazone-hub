@@ -120,7 +120,7 @@ function ModerationPage() {
   });
 
   const act = useMutation({
-    mutationFn: async (v: { id: string; action: string; note?: string; days?: number }) => {
+    mutationFn: async (v: { id: string; action: string; note?: string | undefined; days?: number }) => {
       const { error } = await supabase.rpc("moderate_report" as never, {
         _report_id: v.id,
         _action: v.action,
@@ -203,7 +203,7 @@ function ModerationPage() {
             <p className="text-sm text-muted-foreground">Aucun signalement en attente.</p>
           )}
           {[...groups.values()].map((list) => {
-            const r = list[0];
+            const r = list[0]!;
             const reasons = [...new Set(list.map((x) => x.reason))].join(", ");
             return (
               <div key={r.id} className="space-y-3 rounded-2xl border border-border p-4">
