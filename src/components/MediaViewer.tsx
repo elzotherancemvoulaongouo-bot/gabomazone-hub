@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Bookmark, Heart, MessageCircle, MoreHorizontal, Pause, Play, Plus, Share2, Volume2, VolumeX } from "lucide-react";
