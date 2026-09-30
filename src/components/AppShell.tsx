@@ -46,11 +46,14 @@ export function AppShell({ children }: { children: ReactNode }) {
     seededHistory.current = true;
     if (canGoBack || isMainPath(window.location.pathname)) return;
     const here = window.location.pathname + window.location.search + window.location.hash;
-    router.history.replace("/feed");
-    router.history.push(here);
-  }, [canGoBack, router]);
+    const state = (window.history.state ?? {}) as Record<string, unknown>;
+    const key = Math.random().toString(36).slice(2, 7);
+    window.history.replaceState({ ...state, __TSR_index: 0, key: `${key}0`, __TSR_key: `${key}0` }, "", "/feed");
+    window.history.pushState({ ...state, __TSR_index: 1, key, __TSR_key: key }, "", here);
+  }, [canGoBack]);
   function goBack() {
-    if (canGoBack) router.history.back();
+    const index = Number((window.history.state as { __TSR_index?: number } | null)?.__TSR_index ?? 0);
+    if (canGoBack || index > 0) router.history.back();
     else navigate({ to: "/feed" });
   }
   const { user } = useAuth();
