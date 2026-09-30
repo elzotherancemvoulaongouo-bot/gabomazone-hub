@@ -2,6 +2,7 @@ import { buildShareUrl, shareContent } from "@/lib/share";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  Ban,
   Bookmark,
   EyeOff,
   Flag,
@@ -20,7 +21,7 @@ import { UserAvatar } from "@/components/Avatar";
 import { timeAgo } from "@/lib/media";
 import { cn } from "@/lib/utils";
 import { deletePost } from "@/lib/posts";
-import { usePostActions, useSavedPostIds } from "@/lib/social";
+import { useBlockActions, usePostActions, useSavedPostIds } from "@/lib/social";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -95,6 +96,7 @@ export function PostCard({
   const { data: savedIds } = useSavedPostIds(currentUserId);
   const saved = (savedIds ?? []).includes(post.id);
   const { toggleSave, hidePost, reportPost } = usePostActions(currentUserId);
+  const { block } = useBlockActions(currentUserId);
 
   const mediaItems =
     post.media && post.media.length > 0
@@ -253,6 +255,12 @@ export function PostCard({
                     }
                   >
                     <Flag className="mr-2 size-4" /> Signaler
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onSelect={() => block.mutate(post.user_id)}
+                  >
+                    <Ban className="mr-2 size-4" /> Bloquer l'auteur
                   </DropdownMenuItem>
                 </>
               ) : null}
