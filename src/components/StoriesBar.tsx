@@ -7,6 +7,7 @@ import { StoryThumb } from "@/components/StoryThumb";
 import { StoryViewer } from "@/components/StoryViewer";
 import { CreateStoryDialog, type StoryDraft } from "@/components/CreateStoryDialog";
 import { cn } from "@/lib/utils";
+import { PHOTO_ACCEPT, VIDEO_ACCEPT } from "@/lib/image-processing";
 
 export function StoriesBar({
   userId,
@@ -47,7 +48,7 @@ export function StoriesBar({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*,video/*"
+         accept={`${PHOTO_ACCEPT},${VIDEO_ACCEPT}`}
         hidden
         onChange={(e) => {
           const file = e.target.files?.[0];

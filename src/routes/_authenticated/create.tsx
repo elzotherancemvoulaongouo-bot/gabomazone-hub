@@ -3,8 +3,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { ImagePlus } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { MEDIA_BUCKET } from "@/lib/media";
+import { createPost, uploadPostMedia } from "@/lib/posts";
+import { PHOTO_ACCEPT, VIDEO_ACCEPT, validatePostFile } from "@/lib/image-processing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +39,8 @@ function CreatePage() {
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0] ?? null;
+    if (selected) { const error = validatePostFile(selected); if (error) { toast.error(error); e.target.value = ""; return; } }
+    if (preview) URL.revokeObjectURL(preview);
     setFile(selected);
     setPreview(selected ? URL.createObjectURL(selected) : null);
   }
@@ -49,24 +51,8 @@ function CreatePage() {
     if (!file && !text) return;
     setUploading(true);
     try {
-      let path: string | null = null;
-      if (file) {
-        const ext = file.name.split(".").pop() ?? "bin";
-        path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-        const { error: uploadError } = await supabase.storage
-          .from(MEDIA_BUCKET)
-          .upload(path, file, { contentType: file.type, upsert: false });
-        if (uploadError) throw uploadError;
-      }
-
-      const { error } = await supabase.from("posts").insert({
-        user_id: user.id,
-        media_url: path,
-        media_type: file ? (file.type.startsWith("video") ? "video" : "image") : null,
-        caption: text || null,
-        location: location.trim() || null,
-      });
-      if (error) throw error;
+      const media = file ? [await uploadPostMedia(user.id, file)] : [];
+      await createPost({ userId: user.id, media, caption: text || null, location: location.trim() || null });
 
       await queryClient.invalidateQueries({ queryKey: ["feed"] });
       toast.success("Publication en ligne !");
@@ -108,7 +94,7 @@ function CreatePage() {
         )}
         <input
           type="file"
-          accept="image/*,video/*"
+           accept={`${PHOTO_ACCEPT},${VIDEO_ACCEPT}`}
           className="hidden"
           onChange={onFileChange}
         />
