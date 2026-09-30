@@ -1,4 +1,4 @@
-export const MAX_STORY_VIDEO_SECONDS = 30;
+export const MAX_STORY_VIDEO_SECONDS = 60;
 
 export function loadVideoMeta(file: File): Promise<{ duration: number; url: string }> {
   return new Promise((resolve, reject) => {
@@ -12,7 +12,7 @@ export function loadVideoMeta(file: File): Promise<{ duration: number; url: stri
 }
 
 /**
- * Découpe une vidéo à 30 s max en réencodant le segment choisi (audio conservé).
+   * Découpe une vidéo à 60 s max en réencodant le segment choisi (audio conservé).
  * Fonctionne dans les navigateurs mobiles modernes via MediaRecorder + captureStream.
  */
 export async function trimVideo(
@@ -36,7 +36,7 @@ export async function trimVideo(
   });
   const getStream = capture.captureStream ?? capture.mozCaptureStream;
   if (typeof getStream !== "function" || typeof MediaRecorder === "undefined") {
-    throw new Error("Découpage impossible sur cet appareil : choisissez une vidéo de 30 s maximum.");
+     throw new Error("Découpage impossible sur cet appareil : choisissez une vidéo de 60 s maximum.");
   }
 
   video.currentTime = startSeconds;

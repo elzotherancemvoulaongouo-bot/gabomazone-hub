@@ -186,7 +186,7 @@ export function StoryViewer({
         </button>
       </div>
 
-      <div className="relative flex-1 overflow-hidden">
+       <div className="relative mx-auto flex w-full max-w-[calc(100dvh*9/16)] flex-1 overflow-hidden">
         {story.media_path && mediaUrl ? (
           story.media_type === "video" ? (
             <video
@@ -195,7 +195,7 @@ export function StoryViewer({
               src={mediaUrl}
               autoPlay
               playsInline
-              className="size-full object-contain"
+               className="size-full object-contain"
               onTimeUpdate={(e) => {
                 const el = e.currentTarget;
                 setProgress(el.duration ? (el.currentTime / el.duration) * 100 : 0);

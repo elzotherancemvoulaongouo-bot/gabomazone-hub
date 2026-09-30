@@ -41,8 +41,8 @@ export function VideoPlayer({
         if (!entry) return;
         if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
           claimPlayback(el);
-          // Son activé automatiquement ; repli en muet si le navigateur le bloque.
-          const wantMuted = userMuteChoice.current ?? false;
+          // La lecture automatique commence toujours en muet.
+          const wantMuted = userMuteChoice.current ?? true;
           el.muted = wantMuted;
           setMuted(wantMuted);
           el.play().catch(() => {
@@ -107,8 +107,7 @@ export function VideoPlayer({
     <div
       className={cn("relative w-full overflow-hidden bg-black", className)}
       style={{
-        aspectRatio: ratio ? `${ratio}` : "16 / 9",
-        maxHeight: "80dvh",
+         aspectRatio: ratio ? `${Math.max(4 / 5, Math.min(16 / 9, ratio))}` : "16 / 9",
       }}
     >
       <video
@@ -118,8 +117,8 @@ export function VideoPlayer({
         loop
         playsInline
         preload="metadata"
-        className="absolute inset-0 h-full w-full object-contain"
-        onClick={() => (onOpen ? onOpen() : toggle())}
+         className="absolute inset-0 h-full w-full object-contain"
+         onClick={toggle}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         onLoadedMetadata={(e) => {
@@ -136,7 +135,7 @@ export function VideoPlayer({
       />
 
       <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-gradient-to-t from-black/70 to-transparent px-2 pb-2 pt-6">
-        <button
+         <button
           type="button"
           onClick={toggle}
           aria-label={playing ? "Mettre en pause" : "Lire la vidéo"}

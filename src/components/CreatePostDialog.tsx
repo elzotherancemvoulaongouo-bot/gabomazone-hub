@@ -10,6 +10,7 @@ import { CameraCapture } from "@/components/CameraCapture";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { createPost, uploadPostMedia } from "@/lib/posts";
 import { cn } from "@/lib/utils";
+import { PHOTO_ACCEPT, VIDEO_ACCEPT, validatePostFile } from "@/lib/image-processing";
 
 type Draft = { id: string; file: File; url: string; kind: "image" | "video" };
 
@@ -30,7 +31,7 @@ export function CreatePostDialog({
   groupId,
   startWithCamera = false,
   startWithPicker = false,
-  pickerAccept = "image/*,video/*",
+  pickerAccept = `${PHOTO_ACCEPT},${VIDEO_ACCEPT}`,
   inline = false,
 }: {
   open: boolean;
@@ -67,6 +68,8 @@ export function CreatePostDialog({
   function addFiles(files: FileList | File[]) {
     const next: Draft[] = [];
     for (const file of Array.from(files)) {
+      const error = validatePostFile(file);
+      if (error) { toast.error(error); continue; }
       const isVideo = file.type.startsWith("video");
       if (!isVideo && !file.type.startsWith("image")) continue;
       next.push({
