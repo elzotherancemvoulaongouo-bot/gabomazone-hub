@@ -1,3 +1,4 @@
+import { buildShareUrl, shareContent } from "@/lib/share";
 import { claimPlayback, playWithSound, useSound } from "@/lib/sound";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
@@ -168,7 +169,7 @@ function ViewerSlide({ post, kind, initialIndex, active, preload, userId, saved,
     if (detail >= 2) { clickTimer.current = null; if (!liked && !like.isPending) like.mutate(true); return; }
     clickTimer.current = setTimeout(() => { setPaused((value) => !value); clickTimer.current = null; }, 250);
   };
-  const share = async () => { const url = `${window.location.origin}/p/${post.id}`; try { if (navigator.share) await navigator.share({ url, text: post.caption ?? "" }); else { await navigator.clipboard.writeText(url); toast.success("Lien copié"); } } catch { /* annulé */ } };
+  const share = () => { void shareContent({ title: "Gabomazone", text: post.caption ?? "", url: buildShareUrl("p", post.id) }); };
   const profile = post.author?.username ?? "";
   const gestureStart = (event: React.TouchEvent) => {
     const a = event.touches[0], b = event.touches[1]; if (!a) return;

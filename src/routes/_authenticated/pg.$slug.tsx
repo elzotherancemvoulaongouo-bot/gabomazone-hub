@@ -1,3 +1,4 @@
+import { buildShareUrl, shareContent } from "@/lib/share";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -36,6 +37,10 @@ export const Route = createFileRoute("/_authenticated/pg/$slug")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  // Préchargement dès le toucher du lien (defaultPreload "intent").
+  loader: ({ context, params }) => {
+    void context.queryClient.prefetchQuery({ queryKey: ["page", params.slug], queryFn: () => fetchPageBySlug(params.slug) });
+  },
   component: PageDetail,
 });
 
@@ -86,29 +91,33 @@ function PageDetail() {
   const toggleFollow = useMutation({
     mutationFn: () =>
       isFollowing ? unfollowPage(page!.id, user.id) : followPage(page!.id, user.id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["page-followers", page?.id] }),
-    onError: (err) => toast.error(err instanceof Error ? err.message : "Action impossible"),
+    // Affichage immédiat, retour en arrière si le serveur échoue.
+    onMutate: async () => {
+      const key = ["page-followers", page?.id];
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData(key);
+      queryClient.setQueryData(key, (old: typeof followerList | undefined) =>
+        isFollowing
+          ? (old ?? []).filter((f) => f.user_id !== user.id)
+          : [...(old ?? []), { user_id: user.id, profile: me.data ?? null } as unknown as (typeof followerList)[number]]);
+      return { previous };
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["page-followers", page?.id] }),
+    onError: (err, _v, ctx) => {
+      if (ctx) queryClient.setQueryData(["page-followers", page?.id], ctx.previous);
+      toast.error(err instanceof Error ? err.message : "Action impossible");
+    },
   });
 
-  async function share() {
-    const url = typeof window !== "undefined" ? `${window.location.origin}/pg/${slug}` : `/pg/${slug}`;
-    try {
-      if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title: page?.name ?? "Gabomazone", url });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      toast.success("Lien de la page copié");
-    } catch {
-      /* partage annulé */
-    }
+  function share() {
+    void shareContent({ title: page?.name ?? "Gabomazone", url: buildShareUrl("pg", slug) });
   }
 
   if (isPending) return <Skeleton className="h-64 w-full rounded-2xl" />;
   if (!page) return <p className="text-sm text-muted-foreground">Page introuvable.</p>;
 
   const actionButtons = parseActionButtons(page.action_buttons);
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/pg/${slug}` : `/pg/${slug}`;
+  const shareUrl = buildShareUrl("pg", slug);
   const needle = term.trim().toLowerCase();
   const allPosts = (posts.data ?? []).filter((p) => !needle || (p.caption ?? "").toLowerCase().includes(needle));
   const photos = allPosts.filter((p) => p.media_url && p.media_type !== "video");

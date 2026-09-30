@@ -1,3 +1,4 @@
+import { buildShareUrl, shareContent } from "@/lib/share";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -29,6 +30,9 @@ export const Route = createFileRoute("/_authenticated/g/$slug")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  loader: ({ context, params }) => {
+    void context.queryClient.prefetchQuery({ queryKey: ["group", params.slug], queryFn: () => fetchGroupBySlug(params.slug) });
+  },
   component: GroupDetail,
 });
 
@@ -74,33 +78,37 @@ function GroupDetail() {
 
   const toggleMembership = useMutation({
     mutationFn: () => (membership ? leaveGroup(group!.id, user.id) : joinGroup(group!, user.id)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["group-members", group?.id] }),
-    onError: (err) => toast.error(err instanceof Error ? err.message : "Action impossible"),
+    onMutate: async () => {
+      const key = ["group-members", group?.id];
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData(key);
+      type M = NonNullable<typeof members.data>[number];
+      queryClient.setQueryData(key, (old: M[] | undefined) =>
+        membership
+          ? (old ?? []).filter((m) => m.user_id !== user.id)
+          : [...(old ?? []), { user_id: user.id, role: "member", status: group?.is_private ? "pending" : "approved" } as unknown as M]);
+      return { previous };
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["group-members", group?.id] }),
+    onError: (err, _v, ctx) => {
+      if (ctx) queryClient.setQueryData(["group-members", group?.id], ctx.previous);
+      toast.error(err instanceof Error ? err.message : "Action impossible");
+    },
   });
 
-  async function share(invite = false) {
-    const url = typeof window !== "undefined" ? `${window.location.origin}/g/${slug}` : `/g/${slug}`;
-    try {
-      if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({
-          title: group?.name ?? "Gabomazone",
-          text: invite ? `Rejoins le groupe ${group?.name} sur Gabomazone` : "",
-          url,
-        });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      toast.success(invite ? "Lien d'invitation copié" : "Lien du groupe copié");
-    } catch {
-      /* partage annulé */
-    }
+  function share(invite = false) {
+    void shareContent({
+      title: group?.name ?? "Gabomazone",
+      text: invite ? `Rejoins le groupe ${group?.name} sur Gabomazone` : "",
+      url: buildShareUrl("g", slug),
+    });
   }
 
   if (isPending) return <Skeleton className="h-64 w-full rounded-2xl" />;
   if (!group) return <p className="text-sm text-muted-foreground">Groupe introuvable.</p>;
 
   const canSeeContent = isMember || !group.is_private;
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/g/${slug}` : `/g/${slug}`;
+  const shareUrl = buildShareUrl("g", slug);
   const needle = term.trim().toLowerCase();
   const allPosts = (posts.data ?? []).filter((p) => !needle || (p.caption ?? "").toLowerCase().includes(needle));
   const photos = allPosts.filter((p) => p.media_url && p.media_type !== "video");

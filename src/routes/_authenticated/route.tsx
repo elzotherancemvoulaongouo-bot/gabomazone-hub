@@ -5,9 +5,14 @@ import { MediaViewerProvider } from "@/components/MediaViewerContext";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
     const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth" });
+    if (error || !data.user) {
+      // Lien direct vers un contenu : on montre son aperçu public avec un bouton de connexion.
+      const m = location.pathname.match(/^\/(p|watch|pg|g|u)\/([^/]+)\/?$/);
+      if (m) throw redirect({ to: "/s/$kind/$id", params: { kind: m[1] ?? "p", id: decodeURIComponent(m[2] ?? "") } });
+      throw redirect({ to: "/auth" });
+    }
     return { user: data.user };
   },
   component: AuthenticatedLayout,

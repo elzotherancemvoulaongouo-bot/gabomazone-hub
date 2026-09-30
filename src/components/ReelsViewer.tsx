@@ -1,3 +1,4 @@
+import { buildShareUrl, shareContent } from "@/lib/share";
 import { claimPlayback, playWithSound, useSound } from "@/lib/sound";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -160,12 +161,8 @@ function Reel({ post, userId, active, saved, following, followPending, onFollow,
     clickTimer.current = setTimeout(() => { playPause(); clickTimer.current = null; }, 250);
   };
   const profile = post.author?.username ?? "";
-  async function share() {
-    const url = `${window.location.origin}/watch/${post.id}`;
-    try {
-      if (navigator.share) await navigator.share({ url, text: post.caption ?? "" });
-      else { await navigator.clipboard.writeText(url); toast.success("Lien copié"); }
-    } catch { /* partage annulé */ }
+  function share() {
+    void shareContent({ title: "Gabomazone", text: post.caption ?? "", url: buildShareUrl("watch", post.id) });
   }
 
   return <>

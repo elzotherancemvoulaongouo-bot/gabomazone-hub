@@ -1,3 +1,4 @@
+import { shareContent } from "@/lib/share";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -283,15 +284,9 @@ export function InviteFriendsDialog({
     onError: (err) => toast.error(err instanceof Error ? err.message : "Envoi impossible"),
   });
 
-  async function shareLink() {
+  function shareLink() {
     const text = kind === "page" ? `Suis la page ${name} sur Gabomazone` : `Rejoins le groupe ${name} sur Gabomazone`;
-    try {
-      if (navigator.share) return await navigator.share({ title: name, text, url: shareUrl });
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success("Lien d'invitation copié");
-    } catch {
-      /* annulé */
-    }
+    void shareContent({ title: name, text, url: shareUrl });
   }
 
   return (
@@ -434,14 +429,8 @@ export function CommunityMoreButton({
     fn();
   }
 
-  async function share() {
-    try {
-      if (navigator.share) return await navigator.share({ title: name, url: shareUrl });
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success("Lien copié");
-    } catch {
-      /* annulé */
-    }
+  function share() {
+    void shareContent({ title: name, url: shareUrl });
   }
 
   const items: MoreItem[] = [

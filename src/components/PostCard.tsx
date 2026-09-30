@@ -1,3 +1,4 @@
+import { buildShareUrl, shareContent } from "@/lib/share";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -99,17 +100,8 @@ export function PostCard({ post, currentUserId, contextPosts }: { post: FeedPost
   const postUrl =
     typeof window !== "undefined" ? `${window.location.origin}/p/${post.id}` : `/p/${post.id}`;
 
-  async function share() {
-    try {
-      if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title: "Gabomazone", text: post.caption ?? "", url: postUrl });
-        return;
-      }
-      await navigator.clipboard.writeText(postUrl);
-      toast.success("Lien copié");
-    } catch {
-      /* partage annulé */
-    }
+  function share() {
+    void shareContent({ title: "Gabomazone", text: post.caption ?? "", url: buildShareUrl("p", post.id) });
   }
 
   // Mise à jour optimiste : le compteur bouge immédiatement, sans recharger le fil.
