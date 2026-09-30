@@ -1,4 +1,4 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useCanGoBack, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Bell, Bookmark, CalendarDays, ChevronDown, CircleHelp, Compass, Home, LogOut, Menu, MessageCircle, Play, PlusSquare, Search, Settings, Store, User, Users, UsersRound, X } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
@@ -28,11 +28,31 @@ const shortcuts = [
 ] as const;
 
 const HISTORY_KEY = "gabomazone-recent-searches";
+const MAIN_PATHS = ["/feed", "/explore", "/create", "/friends", "/me", "/messages", "/notifications"];
+const isMainPath = (path: string) => MAIN_PATHS.includes(path.replace(/\/$/, "") || "/feed");
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const canGoBack = useCanGoBack();
+  const showBack = !isMainPath(pathname);
+  const seededHistory = useRef(false);
+  // Arrivée directe par un lien sur un écran secondaire : on place l'Accueil
+  // derrière, pour que la flèche et le bouton retour d'Android ne quittent pas l'app.
+  useEffect(() => {
+    if (seededHistory.current) return;
+    seededHistory.current = true;
+    if (canGoBack || isMainPath(window.location.pathname)) return;
+    const here = window.location.pathname + window.location.search + window.location.hash;
+    router.history.replace("/feed");
+    router.history.push(here);
+  }, [canGoBack, router]);
+  function goBack() {
+    if (canGoBack) router.history.back();
+    else navigate({ to: "/feed" });
+  }
   const { user } = useAuth();
   useNotificationsRealtime(user?.id);
   const unread = useUnreadNotificationsCount(Boolean(user));
@@ -123,7 +143,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             </form>
           ) : (
             <>
-              <Link to="/feed" className="min-w-0 shrink truncate font-display text-lg font-bold brand-text sm:text-xl">gabomazone</Link>
+              {showBack && <Button variant="ghost" size="icon" className="-ml-1 shrink-0" aria-label="Retour" onClick={goBack}><ArrowLeft className="size-6" /></Button>}
+              <Link to="/feed" className="mr-auto min-w-0 shrink truncate font-display text-lg font-bold brand-text sm:text-xl">gabomazone</Link>
               <div className="flex shrink-0 items-center gap-0.5">
                 <Button variant="ghost" size="icon" aria-label="Rechercher" onClick={() => { setSearchOpen(true); setTimeout(() => inputRef.current?.focus(), 0); }}><Search className="size-5" /></Button>
                 <Button asChild variant="ghost" size="icon" aria-label="Notifications" className="relative"><Link to="/notifications"><Bell className="size-5" />{unread > 0 && <span className="absolute right-0 top-0 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground">{unread > 9 ? "9+" : unread}</span>}</Link></Button>
