@@ -11,3 +11,6 @@
 - [x] Rétablir la visionneuse verticale type Reels pour les vidéos, depuis Explorer et Vidéos, avec actions et lecture active uniquement.
 - [x] Vérifier la visionneuse sur mobile et ordinateur sans changer le fil classique.
 - [x] Finaliser la visionneuse verticale : actions ordonnées à droite, abonnement par le + du créateur, nom/description/son en bas à gauche, double-clic J’aime et lecture limitée à la vidéo visible ; vérifier mobile et ordinateur.
+- [ ] Ouvrir les vidéos et photos depuis fil, Explorer, profils, groupes et pages dans un visionneur plein écran sans démonter la page source ; retour navigateur et position préservés.
+- [ ] Vidéos verticales contextuelles puis recommandées : snap, préchargement, lecture exclusive, progression, son et actions sociales ; photos multiples : balayage, zoom et actions.
+- [ ] Vérifier sur mobile et ordinateur les ouvertures, gestes, actions, fermeture et arrêt des vidéos en arrière-plan.
