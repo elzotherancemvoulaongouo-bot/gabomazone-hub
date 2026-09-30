@@ -53,7 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [canGoBack]);
   function goBack() {
     const index = Number((window.history.state as { __TSR_index?: number } | null)?.__TSR_index ?? 0);
-    if (canGoBack || index > 0) router.history.back();
+    if (canGoBack || index > 0) window.history.back();
     else navigate({ to: "/feed" });
   }
   const { user } = useAuth();
