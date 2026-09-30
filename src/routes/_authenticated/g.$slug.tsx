@@ -99,6 +99,7 @@ function GroupDetail() {
   return (
     <section className="space-y-5">
       <CoverPhoto
+        kind="group"
         path={group.cover_url ?? null}
         editable={isAdmin}
         userId={user.id}

@@ -4,9 +4,9 @@ import { getSignedUrl } from "@/lib/media";
 
 export const COVERS_BUCKET = "covers";
 export const COVER_PREFIX = "covers:";
-export const COVER_MAX_BYTES = 5 * 1024 * 1024;
+export const COVER_MAX_BYTES = 10 * 1024 * 1024;
 export const COVER_ACCEPT = "image/jpeg,image/png,image/webp";
-export const COVER_RATIO = 8 / 3;
+export const COVER_RATIO = 851 / 315;
 
 const ALLOWED = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
