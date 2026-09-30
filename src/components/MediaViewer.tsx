@@ -23,6 +23,7 @@ export function MediaViewer({ post, posts, kind, index, userId, onClose }: Props
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeId, setActiveId] = useState(post.id);
   const [commentsId, setCommentsId] = useState<string | null>(null);
+  const [recommendationStarted, setRecommendationStarted] = useState(false);
   const [text, setText] = useState("");
   const touch = useRef<{ x: number; y: number } | null>(null);
   const queryClient = useQueryClient();
@@ -37,7 +38,7 @@ export function MediaViewer({ post, posts, kind, index, userId, onClose }: Props
     const { error } = await supabase.from("follows").insert({ follower_id: userId, following_id: id });
     if (error) throw error;
   }, onSuccess: () => queryClient.invalidateQueries({ queryKey: ["following-ids", userId] }), onError: () => toast.error("Abonnement impossible") });
-  const { data: recommended } = useQuery({ queryKey: ["viewer-recommended-videos"], enabled: kind === "video", queryFn: async () => {
+  const { data: recommended } = useQuery({ queryKey: ["viewer-recommended-videos"], enabled: kind === "video" && recommendationStarted, queryFn: async () => {
     const { data, error } = await supabase.from("posts").select(POST_SELECT).eq("visibility", "public").eq("media_type", "video").order("created_at", { ascending: false }).limit(60);
     if (error) throw error;
     return (data ?? []) as unknown as FeedPost[];
@@ -50,6 +51,12 @@ export function MediaViewer({ post, posts, kind, index, userId, onClose }: Props
     for (const item of recommended ?? []) if (isVideo(item) && !seen.has(item.id)) { ordered.push(item); seen.add(item.id); }
     return ordered;
   }, [posts, post, recommended]);
+  useEffect(() => {
+    if (kind !== "video") return;
+    const source = (posts?.length ? posts : [post]).filter(isVideo);
+    const timer = window.setTimeout(() => setRecommendationStarted(true), source.length > 1 ? 1600 : 0);
+    return () => window.clearTimeout(timer);
+  }, [kind, posts, post]);
   useEffect(() => {
     if (kind !== "video") return;
     const target = Array.from(scrollRef.current?.children ?? []).find((child) => child.getAttribute("data-post-id") === post.id);
