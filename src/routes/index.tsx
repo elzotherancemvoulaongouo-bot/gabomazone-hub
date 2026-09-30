@@ -1,3 +1,5 @@
+import { useRouter } from "@tanstack/react-router";
+import { consumeAfterLogin } from "@/lib/share";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Camera, Heart, MessageCircle } from "lucide-react";
@@ -33,10 +35,12 @@ const features = [
 
 function Index() {
   const navigate = useNavigate();
+  const router = useRouter();
+  const goAfterLogin = () => { const t = consumeAfterLogin(); if (t) router.history.replace(t); else navigate({ to: "/feed", replace: true }); };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/feed", replace: true });
+      if (data.session) goAfterLogin();
     });
   }, [navigate]);
 

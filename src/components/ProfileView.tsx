@@ -1,3 +1,5 @@
+import { Share2 } from "lucide-react";
+import { buildShareUrl, shareContent } from "@/lib/share";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchPost, fetchUserPosts } from "@/lib/posts";
@@ -118,6 +120,9 @@ export function ProfileView({ profile }: { profile: ProfileRow }) {
               <MessageButton profileId={profile.id} />
             </>
           )}
+          <Button variant="secondary" size="sm" onClick={() => void shareContent({ title: `${profile.display_name ?? profile.username} sur Gabomazone`, url: buildShareUrl("u", profile.username) })}>
+            <Share2 className="mr-1 size-4" /> Partager
+          </Button>
         </div>
       </header>
 

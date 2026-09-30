@@ -1,3 +1,5 @@
+import { useRouter } from "@tanstack/react-router";
+import { consumeAfterLogin } from "@/lib/share";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -30,6 +32,8 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const router = useRouter();
+  const goAfterLogin = () => { const t = consumeAfterLogin(); if (t) router.history.replace(t); else navigate({ to: "/feed", replace: true }); };
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,7 +44,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/feed", replace: true });
+      if (data.session) goAfterLogin();
     });
   }, [navigate]);
 
@@ -61,7 +65,7 @@ function AuthPage() {
         });
         if (error) throw error;
         if (data.session) {
-          navigate({ to: "/feed", replace: true });
+          goAfterLogin();
         } else {
           setNotice(
             "Compte créé. Ouvrez l'e-mail de confirmation envoyé à " +
@@ -75,7 +79,7 @@ function AuthPage() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate({ to: "/feed", replace: true });
+        goAfterLogin();
       }
     } catch (err) {
       const raw = err instanceof Error ? err.message : "Une erreur est survenue";
@@ -102,7 +106,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/feed", replace: true });
+    goAfterLogin();
   }
 
   return (

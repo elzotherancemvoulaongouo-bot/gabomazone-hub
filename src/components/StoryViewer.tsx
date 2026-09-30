@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Trash2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Share2, Trash2, X } from "lucide-react";
+import { buildShareUrl, shareContent } from "@/lib/share";
 import { UserAvatar } from "@/components/Avatar";
 import { useSignedUrl, timeAgo } from "@/lib/media";
 import { deleteStory, markStorySeen, STORY_BACKGROUNDS, type StoryGroup } from "@/lib/stories";
@@ -178,6 +179,14 @@ export function StoryViewer({
             <Trash2 className="size-5" />
           </button>
         ) : null}
+        <button
+          type="button"
+          aria-label="Partager"
+          className="rounded-full p-2 text-white"
+          onClick={() => void shareContent({ title: `Statut de ${group.displayName ?? group.username}`, text: "Regarde ce statut sur Gabomazone", url: buildShareUrl("u", group.username) })}
+        >
+          <Share2 className="size-5" />
+        </button>
         <button
           type="button"
           aria-label="Fermer"
