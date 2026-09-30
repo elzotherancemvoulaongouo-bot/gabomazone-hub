@@ -30,6 +30,9 @@ export const Route = createFileRoute("/_authenticated/g/$slug")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  loader: ({ context, params }) => {
+    void context.queryClient.prefetchQuery({ queryKey: ["group", params.slug], queryFn: () => fetchGroupBySlug(params.slug) });
+  },
   component: GroupDetail,
 });
 
@@ -75,8 +78,22 @@ function GroupDetail() {
 
   const toggleMembership = useMutation({
     mutationFn: () => (membership ? leaveGroup(group!.id, user.id) : joinGroup(group!, user.id)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["group-members", group?.id] }),
-    onError: (err) => toast.error(err instanceof Error ? err.message : "Action impossible"),
+    onMutate: async () => {
+      const key = ["group-members", group?.id];
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData(key);
+      type M = NonNullable<typeof members.data>[number];
+      queryClient.setQueryData(key, (old: M[] | undefined) =>
+        membership
+          ? (old ?? []).filter((m) => m.user_id !== user.id)
+          : [...(old ?? []), { user_id: user.id, role: "member", status: group?.is_private ? "pending" : "approved" } as unknown as M]);
+      return { previous };
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["group-members", group?.id] }),
+    onError: (err, _v, ctx) => {
+      if (ctx) queryClient.setQueryData(["group-members", group?.id], ctx.previous);
+      toast.error(err instanceof Error ? err.message : "Action impossible");
+    },
   });
 
   function share(invite = false) {

@@ -18,6 +18,9 @@ export const Route = createFileRoute("/_authenticated/u/$username")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  loader: ({ context, params }) => {
+    void context.queryClient.prefetchQuery({ queryKey: ["profile-username", params.username], queryFn: () => fetchProfileByUsername(params.username) });
+  },
   component: UserPage,
 });
 

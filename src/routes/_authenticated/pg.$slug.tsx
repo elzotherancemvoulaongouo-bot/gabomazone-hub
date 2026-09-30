@@ -37,6 +37,10 @@ export const Route = createFileRoute("/_authenticated/pg/$slug")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  // Préchargement dès le toucher du lien (defaultPreload "intent").
+  loader: ({ context, params }) => {
+    void context.queryClient.prefetchQuery({ queryKey: ["page", params.slug], queryFn: () => fetchPageBySlug(params.slug) });
+  },
   component: PageDetail,
 });
 
@@ -87,8 +91,22 @@ function PageDetail() {
   const toggleFollow = useMutation({
     mutationFn: () =>
       isFollowing ? unfollowPage(page!.id, user.id) : followPage(page!.id, user.id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["page-followers", page?.id] }),
-    onError: (err) => toast.error(err instanceof Error ? err.message : "Action impossible"),
+    // Affichage immédiat, retour en arrière si le serveur échoue.
+    onMutate: async () => {
+      const key = ["page-followers", page?.id];
+      await queryClient.cancelQueries({ queryKey: key });
+      const previous = queryClient.getQueryData(key);
+      queryClient.setQueryData(key, (old: typeof followerList | undefined) =>
+        isFollowing
+          ? (old ?? []).filter((f) => f.user_id !== user.id)
+          : [...(old ?? []), { user_id: user.id, profile: me.data ?? null } as unknown as (typeof followerList)[number]]);
+      return { previous };
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["page-followers", page?.id] }),
+    onError: (err, _v, ctx) => {
+      if (ctx) queryClient.setQueryData(["page-followers", page?.id], ctx.previous);
+      toast.error(err instanceof Error ? err.message : "Action impossible");
+    },
   });
 
   function share() {
