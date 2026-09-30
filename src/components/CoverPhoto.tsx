@@ -6,7 +6,7 @@ import { useCoverUrl, uploadCover } from "@/lib/covers";
 import { ImageCropDialog, PAGE_COVER_CROP, GROUP_COVER_CROP, checkCropFile } from "@/components/ImageCropDialog";
 import { PHOTO_ACCEPT } from "@/lib/image-processing";
 
-type Props = { path: string | null; editable?: boolean; userId?: string; onSave?: (coverValue: string) => Promise<void> | void; className?: string; kind?: "group" | "page" };
+type Props = { path: string | null; editable?: boolean; userId?: string | undefined; onSave?: (coverValue: string) => Promise<void> | void; className?: string; kind?: "group" | "page" };
 
 export function CoverPhoto({ path, editable = false, userId, onSave, className, kind = "page" }: Props) {
   const { data: url } = useCoverUrl(path);
