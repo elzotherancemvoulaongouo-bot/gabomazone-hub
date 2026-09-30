@@ -1,4 +1,6 @@
 - [x] En-tête, menu, recherche et messagerie mobile (travail précédent).
-- [x] Explorer : filtres, recommandations distinctes et miniatures ouvrant la visionneuse.
-- [x] Visionneuse verticale plein écran : lecture exclusive, actions, commentaires, abonnement.
-- [x] Barre basse préservée sans doublon Messages ; navigation et petits écrans vérifiés.
+- [x] Explorer et visionneuse verticale (travail précédent).
+- [ ] Caméra : permissions, caméra arrière, bascule avant/arrière, photo et vidéo, aperçu Reprendre/Utiliser.
+- [ ] Publication : caméra et galerie ajoutent plusieurs miniatures retirable avec légende et bouton actif.
+- [ ] Vérifier qu’une nouvelle publication apparaît dans le fil.
+- [ ] Vérifier petits écrans et navigation sans erreur.
