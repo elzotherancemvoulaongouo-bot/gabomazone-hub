@@ -5,6 +5,8 @@ import { useSignedUrl, timeAgo } from "@/lib/media";
 import { deleteStory, markStorySeen, STORY_BACKGROUNDS, type StoryGroup } from "@/lib/stories";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { claimPlayback, playWithSound, useSound } from "@/lib/sound";
+import { Volume2, VolumeX } from "lucide-react";
 
 const IMAGE_DURATION = 5000;
 const LONG_PRESS_MS = 180;
@@ -98,11 +100,7 @@ export function StoryViewer({
     if (!video) return;
     if (paused) video.pause();
     else
-      void video.play().catch(() => {
-        // Autoplay avec son bloqué : on relance en muet.
-        video.muted = true;
-        void video.play().catch(() => undefined);
-      });
+      { claimPlayback(video); void playWithSound(video); }
   }, [paused, mediaUrl]);
 
   // Clavier
@@ -197,6 +195,7 @@ export function StoryViewer({
               src={mediaUrl}
               autoPlay
               playsInline
+              data-app-video
                className="size-full object-contain"
               onTimeUpdate={(e) => {
                 const el = e.currentTarget;
