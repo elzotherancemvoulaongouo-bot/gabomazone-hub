@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Camera } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { MEDIA_BUCKET } from "@/lib/media";
 import { useCoverUrl } from "@/lib/covers";
-import { UserAvatar } from "@/components/Avatar";
+import { CoverPhoto } from "@/components/CoverPhoto";
+import { AvatarPhotoEditor } from "@/components/AvatarPhotoEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,7 +46,6 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
   const [form, setForm] = useState<FormState>(EMPTY);
   const [avatarPath, setAvatarPath] = useState<string | null>(null);
   const [coverPath, setCoverPath] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
 
   const { data, isPending } = useQuery({
     queryKey: ["profile", userId],
@@ -86,29 +84,6 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  async function uploadImage(
-    e: React.ChangeEvent<HTMLInputElement>,
-    kind: "avatar" | "cover",
-  ) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `${userId}/${kind}-${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage
-        .from(MEDIA_BUCKET)
-        .upload(path, file, { contentType: file.type, upsert: false });
-      if (error) throw error;
-      if (kind === "avatar") setAvatarPath(path);
-      else setCoverPath(path);
-      toast.success("Photo prête, n'oubliez pas d'enregistrer.");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Échec du téléversement");
-    } finally {
-      setUploading(false);
-    }
-  }
 
   const save = useMutation({
     mutationFn: async () => {
@@ -155,36 +130,8 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
       }}
     >
       <div className="space-y-4">
-        <div className="relative h-32 overflow-hidden rounded-2xl border border-border/70 bg-secondary">
-          <CoverPreview path={coverPath} />
-          <label className="absolute bottom-2 right-2 inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-lg bg-background/85 px-3 py-1.5 text-xs font-medium backdrop-blur">
-            <Camera className="size-4 text-primary" />
-            {coverPath ? "Changer la couverture" : "Ajouter une couverture"}
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => uploadImage(e, "cover")}
-            />
-          </label>
-        </div>
-        <div className="flex items-center gap-4">
-          <label className="relative cursor-pointer">
-            <UserAvatar avatarPath={avatarPath} name={form.username} className="size-20" />
-            <span className="absolute -bottom-1 -right-1 grid size-7 place-items-center rounded-full bg-primary text-primary-foreground">
-              <Camera className="size-4" />
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => uploadImage(e, "avatar")}
-            />
-          </label>
-          <p className="text-sm text-muted-foreground">
-            {uploading ? "Téléversement…" : "Touchez la photo pour la changer."}
-          </p>
-        </div>
+        <CoverPhoto path={coverPath} editable userId={userId} onSave={(value) => { setCoverPath(value); }} />
+        <AvatarPhotoEditor path={avatarPath} name={form.username} userId={userId} onSave={(value) => { setAvatarPath(value); }} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -230,17 +177,11 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
         />
       </div>
 
-      <Button type="submit" className="h-12 w-full" disabled={save.isPending || uploading}>
+       <Button type="submit" className="h-12 w-full" disabled={save.isPending}>
         {save.isPending ? "Enregistrement…" : "Enregistrer"}
       </Button>
     </form>
   );
-}
-
-function CoverPreview({ path }: { path: string | null }) {
-  const { data: url } = useCoverUrl(path);
-  if (!url) return <div className="size-full brand-surface" />;
-  return <img src={url} alt="Photo de couverture" className="size-full object-cover" />;
 }
 
 function Field({

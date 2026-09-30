@@ -9,8 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserAvatar } from "@/components/Avatar";
-import { MEDIA_BUCKET } from "@/lib/media";
-import { supabase } from "@/integrations/supabase/client";
+import { AvatarPhotoEditor } from "@/components/AvatarPhotoEditor";
+import { CoverPhoto } from "@/components/CoverPhoto";
 import {
   addPageAdminByUsername,
   deletePage,
@@ -93,20 +93,6 @@ function PageSettings() {
     onError: (err) => toast.error(err instanceof Error ? err.message : "Enregistrement impossible"),
   });
 
-  const uploadAvatar = useMutation({
-    mutationFn: async (file: File) => {
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `${user.id}/pages/${crypto.randomUUID()}.${ext}`;
-      const up = await supabase.storage.from(MEDIA_BUCKET).upload(path, file, { contentType: file.type });
-      if (up.error) throw up.error;
-      await updatePage(page!.id, { avatar_url: path });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["page", slug] });
-      toast.success("Logo mis à jour");
-    },
-    onError: (err) => toast.error(err instanceof Error ? err.message : "Envoi impossible"),
-  });
 
   const addAdmin = useMutation({
     mutationFn: () => addPageAdminByUsername(page!.id, newAdmin),
@@ -150,21 +136,8 @@ function PageSettings() {
     <section className="space-y-6">
       <h1 className="font-display text-2xl font-bold">Paramètres de la page</h1>
 
-      <div className="flex items-center gap-3">
-        <UserAvatar avatarPath={page.avatar_url} name={page.name} />
-        <label className="cursor-pointer text-sm text-primary">
-          Changer le logo
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) uploadAvatar.mutate(f);
-            }}
-          />
-        </label>
-      </div>
+      <CoverPhoto path={page.cover_url ?? null} editable userId={user.id} onSave={async (value) => { await updatePage(page.id, { cover_url: value }); await queryClient.invalidateQueries({ queryKey: ["page", slug] }); }} />
+      <AvatarPhotoEditor path={page.avatar_url} name={page.name} userId={user.id} label="Changer le logo" onSave={async (path) => { await updatePage(page.id, { avatar_url: path }); await queryClient.invalidateQueries({ queryKey: ["page", slug] }); }} />
 
       <form
         className="space-y-3"
