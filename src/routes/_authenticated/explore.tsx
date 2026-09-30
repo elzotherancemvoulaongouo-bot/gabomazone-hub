@@ -1,9 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { POST_SELECT } from "@/lib/posts";
-import { rankPosts } from "@/lib/feed";
-import type { FeedPost } from "@/components/PostCard";
+import { fetchRecommendations } from "@/lib/discovery";
 import { ExploreTile } from "@/components/ExploreTile";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,16 +30,7 @@ function ExplorePage() {
   const [tab, setTab] = useState("all");
   const term = q.trim();
   const matching = `%${term.replace(/[%,()]/g, "")}%`;
-  const { data: discoveries, isPending: loadingPosts } = useQuery({ queryKey: ["explore-recommendations", user.id], enabled: !term, queryFn: async () => {
-    const [posts, follows, friends] = await Promise.all([
-      supabase.from("posts").select(POST_SELECT).eq("visibility", "public").order("created_at", { ascending: false }).limit(100),
-      supabase.from("follows").select("following_id").eq("follower_id", user.id),
-      supabase.from("friend_requests").select("sender_id, receiver_id").eq("status", "accepted").or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`),
-    ]);
-    if (posts.error) throw posts.error;
-    const familiar = new Set([user.id, ...(follows.data ?? []).map((row) => row.following_id), ...(friends.data ?? []).map((row) => row.sender_id === user.id ? row.receiver_id : row.sender_id)]);
-    return rankPosts((posts.data ?? [] as unknown as FeedPost[]).filter((post) => !familiar.has(post.user_id)), "popular");
-  } });
+  const { data: discoveries, isPending: loadingPosts } = useQuery({ queryKey: ["explore-recommendations", user.id], enabled: !term, queryFn: () => fetchRecommendations(user.id) });
   const { data: searchedPosts, isPending: searchingPosts } = useQuery({
     queryKey: ["search-posts", term], enabled: term.length > 0,
     queryFn: async () => {
