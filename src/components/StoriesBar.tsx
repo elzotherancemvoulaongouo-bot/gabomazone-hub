@@ -48,7 +48,7 @@ export function StoriesBar({
       <input
         ref={inputRef}
         type="file"
-         accept={`${PHOTO_ACCEPT},${VIDEO_ACCEPT}`}
+        accept={`${PHOTO_ACCEPT},${VIDEO_ACCEPT}`}
         hidden
         onChange={(e) => {
           const file = e.target.files?.[0];

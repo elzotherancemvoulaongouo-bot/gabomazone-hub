@@ -72,7 +72,12 @@ function PagesPage() {
         >
           <div className="space-y-2">
             <Label htmlFor="page-name">Nom de la page</Label>
-            <Input id="page-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ma boutique" />
+            <Input
+              id="page-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ma boutique"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="page-desc">Description</Label>

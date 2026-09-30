@@ -19,7 +19,10 @@ export const Route = createFileRoute("/_authenticated/u/$username")({
     ],
   }),
   loader: ({ context, params }) => {
-    void context.queryClient.prefetchQuery({ queryKey: ["profile-username", params.username], queryFn: () => fetchProfileByUsername(params.username) });
+    void context.queryClient.prefetchQuery({
+      queryKey: ["profile-username", params.username],
+      queryFn: () => fetchProfileByUsername(params.username),
+    });
   },
   component: UserPage,
 });

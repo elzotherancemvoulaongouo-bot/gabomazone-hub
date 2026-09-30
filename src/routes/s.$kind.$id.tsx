@@ -30,7 +30,12 @@ export const Route = createFileRoute("/s/$kind/$id")({
         { property: "og:description", content: description },
         { property: "og:type", content: "article" },
         { name: "twitter:card", content: "summary_large_image" },
-        ...(p?.image ? [{ property: "og:image", content: p.image }, { name: "twitter:image", content: p.image }] : []),
+        ...(p?.image
+          ? [
+              { property: "og:image", content: p.image },
+              { name: "twitter:image", content: p.image },
+            ]
+          : []),
       ],
     };
   },
@@ -52,13 +57,19 @@ function SharedPreview() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
-        {preview?.image && <img src={preview.image} alt="" className="aspect-video w-full object-cover" />}
+        {preview?.image && (
+          <img src={preview.image} alt="" className="aspect-video w-full object-cover" />
+        )}
         <div className="space-y-3 p-5">
           <p className="font-display text-lg font-bold brand-text">gabomazone</p>
           <h1 className="text-xl font-semibold">{preview?.title ?? "Contenu indisponible"}</h1>
-          <p className="text-sm text-muted-foreground">{preview?.description ?? "Ce contenu est privé ou n'existe plus."}</p>
+          <p className="text-sm text-muted-foreground">
+            {preview?.description ?? "Ce contenu est privé ou n'existe plus."}
+          </p>
           <Button asChild className="w-full">
-            <Link to="/auth" onClick={() => preview && rememberAfterLogin(preview.target)}>Se connecter pour voir</Link>
+            <Link to="/auth" onClick={() => preview && rememberAfterLogin(preview.target)}>
+              Se connecter pour voir
+            </Link>
           </Button>
         </div>
       </div>

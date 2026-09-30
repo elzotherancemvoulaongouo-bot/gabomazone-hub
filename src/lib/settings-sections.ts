@@ -54,7 +54,11 @@ export const MAIN_SECTIONS: Record<string, SettingsSection> = {
     title: "Fil d'actualité",
     description: "Ordre du fil, contenus masqués, comptes prioritaires",
     icon: "newspaper",
-    items: ["Chronologique ou personnalisé", "Masquer certains contenus", "Amis et pages prioritaires"],
+    items: [
+      "Chronologique ou personnalisé",
+      "Masquer certains contenus",
+      "Amis et pages prioritaires",
+    ],
   },
   moderation: {
     title: "Contenu et modération",
@@ -106,7 +110,11 @@ export const SETTINGS_SECTIONS: Record<string, SettingsSection> = {
     description: "Animations réduites, contraste élevé",
     icon: "accessibility",
   },
-  help: { title: "Aide et assistance", description: "Questions fréquentes et contact", icon: "help" },
+  help: {
+    title: "Aide et assistance",
+    description: "Questions fréquentes et contact",
+    icon: "help",
+  },
   legal: {
     title: "Conditions et confidentialité",
     description: "Conditions d'utilisation et politique de confidentialité",

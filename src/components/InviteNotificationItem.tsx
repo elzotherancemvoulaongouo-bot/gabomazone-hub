@@ -31,15 +31,33 @@ export function InviteNotificationItem({
       if (isPage) {
         const [p, f] = await Promise.all([
           supabase.from("pages").select("slug").eq("id", targetId!).maybeSingle(),
-          supabase.from("page_followers").select("user_id").eq("page_id", targetId!).eq("user_id", me!).maybeSingle(),
+          supabase
+            .from("page_followers")
+            .select("user_id")
+            .eq("page_id", targetId!)
+            .eq("user_id", me!)
+            .maybeSingle(),
         ]);
-        return { slug: p.data?.slug ?? null, done: Boolean(f.data), group: null as GroupRow | null };
+        return {
+          slug: p.data?.slug ?? null,
+          done: Boolean(f.data),
+          group: null as GroupRow | null,
+        };
       }
       const [g, m] = await Promise.all([
         supabase.from("groups").select("*").eq("id", targetId!).maybeSingle(),
-        supabase.from("group_members").select("status").eq("group_id", targetId!).eq("user_id", me!).maybeSingle(),
+        supabase
+          .from("group_members")
+          .select("status")
+          .eq("group_id", targetId!)
+          .eq("user_id", me!)
+          .maybeSingle(),
       ]);
-      return { slug: g.data?.slug ?? null, done: Boolean(m.data), group: (g.data as GroupRow) ?? null };
+      return {
+        slug: g.data?.slug ?? null,
+        done: Boolean(m.data),
+        group: (g.data as GroupRow) ?? null,
+      };
     },
   });
 
@@ -50,7 +68,13 @@ export function InviteNotificationItem({
     },
     onSuccess: async () => {
       onOpen();
-      toast.success(isPage ? "Vous suivez cette page" : target.data?.group?.is_private ? "Demande envoyée" : "Vous avez rejoint le groupe");
+      toast.success(
+        isPage
+          ? "Vous suivez cette page"
+          : target.data?.group?.is_private
+            ? "Demande envoyée"
+            : "Vous avez rejoint le groupe",
+      );
       await queryClient.invalidateQueries({ queryKey: ["invite-target"] });
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Action impossible"),
@@ -61,9 +85,13 @@ export function InviteNotificationItem({
     <li className="space-y-2">
       {slug ? (
         isPage ? (
-          <Link to="/pg/$slug" params={{ slug }} onClick={onOpen}>{body}</Link>
+          <Link to="/pg/$slug" params={{ slug }} onClick={onOpen}>
+            {body}
+          </Link>
         ) : (
-          <Link to="/g/$slug" params={{ slug }} onClick={onOpen}>{body}</Link>
+          <Link to="/g/$slug" params={{ slug }} onClick={onOpen}>
+            {body}
+          </Link>
         )
       ) : (
         <div onClick={onOpen}>{body}</div>
@@ -71,7 +99,9 @@ export function InviteNotificationItem({
       {target.data && slug ? (
         <div className="flex justify-end px-2">
           {target.data.done ? (
-            <span className="text-xs text-muted-foreground">{isPage ? "Déjà abonné" : "Déjà membre ou demande envoyée"}</span>
+            <span className="text-xs text-muted-foreground">
+              {isPage ? "Déjà abonné" : "Déjà membre ou demande envoyée"}
+            </span>
           ) : (
             <Button size="sm" onClick={() => act.mutate()} disabled={act.isPending}>
               {isPage ? "Suivre" : "Rejoindre"}

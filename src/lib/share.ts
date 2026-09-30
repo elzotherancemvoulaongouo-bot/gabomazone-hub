@@ -19,7 +19,9 @@ const listeners = new Set<Listener>();
 
 export function subscribeShareSheet(fn: Listener) {
   listeners.add(fn);
-  return () => { listeners.delete(fn); };
+  return () => {
+    listeners.delete(fn);
+  };
 }
 
 export function openShareSheet(payload: SharePayload | null) {
@@ -63,7 +65,11 @@ export async function copyLink(url: string) {
 const AFTER_LOGIN_KEY = "gabomazone:after-login";
 
 export function rememberAfterLogin(path: string) {
-  try { sessionStorage.setItem(AFTER_LOGIN_KEY, path); } catch { /* ignoré */ }
+  try {
+    sessionStorage.setItem(AFTER_LOGIN_KEY, path);
+  } catch {
+    /* ignoré */
+  }
 }
 
 /** Renvoie (et efface) la destination mémorisée avant la connexion. */

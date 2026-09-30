@@ -22,7 +22,8 @@ export const Route = createFileRoute("/_authenticated/friends")({
       { title: "Amis — Gabomazone" },
       {
         name: "description",
-        content: "Gérez vos amis, vos demandes reçues et trouvez de nouveaux membres sur Gabomazone.",
+        content:
+          "Gérez vos amis, vos demandes reçues et trouvez de nouveaux membres sur Gabomazone.",
       },
       { property: "og:title", content: "Amis — Gabomazone" },
       { property: "og:description", content: "Vos amis et demandes d'amis sur Gabomazone." },
@@ -36,7 +37,11 @@ export const Route = createFileRoute("/_authenticated/friends")({
 function PersonRow({ profile, children }: { profile: FriendProfile; children?: React.ReactNode }) {
   return (
     <li className="flex items-center gap-3 rounded-xl border border-border/70 p-3">
-      <Link to="/u/$username" params={{ username: profile.username }} className="flex min-w-0 flex-1 items-center gap-3">
+      <Link
+        to="/u/$username"
+        params={{ username: profile.username }}
+        className="flex min-w-0 flex-1 items-center gap-3"
+      >
         <UserAvatar avatarPath={profile.avatar_url} name={profile.username} />
         <span className="min-w-0">
           <span className="block truncate text-sm font-medium">
@@ -64,13 +69,21 @@ function FriendsPage() {
     queryFn: () => fetchMyRequests(user.id),
   });
 
-  const incoming = (requests ?? []).filter((r) => r.status === "pending" && r.receiver_id === user.id);
-  const outgoing = (requests ?? []).filter((r) => r.status === "pending" && r.sender_id === user.id);
+  const incoming = (requests ?? []).filter(
+    (r) => r.status === "pending" && r.receiver_id === user.id,
+  );
+  const outgoing = (requests ?? []).filter(
+    (r) => r.status === "pending" && r.sender_id === user.id,
+  );
   const friendIds = (requests ?? [])
     .filter((r) => r.status === "accepted")
     .map((r) => (r.sender_id === user.id ? r.receiver_id : r.sender_id));
   const peopleIds = [
-    ...new Set([...friendIds, ...incoming.map((r) => r.sender_id), ...outgoing.map((r) => r.receiver_id)]),
+    ...new Set([
+      ...friendIds,
+      ...incoming.map((r) => r.sender_id),
+      ...outgoing.map((r) => r.receiver_id),
+    ]),
   ];
 
   const { data: people } = useQuery({

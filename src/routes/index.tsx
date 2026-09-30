@@ -18,7 +18,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Gabomazone — Réseau social photo & vidéo" },
       {
         property: "og:description",
-        content: "Gabomazone : partagez vos photos et vidéos, likez et commentez les publications de la communauté.",
+        content:
+          "Gabomazone : partagez vos photos et vidéos, likez et commentez les publications de la communauté.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -36,7 +37,11 @@ const features = [
 function Index() {
   const navigate = useNavigate();
   const router = useRouter();
-  const goAfterLogin = () => { const t = consumeAfterLogin(); if (t) router.history.replace(t); else navigate({ to: "/feed", replace: true }); };
+  const goAfterLogin = () => {
+    const t = consumeAfterLogin();
+    if (t) router.history.replace(t);
+    else navigate({ to: "/feed", replace: true });
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {

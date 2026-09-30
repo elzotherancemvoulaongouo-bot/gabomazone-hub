@@ -32,7 +32,11 @@ const STORY_SELECT =
 
 /** Fonds disponibles pour les statuts écrits. */
 export const STORY_BACKGROUNDS = [
-  { id: "sunset", label: "Coucher de soleil", className: "bg-gradient-to-br from-primary to-amber-500" },
+  {
+    id: "sunset",
+    label: "Coucher de soleil",
+    className: "bg-gradient-to-br from-primary to-amber-500",
+  },
   { id: "night", label: "Nuit", className: "bg-gradient-to-br from-slate-900 to-slate-600" },
   { id: "forest", label: "Forêt", className: "bg-gradient-to-br from-emerald-700 to-lime-500" },
   { id: "ocean", label: "Océan", className: "bg-gradient-to-br from-sky-700 to-cyan-400" },
@@ -157,10 +161,14 @@ export async function createStory(input: {
     const { validatePostFile, prepareStoryPhoto } = await import("@/lib/image-processing");
     const validation = validatePostFile(input.file);
     if (validation) throw new Error(validation);
-    const prepared = input.file.type.startsWith("image/") ? await prepareStoryPhoto(input.file) : input.file;
+    const prepared = input.file.type.startsWith("image/")
+      ? await prepareStoryPhoto(input.file)
+      : input.file;
     const ext = prepared.name.split(".").pop() ?? "bin";
     mediaPath = `${input.userId}/${crypto.randomUUID()}.${ext}`;
-    const { error: uploadError } = await supabase.storage.from("media").upload(mediaPath, prepared, { contentType: prepared.type, upsert: false });
+    const { error: uploadError } = await supabase.storage
+      .from("media")
+      .upload(mediaPath, prepared, { contentType: prepared.type, upsert: false });
     if (uploadError) throw uploadError;
     mediaType = input.file.type.startsWith("video/") ? "video" : "image";
   }
@@ -177,8 +185,11 @@ export async function createStory(input: {
 export function useCreateStory(userId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: { file?: File | null; caption?: string | null; background?: string | null }) =>
-      createStory({ userId, ...input }),
+    mutationFn: (input: {
+      file?: File | null;
+      caption?: string | null;
+      background?: string | null;
+    }) => createStory({ userId, ...input }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["stories"] }),
   });
 }

@@ -15,9 +15,19 @@ export type ActionButtonType =
 
 export type ActionButton = { type: ActionButtonType; value?: string };
 
-export const ACTION_BUTTON_OPTIONS: { type: ActionButtonType; label: string; needs: "none" | "phone" | "email" | "url"; placeholder?: string }[] = [
+export const ACTION_BUTTON_OPTIONS: {
+  type: ActionButtonType;
+  label: string;
+  needs: "none" | "phone" | "email" | "url";
+  placeholder?: string;
+}[] = [
   { type: "message", label: "Message", needs: "none" },
-  { type: "whatsapp", label: "WhatsApp", needs: "phone", placeholder: "Numéro WhatsApp (ex. +24177000000)" },
+  {
+    type: "whatsapp",
+    label: "WhatsApp",
+    needs: "phone",
+    placeholder: "Numéro WhatsApp (ex. +24177000000)",
+  },
   { type: "call", label: "Appeler", needs: "phone", placeholder: "Numéro de téléphone" },
   { type: "email", label: "E-mail", needs: "email", placeholder: "adresse@exemple.com" },
   { type: "contact", label: "Nous contacter", needs: "url", placeholder: "https://…" },
@@ -79,7 +89,10 @@ export async function fetchMyFriends(userId: string) {
 type Target = { pageId?: string; groupId?: string };
 
 export async function fetchSentInvites(userId: string, target: Target) {
-  let q = supabase.from("community_invites" as never).select("invitee_id").eq("inviter_id", userId);
+  let q = supabase
+    .from("community_invites" as never)
+    .select("invitee_id")
+    .eq("inviter_id", userId);
   q = target.pageId ? q.eq("page_id", target.pageId) : q.eq("group_id", target.groupId!);
   const { data, error } = await q;
   if (error) throw error;
@@ -101,14 +114,22 @@ export async function sendInvites(userId: string, target: Target, inviteeIds: st
 /* ---------- Saved / blocked / reports ---------- */
 
 export async function fetchFlags(userId: string, target: Target) {
-  let q = supabase.from("community_user_flags" as never).select("flag").eq("user_id", userId);
+  let q = supabase
+    .from("community_user_flags" as never)
+    .select("flag")
+    .eq("user_id", userId);
   q = target.pageId ? q.eq("page_id", target.pageId) : q.eq("group_id", target.groupId!);
   const { data, error } = await q;
   if (error) throw error;
   return ((data ?? []) as { flag: string }[]).map((r) => r.flag);
 }
 
-export async function setFlag(userId: string, target: Target, flag: "saved" | "blocked", on: boolean) {
+export async function setFlag(
+  userId: string,
+  target: Target,
+  flag: "saved" | "blocked",
+  on: boolean,
+) {
   if (on) {
     const { error } = await supabase.from("community_user_flags" as never).insert({
       user_id: userId,
@@ -118,7 +139,11 @@ export async function setFlag(userId: string, target: Target, flag: "saved" | "b
     } as never);
     if (error) throw error;
   } else {
-    let q = supabase.from("community_user_flags" as never).delete().eq("user_id", userId).eq("flag", flag);
+    let q = supabase
+      .from("community_user_flags" as never)
+      .delete()
+      .eq("user_id", userId)
+      .eq("flag", flag);
     q = target.pageId ? q.eq("page_id", target.pageId) : q.eq("group_id", target.groupId!);
     const { error } = await q;
     if (error) throw error;

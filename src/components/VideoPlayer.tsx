@@ -29,7 +29,10 @@ export function VideoPlayer({
       (entries) => {
         const entry = entries[0];
         if (!entry) return;
-        if (document.querySelector('[data-media-viewer="true"]')) { el.pause(); return; }
+        if (document.querySelector('[data-media-viewer="true"]')) {
+          el.pause();
+          return;
+        }
         if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
           claimPlayback(el);
           void playWithSound(el);
@@ -60,7 +63,9 @@ export function VideoPlayer({
     }
   }, []);
 
-  useEffect(() => { if (ref.current) ref.current.muted = muted; }, [muted]);
+  useEffect(() => {
+    if (ref.current) ref.current.muted = muted;
+  }, [muted]);
 
   async function fullscreen() {
     const el = ref.current as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | null;
@@ -84,7 +89,7 @@ export function VideoPlayer({
     <div
       className={cn("relative w-full overflow-hidden bg-foreground", className)}
       style={{
-         aspectRatio: ratio ? `${Math.max(4 / 5, Math.min(16 / 9, ratio))}` : "16 / 9",
+        aspectRatio: ratio ? `${Math.max(4 / 5, Math.min(16 / 9, ratio))}` : "16 / 9",
       }}
     >
       <video
@@ -94,8 +99,8 @@ export function VideoPlayer({
         loop
         playsInline
         preload="metadata"
-         className="absolute inset-0 h-full w-full object-contain"
-         onClick={toggle}
+        className="absolute inset-0 h-full w-full object-contain"
+        onClick={toggle}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         onLoadedMetadata={(e) => {
@@ -111,16 +116,26 @@ export function VideoPlayer({
         }}
       />
 
-      {blocked && playing && <button type="button" onClick={toggleMute} className="absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-full bg-foreground/80 px-4 py-2 text-sm font-semibold text-background">🔇 Touchez pour activer le son</button>}
-       <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-foreground/75 px-2 pb-2 pt-3 text-background">
-          <Button variant="ghost" size="icon"
+      {blocked && playing && (
+        <button
+          type="button"
+          onClick={toggleMute}
+          className="absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-full bg-foreground/80 px-4 py-2 text-sm font-semibold text-background"
+        >
+          🔇 Touchez pour activer le son
+        </button>
+      )}
+      <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-foreground/75 px-2 pb-2 pt-3 text-background">
+        <Button
+          variant="ghost"
+          size="icon"
           type="button"
           onClick={toggle}
           aria-label={playing ? "Mettre en pause" : "Lire la vidéo"}
-           className="shrink-0 text-background hover:bg-background/20 hover:text-background"
+          className="shrink-0 text-background hover:bg-background/20 hover:text-background"
         >
           {playing ? <Pause className="size-5" /> : <Play className="size-5" />}
-         </Button>
+        </Button>
         <input
           type="range"
           min={0}
@@ -131,22 +146,26 @@ export function VideoPlayer({
           aria-label="Progression de la vidéo"
           className="h-1 flex-1 cursor-pointer accent-primary"
         />
-         <Button variant="ghost" size="icon"
+        <Button
+          variant="ghost"
+          size="icon"
           type="button"
           onClick={toggleMute}
           aria-label={muted ? "Activer le son" : "Couper le son"}
-           className="shrink-0 text-background hover:bg-background/20 hover:text-background"
+          className="shrink-0 text-background hover:bg-background/20 hover:text-background"
         >
           {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
-         </Button>
-         <Button variant="ghost" size="icon"
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
           type="button"
           onClick={fullscreen}
           aria-label="Plein écran"
-           className="shrink-0 text-background hover:bg-background/20 hover:text-background"
+          className="shrink-0 text-background hover:bg-background/20 hover:text-background"
         >
           <Maximize2 className="size-5" />
-         </Button>
+        </Button>
       </div>
     </div>
   );

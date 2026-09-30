@@ -20,11 +20,7 @@ export function UserAvatar({
         className,
       )}
     >
-      {url ? (
-        <img src={url} alt={name ?? "avatar"} className="size-full object-cover" />
-      ) : (
-        initials
-      )}
+      {url ? <img src={url} alt={name ?? "avatar"} className="size-full object-cover" /> : initials}
     </span>
   );
 }

@@ -60,13 +60,7 @@ export function Media({
   }
 
   if (type === "video") {
-    return (
-      <VideoPlayer
-        src={url}
-        className={className}
-        autoPlayOnVisible={autoPlay}
-      />
-    );
+    return <VideoPlayer src={url} className={className} autoPlayOnVisible={autoPlay} />;
   }
 
   return (

@@ -30,9 +30,15 @@ export const Route = createFileRoute("/_authenticated/settings/$section")({
   head: () => ({
     meta: [
       { title: "Paramètres — Gabomazone" },
-      { name: "description", content: "Gérez votre compte, votre confidentialité et vos préférences Gabomazone." },
+      {
+        name: "description",
+        content: "Gérez votre compte, votre confidentialité et vos préférences Gabomazone.",
+      },
       { property: "og:title", content: "Paramètres — Gabomazone" },
-      { property: "og:description", content: "Compte, confidentialité, notifications et apparence." },
+      {
+        property: "og:description",
+        content: "Compte, confidentialité, notifications et apparence.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -81,7 +87,11 @@ function Row({
 }
 
 function Card({ children }: { children: React.ReactNode }) {
-  return <div className="overflow-hidden rounded-2xl border border-border/70 brand-surface">{children}</div>;
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border/70 brand-surface">
+      {children}
+    </div>
+  );
 }
 
 function Choices<T extends string>({
@@ -114,8 +124,13 @@ function Choices<T extends string>({
 
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <AccordionItem value={title} className="overflow-hidden rounded-2xl border border-border/70 brand-surface">
-      <AccordionTrigger className="px-4 text-sm font-semibold hover:no-underline">{title}</AccordionTrigger>
+    <AccordionItem
+      value={title}
+      className="overflow-hidden rounded-2xl border border-border/70 brand-surface"
+    >
+      <AccordionTrigger className="px-4 text-sm font-semibold hover:no-underline">
+        {title}
+      </AccordionTrigger>
       <AccordionContent className="pb-0">
         <div className="border-t border-border/50">{children}</div>
       </AccordionContent>
@@ -224,27 +239,48 @@ function Panel({ section, userId, email }: { section: string; userId: string; em
             <Switch checked={settings.notif_push} onCheckedChange={(v) => set({ notif_push: v })} />
           </Row>
           <Row label="Notifications par e-mail" hint={email}>
-            <Switch checked={settings.notif_email} onCheckedChange={(v) => set({ notif_email: v })} />
+            <Switch
+              checked={settings.notif_email}
+              onCheckedChange={(v) => set({ notif_email: v })}
+            />
           </Row>
         </Group>
         <Group title="Par catégorie">
           <Row label="Nouveaux messages">
-            <Switch checked={settings.notif_messages} onCheckedChange={(v) => set({ notif_messages: v })} />
+            <Switch
+              checked={settings.notif_messages}
+              onCheckedChange={(v) => set({ notif_messages: v })}
+            />
           </Row>
           <Row label="Commentaires">
-            <Switch checked={settings.notif_comments} onCheckedChange={(v) => set({ notif_comments: v })} />
+            <Switch
+              checked={settings.notif_comments}
+              onCheckedChange={(v) => set({ notif_comments: v })}
+            />
           </Row>
           <Row label="Mentions">
-            <Switch checked={settings.notif_mentions} onCheckedChange={(v) => set({ notif_mentions: v })} />
+            <Switch
+              checked={settings.notif_mentions}
+              onCheckedChange={(v) => set({ notif_mentions: v })}
+            />
           </Row>
           <Row label="Groupes et pages">
-            <Switch checked={settings.notif_groups} onCheckedChange={(v) => set({ notif_groups: v })} />
+            <Switch
+              checked={settings.notif_groups}
+              onCheckedChange={(v) => set({ notif_groups: v })}
+            />
           </Row>
           <Row label="Amis" hint="Demandes envoyées et acceptées">
-            <Switch checked={settings.notif_friends} onCheckedChange={(v) => set({ notif_friends: v })} />
+            <Switch
+              checked={settings.notif_friends}
+              onCheckedChange={(v) => set({ notif_friends: v })}
+            />
           </Row>
           <Row label="J'aime">
-            <Switch checked={settings.notif_likes} onCheckedChange={(v) => set({ notif_likes: v })} />
+            <Switch
+              checked={settings.notif_likes}
+              onCheckedChange={(v) => set({ notif_likes: v })}
+            />
           </Row>
         </Group>
       </Groups>
@@ -292,10 +328,16 @@ function Panel({ section, userId, email }: { section: string; userId: string; em
         </Group>
         <Group title="Accessibilité">
           <Row label="Réduire les animations">
-            <Switch checked={settings.reduce_motion} onCheckedChange={(v) => set({ reduce_motion: v })} />
+            <Switch
+              checked={settings.reduce_motion}
+              onCheckedChange={(v) => set({ reduce_motion: v })}
+            />
           </Row>
           <Row label="Contraste élevé">
-            <Switch checked={settings.high_contrast} onCheckedChange={(v) => set({ high_contrast: v })} />
+            <Switch
+              checked={settings.high_contrast}
+              onCheckedChange={(v) => set({ high_contrast: v })}
+            />
           </Row>
         </Group>
       </Groups>
@@ -332,7 +374,10 @@ function Panel({ section, userId, email }: { section: string; userId: string; em
         </Group>
         <Group title="Médias">
           <Row label="Lecture automatique des vidéos">
-            <Switch checked={settings.autoplay_videos} onCheckedChange={(v) => set({ autoplay_videos: v })} />
+            <Switch
+              checked={settings.autoplay_videos}
+              onCheckedChange={(v) => set({ autoplay_videos: v })}
+            />
           </Row>
           <Row label="Économiseur de données" hint="Charge les médias en qualité réduite">
             <Switch checked={settings.data_saver} onCheckedChange={(v) => set({ data_saver: v })} />
@@ -363,7 +408,10 @@ function Panel({ section, userId, email }: { section: string; userId: string; em
     return (
       <Card>
         <Row label="Lecture automatique des vidéos">
-          <Switch checked={settings.autoplay_videos} onCheckedChange={(v) => set({ autoplay_videos: v })} />
+          <Switch
+            checked={settings.autoplay_videos}
+            onCheckedChange={(v) => set({ autoplay_videos: v })}
+          />
         </Row>
         <Row label="Économiseur de données">
           <Switch checked={settings.data_saver} onCheckedChange={(v) => set({ data_saver: v })} />
@@ -376,10 +424,16 @@ function Panel({ section, userId, email }: { section: string; userId: string; em
     return (
       <Card>
         <Row label="Réduire les animations">
-          <Switch checked={settings.reduce_motion} onCheckedChange={(v) => set({ reduce_motion: v })} />
+          <Switch
+            checked={settings.reduce_motion}
+            onCheckedChange={(v) => set({ reduce_motion: v })}
+          />
         </Row>
         <Row label="Contraste élevé">
-          <Switch checked={settings.high_contrast} onCheckedChange={(v) => set({ high_contrast: v })} />
+          <Switch
+            checked={settings.high_contrast}
+            onCheckedChange={(v) => set({ high_contrast: v })}
+          />
         </Row>
       </Card>
     );
@@ -513,8 +567,8 @@ function AccountPanel({ email, userId }: { email: string; userId: string }) {
       <Group title="Désactivation et suppression">
         <div className="space-y-3 p-4">
           <p className="text-sm text-muted-foreground">
-            La désactivation masque votre profil jusqu'à votre prochaine connexion. La suppression est
-            définitive et efface vos publications.
+            La désactivation masque votre profil jusqu'à votre prochaine connexion. La suppression
+            est définitive et efface vos publications.
           </p>
           <Button
             variant="secondary"
@@ -531,7 +585,8 @@ function AccountPanel({ email, userId }: { email: string; userId: string }) {
             variant="destructive"
             className="h-11 w-full"
             onClick={async () => {
-              if (!window.confirm("Supprimer définitivement vos publications et votre profil ?")) return;
+              if (!window.confirm("Supprimer définitivement vos publications et votre profil ?"))
+                return;
               const { error } = await supabase.from("posts").delete().eq("user_id", userId);
               if (error) {
                 toast.error(error.message);
@@ -614,7 +669,9 @@ function SecurityPanel({
             checked={settings.two_factor_enabled}
             onCheckedChange={(v) => {
               set({ two_factor_enabled: v });
-              toast.success(v ? "Double authentification activée" : "Double authentification désactivée");
+              toast.success(
+                v ? "Double authentification activée" : "Double authentification désactivée",
+              );
             }}
           />
         </Row>
@@ -747,7 +804,12 @@ function HiddenPostsPanel({ userId }: { userId: string }) {
     },
   });
 
-  if (isPending) return <div className="p-4"><Skeleton className="h-16 w-full rounded-xl" /></div>;
+  if (isPending)
+    return (
+      <div className="p-4">
+        <Skeleton className="h-16 w-full rounded-xl" />
+      </div>
+    );
   if (!data || data.length === 0)
     return <p className="p-4 text-sm text-muted-foreground">Aucun contenu masqué.</p>;
 
@@ -759,7 +821,11 @@ function HiddenPostsPanel({ userId }: { userId: string }) {
             size="sm"
             variant="secondary"
             onClick={async () => {
-              await supabase.from("hidden_posts").delete().eq("user_id", userId).eq("post_id", row.post_id);
+              await supabase
+                .from("hidden_posts")
+                .delete()
+                .eq("user_id", userId)
+                .eq("post_id", row.post_id);
               queryClient.invalidateQueries({ queryKey: ["hidden-posts", userId] });
               queryClient.invalidateQueries({ queryKey: ["feed"] });
             }}
@@ -785,7 +851,10 @@ function BlocksPanel({ userId, flush }: { userId: string; flush?: boolean }) {
     );
 
   const list = data.map((row) => (
-    <Row key={row.blocked_id} label={row.profile?.display_name || row.profile?.username || "Membre"}>
+    <Row
+      key={row.blocked_id}
+      label={row.profile?.display_name || row.profile?.username || "Membre"}
+    >
       <div className="flex items-center gap-2">
         <UserAvatar avatarPath={row.profile?.avatar_url} name={row.profile?.username} />
         <Button size="sm" variant="secondary" onClick={() => unblock.mutate(row.blocked_id)}>
@@ -830,8 +899,14 @@ function ActivityPanel({ userId }: { userId: string }) {
     queryFn: async () => {
       const [posts, likes, comments, friends] = await Promise.all([
         supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", userId),
-        supabase.from("likes").select("post_id", { count: "exact", head: true }).eq("user_id", userId),
-        supabase.from("comments").select("id", { count: "exact", head: true }).eq("user_id", userId),
+        supabase
+          .from("likes")
+          .select("post_id", { count: "exact", head: true })
+          .eq("user_id", userId),
+        supabase
+          .from("comments")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId),
         supabase
           .from("friend_requests")
           .select("id", { count: "exact", head: true })
@@ -919,14 +994,14 @@ function LegalPanel() {
     <div className="space-y-3 rounded-2xl border border-border/70 brand-surface p-4 text-sm leading-relaxed text-muted-foreground">
       <p className="font-medium text-foreground">Conditions d'utilisation</p>
       <p>
-        En utilisant Gabomazone, vous vous engagez à publier des contenus respectueux, à ne pas usurper
-        l'identité d'autrui et à respecter les droits des autres membres.
+        En utilisant Gabomazone, vous vous engagez à publier des contenus respectueux, à ne pas
+        usurper l'identité d'autrui et à respecter les droits des autres membres.
       </p>
       <p className="font-medium text-foreground">Confidentialité</p>
       <p>
-        Vos données (profil, publications, messages) sont stockées de manière sécurisée et ne sont visibles
-        que selon les réglages de confidentialité que vous choisissez. Vous pouvez modifier ou supprimer vos
-        publications à tout moment.
+        Vos données (profil, publications, messages) sont stockées de manière sécurisée et ne sont
+        visibles que selon les réglages de confidentialité que vous choisissez. Vous pouvez modifier
+        ou supprimer vos publications à tout moment.
       </p>
     </div>
   );

@@ -26,7 +26,10 @@ export const Route = createFileRoute("/_authenticated/group-settings/$slug")({
   head: () => ({
     meta: [
       { title: "Paramètres du groupe — Gabomazone" },
-      { name: "description", content: "Gérez la confidentialité, les membres et les administrateurs du groupe." },
+      {
+        name: "description",
+        content: "Gérez la confidentialité, les membres et les administrateurs du groupe.",
+      },
       { property: "og:title", content: "Paramètres du groupe — Gabomazone" },
       { property: "og:description", content: "Configurez votre groupe Gabomazone." },
       { property: "og:type", content: "website" },
@@ -42,7 +45,10 @@ function GroupSettings() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: group, isPending } = useQuery({ queryKey: ["group", slug], queryFn: () => fetchGroupBySlug(slug) });
+  const { data: group, isPending } = useQuery({
+    queryKey: ["group", slug],
+    queryFn: () => fetchGroupBySlug(slug),
+  });
   const members = useQuery({
     queryKey: ["group-members", group?.id],
     queryFn: () => fetchGroupMembers(group!.id),
@@ -75,12 +81,20 @@ function GroupSettings() {
     onError: (err) => toast.error(err instanceof Error ? err.message : "Enregistrement impossible"),
   });
 
-  const invalidateMembers = () => queryClient.invalidateQueries({ queryKey: ["group-members", group?.id] });
+  const invalidateMembers = () =>
+    queryClient.invalidateQueries({ queryKey: ["group-members", group?.id] });
 
-  const approve = useMutation({ mutationFn: (id: string) => approveMember(group!.id, id), onSuccess: invalidateMembers });
-  const remove = useMutation({ mutationFn: (id: string) => leaveGroup(group!.id, id), onSuccess: invalidateMembers });
+  const approve = useMutation({
+    mutationFn: (id: string) => approveMember(group!.id, id),
+    onSuccess: invalidateMembers,
+  });
+  const remove = useMutation({
+    mutationFn: (id: string) => leaveGroup(group!.id, id),
+    onSuccess: invalidateMembers,
+  });
   const promote = useMutation({
-    mutationFn: ({ id, role }: { id: string; role: "admin" | "member" }) => setMemberRole(group!.id, id, role),
+    mutationFn: ({ id, role }: { id: string; role: "admin" | "member" }) =>
+      setMemberRole(group!.id, id, role),
     onSuccess: invalidateMembers,
   });
   const destroy = useMutation({
@@ -101,8 +115,26 @@ function GroupSettings() {
   return (
     <section className="space-y-6">
       <h1 className="font-display text-2xl font-bold">Paramètres du groupe</h1>
-      <CoverPhoto kind="group" path={group.cover_url ?? null} editable userId={user.id} onSave={async (value) => { await updateGroup(group.id, { cover_url: value }); await queryClient.invalidateQueries({ queryKey: ["group", slug] }); }} />
-      <AvatarPhotoEditor path={group.avatar_url} name={group.name} userId={user.id} label="Changer la photo" onSave={async (path) => { await updateGroup(group.id, { avatar_url: path }); await queryClient.invalidateQueries({ queryKey: ["group", slug] }); }} />
+      <CoverPhoto
+        kind="group"
+        path={group.cover_url ?? null}
+        editable
+        userId={user.id}
+        onSave={async (value) => {
+          await updateGroup(group.id, { cover_url: value });
+          await queryClient.invalidateQueries({ queryKey: ["group", slug] });
+        }}
+      />
+      <AvatarPhotoEditor
+        path={group.avatar_url}
+        name={group.name}
+        userId={user.id}
+        label="Changer la photo"
+        onSave={async (path) => {
+          await updateGroup(group.id, { avatar_url: path });
+          await queryClient.invalidateQueries({ queryKey: ["group", slug] });
+        }}
+      />
 
       <form
         className="space-y-3"
@@ -117,7 +149,12 @@ function GroupSettings() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="desc">Description</Label>
-          <Textarea id="desc" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+          <Textarea
+            id="desc"
+            rows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
         </div>
         <div className="flex items-center justify-between rounded-xl border border-border/70 px-3 py-2">
           <Label htmlFor="private">Groupe privé</Label>
@@ -141,10 +178,19 @@ function GroupSettings() {
                 <span className="min-w-0 flex-1 truncate text-sm">
                   {m.profile?.display_name || m.profile?.username}
                 </span>
-                <Button size="icon" onClick={() => approve.mutate(m.user_id)} aria-label="Approuver">
+                <Button
+                  size="icon"
+                  onClick={() => approve.mutate(m.user_id)}
+                  aria-label="Approuver"
+                >
                   <Check className="size-4" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => remove.mutate(m.user_id)} aria-label="Refuser">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => remove.mutate(m.user_id)}
+                  aria-label="Refuser"
+                >
                   <Trash2 className="size-4" />
                 </Button>
               </li>
@@ -165,7 +211,11 @@ function GroupSettings() {
               <span className="min-w-0 flex-1 truncate text-sm">
                 {m.profile?.display_name || m.profile?.username}
                 <span className="block text-xs text-muted-foreground">
-                  {m.user_id === group.owner_id ? "Propriétaire" : m.role === "admin" ? "Administrateur" : "Membre"}
+                  {m.user_id === group.owner_id
+                    ? "Propriétaire"
+                    : m.role === "admin"
+                      ? "Administrateur"
+                      : "Membre"}
                 </span>
               </span>
               {m.user_id === group.owner_id ? null : (
@@ -174,12 +224,20 @@ function GroupSettings() {
                     variant="ghost"
                     size="sm"
                     onClick={() =>
-                      promote.mutate({ id: m.user_id, role: m.role === "admin" ? "member" : "admin" })
+                      promote.mutate({
+                        id: m.user_id,
+                        role: m.role === "admin" ? "member" : "admin",
+                      })
                     }
                   >
                     {m.role === "admin" ? "Retirer admin" : "Nommer admin"}
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => remove.mutate(m.user_id)} aria-label="Exclure">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => remove.mutate(m.user_id)}
+                    aria-label="Exclure"
+                  >
                     <Trash2 className="size-4" />
                   </Button>
                 </>
@@ -190,7 +248,12 @@ function GroupSettings() {
       </div>
 
       {group.owner_id === user.id ? (
-        <Button variant="destructive" className="w-full" onClick={() => destroy.mutate()} disabled={destroy.isPending}>
+        <Button
+          variant="destructive"
+          className="w-full"
+          onClick={() => destroy.mutate()}
+          disabled={destroy.isPending}
+        >
           <Trash2 className="mr-2 size-4" /> Supprimer le groupe
         </Button>
       ) : null}

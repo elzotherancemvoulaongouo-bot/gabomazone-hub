@@ -56,7 +56,12 @@ export function CreatePostDialog({
   const fileRef = useRef<HTMLInputElement | null>(null);
   const draftsRef = useRef<Draft[]>([]);
   draftsRef.current = drafts;
-  useEffect(() => () => { draftsRef.current.forEach((draft) => URL.revokeObjectURL(draft.url)); }, []);
+  useEffect(
+    () => () => {
+      draftsRef.current.forEach((draft) => URL.revokeObjectURL(draft.url));
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -69,7 +74,10 @@ export function CreatePostDialog({
     const next: Draft[] = [];
     for (const file of Array.from(files)) {
       const error = validatePostFile(file);
-      if (error) { toast.error(error); continue; }
+      if (error) {
+        toast.error(error);
+        continue;
+      }
       const isVideo = file.type.startsWith("video");
       if (!isVideo && !file.type.startsWith("image")) continue;
       next.push({
@@ -128,134 +136,178 @@ export function CreatePostDialog({
     onError: (err) => toast.error(err instanceof Error ? err.message : "Publication impossible"),
   });
 
-  const editor = <>
-          <div className="flex items-center gap-3">
-            <UserAvatar avatarPath={avatarPath} name={displayName} />
-            <div className="flex min-w-0 flex-wrap gap-1.5">
-              {VISIBILITIES.map(({ value, label, icon: Icon }) => (
-                <Button
-                  key={value}
-                  type="button"
-                  onClick={() => setVisibility(value)}
-                  variant="outline"
-                  size="sm"
-                  className={cn(
-                    "h-8 gap-1 rounded-full border-border/70 px-2 text-xs",
-                    visibility === value && "border-primary text-primary",
-                  )}
-                >
-                  <Icon className="size-3.5" />
-                  {label}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          <Textarea
-            autoFocus
-            rows={4}
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            placeholder="Que voulez-vous publier ?"
-            aria-label="Texte de la publication"
-            className="resize-none border-0 bg-transparent px-0 text-base shadow-none focus-visible:ring-0"
-          />
-
-          {drafts.length > 0 ? (
-            <div className="grid grid-cols-2 gap-2">
-              {drafts.map((draft, index) => (
-                <div key={draft.id} className="relative min-w-0 overflow-hidden rounded-lg border border-border/70">
-                  {draft.kind === "video" ? (
-                    <video src={draft.url} className="aspect-square w-full object-cover" controls playsInline />
-                  ) : (
-                    <img src={draft.url} alt="Média sélectionné" className="aspect-square w-full object-cover" />
-                  )}
-                  <Button
-                    type="button"
-                    aria-label="Retirer ce média"
-                    onClick={() => { URL.revokeObjectURL(draft.url); setDrafts((prev) => prev.filter((d) => d.id !== draft.id)); }}
-                    variant="secondary" size="icon" className="absolute right-1.5 top-1.5 size-8 rounded-full"
-                  >
-                    <X className="size-4" />
-                  </Button>
-                  <div className="absolute bottom-1.5 left-1.5 flex gap-1">
-                    <Button
-                      type="button"
-                      aria-label="Déplacer vers la gauche"
-                      onClick={() => move(index, -1)}
-                      variant="secondary" size="icon" className="size-8 rounded-full"
-                    >
-                      <ArrowLeft className="size-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      aria-label="Déplacer vers la droite"
-                      onClick={() => move(index, 1)}
-                      variant="secondary" size="icon" className="size-8 rounded-full"
-                    >
-                      <ArrowRight className="size-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : null}
-
-          <Input
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="Ajouter un lieu (facultatif)"
-            aria-label="Lieu"
-          />
-
-          <div className="flex items-center gap-2 rounded-xl border border-border/70 p-2">
+  const editor = (
+    <>
+      <div className="flex items-center gap-3">
+        <UserAvatar avatarPath={avatarPath} name={displayName} />
+        <div className="flex min-w-0 flex-wrap gap-1.5">
+          {VISIBILITIES.map(({ value, label, icon: Icon }) => (
             <Button
+              key={value}
               type="button"
-              variant="ghost"
-              className="h-11 flex-1"
-              onClick={() => fileRef.current?.click()}
+              onClick={() => setVisibility(value)}
+              variant="outline"
+              size="sm"
+              className={cn(
+                "h-8 gap-1 rounded-full border-border/70 px-2 text-xs",
+                visibility === value && "border-primary text-primary",
+              )}
             >
-              <ImagePlus className="mr-2 size-5 text-primary" /> Photo/Vidéo
+              <Icon className="size-3.5" />
+              {label}
             </Button>
-            <Button type="button" variant="ghost" className="h-11 flex-1" onClick={() => setCameraOpen(true)}>
-              <Camera className="mr-2 size-5 text-primary" /> Caméra
-            </Button>
-          </div>
+          ))}
+        </div>
+      </div>
 
-          <Button
-            type="button"
-            size="lg"
-            className="h-12 w-full"
-            disabled={publish.isPending || (!caption.trim() && drafts.length === 0)}
-            onClick={() => publish.mutate()}
-          >
-            {publish.isPending ? "Publication…" : "Publier"}
-          </Button>
+      <Textarea
+        autoFocus
+        rows={4}
+        value={caption}
+        onChange={(e) => setCaption(e.target.value)}
+        placeholder="Que voulez-vous publier ?"
+        aria-label="Texte de la publication"
+        className="resize-none border-0 bg-transparent px-0 text-base shadow-none focus-visible:ring-0"
+      />
 
-          <input
-            ref={fileRef}
-            type="file"
-            accept={pickerAccept}
-            multiple
-            className="hidden"
-            onChange={(e) => {
-              if (e.target.files) addFiles(e.target.files);
-              e.target.value = "";
-            }}
-          />
-  </>;
+      {drafts.length > 0 ? (
+        <div className="grid grid-cols-2 gap-2">
+          {drafts.map((draft, index) => (
+            <div
+              key={draft.id}
+              className="relative min-w-0 overflow-hidden rounded-lg border border-border/70"
+            >
+              {draft.kind === "video" ? (
+                <video
+                  src={draft.url}
+                  className="aspect-square w-full object-cover"
+                  controls
+                  playsInline
+                />
+              ) : (
+                <img
+                  src={draft.url}
+                  alt="Média sélectionné"
+                  className="aspect-square w-full object-cover"
+                />
+              )}
+              <Button
+                type="button"
+                aria-label="Retirer ce média"
+                onClick={() => {
+                  URL.revokeObjectURL(draft.url);
+                  setDrafts((prev) => prev.filter((d) => d.id !== draft.id));
+                }}
+                variant="secondary"
+                size="icon"
+                className="absolute right-1.5 top-1.5 size-8 rounded-full"
+              >
+                <X className="size-4" />
+              </Button>
+              <div className="absolute bottom-1.5 left-1.5 flex gap-1">
+                <Button
+                  type="button"
+                  aria-label="Déplacer vers la gauche"
+                  onClick={() => move(index, -1)}
+                  variant="secondary"
+                  size="icon"
+                  className="size-8 rounded-full"
+                >
+                  <ArrowLeft className="size-4" />
+                </Button>
+                <Button
+                  type="button"
+                  aria-label="Déplacer vers la droite"
+                  onClick={() => move(index, 1)}
+                  variant="secondary"
+                  size="icon"
+                  className="size-8 rounded-full"
+                >
+                  <ArrowRight className="size-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      <Input
+        value={location}
+        onChange={(e) => setLocation(e.target.value)}
+        placeholder="Ajouter un lieu (facultatif)"
+        aria-label="Lieu"
+      />
+
+      <div className="flex items-center gap-2 rounded-xl border border-border/70 p-2">
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-11 flex-1"
+          onClick={() => fileRef.current?.click()}
+        >
+          <ImagePlus className="mr-2 size-5 text-primary" /> Photo/Vidéo
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-11 flex-1"
+          onClick={() => setCameraOpen(true)}
+        >
+          <Camera className="mr-2 size-5 text-primary" /> Caméra
+        </Button>
+      </div>
+
+      <Button
+        type="button"
+        size="lg"
+        className="h-12 w-full"
+        disabled={publish.isPending || (!caption.trim() && drafts.length === 0)}
+        onClick={() => publish.mutate()}
+      >
+        {publish.isPending ? "Publication…" : "Publier"}
+      </Button>
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept={pickerAccept}
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files) addFiles(e.target.files);
+          e.target.value = "";
+        }}
+      />
+    </>
+  );
 
   return (
     <>
-      {inline ? <div className="space-y-3" aria-label="Créer une publication">
-        <div className="flex items-center justify-between"><h2 className="font-display text-base font-semibold">Créer une publication</h2><Button variant="ghost" size="icon" aria-label="Fermer la publication" onClick={() => onOpenChange(false)}><X className="size-5" /></Button></div>
-        {editor}
-      </div> : <Dialog open={open} onOpenChange={(next) => !publish.isPending && onOpenChange(next)}>
-        <DialogContent className="max-h-[92dvh] gap-3 overflow-y-auto sm:max-w-lg">
-          <DialogHeader><DialogTitle className="font-display">Créer une publication</DialogTitle></DialogHeader>
+      {inline ? (
+        <div className="space-y-3" aria-label="Créer une publication">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-base font-semibold">Créer une publication</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Fermer la publication"
+              onClick={() => onOpenChange(false)}
+            >
+              <X className="size-5" />
+            </Button>
+          </div>
           {editor}
-        </DialogContent>
-      </Dialog>}
+        </div>
+      ) : (
+        <Dialog open={open} onOpenChange={(next) => !publish.isPending && onOpenChange(next)}>
+          <DialogContent className="max-h-[92dvh] gap-3 overflow-y-auto sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="font-display">Créer une publication</DialogTitle>
+            </DialogHeader>
+            {editor}
+          </DialogContent>
+        </Dialog>
+      )}
 
       <CameraCapture
         open={cameraOpen}

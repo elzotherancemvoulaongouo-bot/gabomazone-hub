@@ -35,7 +35,10 @@ function EditPostPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: post, isPending } = useQuery({ queryKey: ["post", postId], queryFn: () => fetchPost(postId) });
+  const { data: post, isPending } = useQuery({
+    queryKey: ["post", postId],
+    queryFn: () => fetchPost(postId),
+  });
 
   const [caption, setCaption] = useState("");
   const [location, setLocation] = useState("");
@@ -64,7 +67,11 @@ function EditPostPage() {
       } else if (removeMedia) {
         media = { media_url: null, media_type: null };
       }
-      await updatePost(postId, { caption: text || null, location: location.trim() || null, ...media });
+      await updatePost(postId, {
+        caption: text || null,
+        location: location.trim() || null,
+        ...media,
+      });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries();
@@ -77,7 +84,9 @@ function EditPostPage() {
   if (isPending) return <Skeleton className="h-72 w-full rounded-2xl" />;
   if (!post) return <p className="text-sm text-muted-foreground">Publication introuvable.</p>;
   if (post.user_id !== user.id)
-    return <p className="text-sm text-muted-foreground">Vous ne pouvez modifier que vos publications.</p>;
+    return (
+      <p className="text-sm text-muted-foreground">Vous ne pouvez modifier que vos publications.</p>
+    );
 
   const showsExisting = Boolean(post.media_url) && !removeMedia && !preview;
 
@@ -93,7 +102,12 @@ function EditPostPage() {
 
       <div className="space-y-2">
         <Label htmlFor="caption">Votre texte</Label>
-        <Textarea id="caption" rows={4} value={caption} onChange={(e) => setCaption(e.target.value)} />
+        <Textarea
+          id="caption"
+          rows={4}
+          value={caption}
+          onChange={(e) => setCaption(e.target.value)}
+        />
       </div>
 
       {showsExisting ? (
@@ -120,16 +134,25 @@ function EditPostPage() {
         ) : (
           <span className="flex flex-col items-center gap-2 px-4 py-8 text-center text-sm text-muted-foreground">
             <ImagePlus className="size-10 text-primary" />
-            {post.media_url && !removeMedia ? "Remplacer la photo ou la vidéo" : "Ajouter une photo ou une vidéo"}
+            {post.media_url && !removeMedia
+              ? "Remplacer la photo ou la vidéo"
+              : "Ajouter une photo ou une vidéo"}
           </span>
         )}
         <input
           type="file"
-           accept={`${PHOTO_ACCEPT},${VIDEO_ACCEPT}`}
+          accept={`${PHOTO_ACCEPT},${VIDEO_ACCEPT}`}
           className="hidden"
           onChange={(e) => {
             const selected = e.target.files?.[0] ?? null;
-            if (selected) { const error = validatePostFile(selected); if (error) { toast.error(error); e.target.value = ""; return; } }
+            if (selected) {
+              const error = validatePostFile(selected);
+              if (error) {
+                toast.error(error);
+                e.target.value = "";
+                return;
+              }
+            }
             setFile(selected);
             setPreview(selected ? URL.createObjectURL(selected) : null);
             if (selected) setRemoveMedia(false);
@@ -146,7 +169,11 @@ function EditPostPage() {
         <Button type="submit" className="flex-1" disabled={save.isPending}>
           Enregistrer
         </Button>
-        <Button type="button" variant="ghost" onClick={() => navigate({ to: "/p/$postId", params: { postId } })}>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => navigate({ to: "/p/$postId", params: { postId } })}
+        >
           Annuler
         </Button>
       </div>

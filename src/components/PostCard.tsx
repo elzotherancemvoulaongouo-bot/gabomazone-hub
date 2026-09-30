@@ -74,7 +74,15 @@ export function postIdentity(post: FeedPost): PostIdentity {
   return "profile";
 }
 
-export function PostCard({ post, currentUserId, contextPosts }: { post: FeedPost; currentUserId: string; contextPosts?: FeedPost[] }) {
+export function PostCard({
+  post,
+  currentUserId,
+  contextPosts,
+}: {
+  post: FeedPost;
+  currentUserId: string;
+  contextPosts?: FeedPost[];
+}) {
   const identity = postIdentity(post);
 
   const queryClient = useQueryClient();
@@ -101,13 +109,18 @@ export function PostCard({ post, currentUserId, contextPosts }: { post: FeedPost
     typeof window !== "undefined" ? `${window.location.origin}/p/${post.id}` : `/p/${post.id}`;
 
   function share() {
-    void shareContent({ title: "Gabomazone", text: post.caption ?? "", url: buildShareUrl("p", post.id) });
+    void shareContent({
+      title: "Gabomazone",
+      text: post.caption ?? "",
+      url: buildShareUrl("p", post.id),
+    });
   }
 
   // Mise à jour optimiste : le compteur bouge immédiatement, sans recharger le fil.
   const [likeOverride, setLikeOverride] = useState<boolean | null>(null);
   const effectiveLiked = likeOverride ?? liked;
-  const effectiveLikeCount = likeCount + (likeOverride === null ? 0 : likeOverride === liked ? 0 : likeOverride ? 1 : -1);
+  const effectiveLikeCount =
+    likeCount + (likeOverride === null ? 0 : likeOverride === liked ? 0 : likeOverride ? 1 : -1);
 
   const toggleLike = useMutation({
     mutationFn: async (next: boolean) => {
@@ -198,16 +211,12 @@ export function PostCard({ post, currentUserId, contextPosts }: { post: FeedPost
           ) : null}
           <p className="truncate text-xs text-muted-foreground">
             {identity === "group" && post.group ? (
-              <>
-                Publication officielle du groupe{" · "}
-              </>
+              <>Publication officielle du groupe{" · "}</>
             ) : null}
             {post.location ? `${post.location} · ` : ""}
             {timeAgo(post.created_at)}
           </p>
         </div>
-
-
 
         <div className="ml-auto">
           <DropdownMenu>
@@ -221,9 +230,7 @@ export function PostCard({ post, currentUserId, contextPosts }: { post: FeedPost
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem
-                onSelect={() => toggleSave.mutate({ postId: post.id, saved })}
-              >
+              <DropdownMenuItem onSelect={() => toggleSave.mutate({ postId: post.id, saved })}>
                 <Bookmark className={cn("mr-2 size-4", saved && "fill-primary text-primary")} />
                 {saved ? "Retirer des enregistrements" : "Enregistrer la publication"}
               </DropdownMenuItem>
@@ -272,31 +279,26 @@ export function PostCard({ post, currentUserId, contextPosts }: { post: FeedPost
           </DropdownMenu>
 
           <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Supprimer cette publication ?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Cette action est définitive : la publication, ses j'aime et ses commentaires seront
-                    supprimés.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Annuler</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => remove.mutate()}
-                    disabled={remove.isPending}
-                  >
-                    Supprimer
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Supprimer cette publication ?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Cette action est définitive : la publication, ses j'aime et ses commentaires
+                  seront supprimés.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                <AlertDialogAction onClick={() => remove.mutate()} disabled={remove.isPending}>
+                  Supprimer
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </header>
 
-      {post.caption ? (
-        <p className="px-4 pb-3 text-base leading-relaxed">{post.caption}</p>
-      ) : null}
+      {post.caption ? <p className="px-4 pb-3 text-base leading-relaxed">{post.caption}</p> : null}
 
       {mediaItems.length > 0 ? (
         <PostMediaGallery

@@ -3,12 +3,7 @@ import { Loader2, Scissors, Type as TypeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCreateStory, STORY_BACKGROUNDS } from "@/lib/stories";
 import { loadVideoMeta, trimVideo, MAX_STORY_VIDEO_SECONDS } from "@/lib/story-video";
 import { cn } from "@/lib/utils";
@@ -69,11 +64,14 @@ export function CreateStoryDialog({
       return;
     }
     try {
-      if (file) { const validation = validatePostFile(file); if (validation) throw new Error(validation); }
+      if (file) {
+        const validation = validatePostFile(file);
+        if (validation) throw new Error(validation);
+      }
       let finalFile = file;
       if (file && tooLong) {
         setTrimProgress(0);
-         toast.info("Découpage des 60 secondes sélectionnées…");
+        toast.info("Découpage des 60 secondes sélectionnées…");
         finalFile = await trimVideo(file, trimStart, setTrimProgress);
         setTrimProgress(null);
       }
@@ -97,18 +95,13 @@ export function CreateStoryDialog({
     <Dialog open={draft !== null} onOpenChange={(open) => !open && onOpenChange(false)}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            {draft?.mode === "text" ? "Statut écrit" : "Nouveau statut"}
-          </DialogTitle>
+          <DialogTitle>{draft?.mode === "text" ? "Statut écrit" : "Nouveau statut"}</DialogTitle>
         </DialogHeader>
 
         {draft?.mode === "text" ? (
           <>
             <div
-              className={cn(
-                "flex h-64 items-center justify-center rounded-xl p-6",
-                bg.className,
-              )}
+              className={cn("flex h-64 items-center justify-center rounded-xl p-6", bg.className)}
             >
               <p className="line-clamp-6 text-center text-xl font-bold text-white">
                 {caption || "Écrivez quelque chose…"}
@@ -145,10 +138,14 @@ export function CreateStoryDialog({
                 src={previewUrl}
                 controls
                 playsInline
-                 className="mx-auto aspect-[9/16] max-h-72 w-auto max-w-full rounded-xl bg-muted object-contain"
+                className="mx-auto aspect-[9/16] max-h-72 w-auto max-w-full rounded-xl bg-muted object-contain"
               />
             ) : (
-               <img src={previewUrl} alt="Aperçu" className="mx-auto aspect-[9/16] max-h-72 w-auto max-w-full rounded-xl bg-muted object-contain" />
+              <img
+                src={previewUrl}
+                alt="Aperçu"
+                className="mx-auto aspect-[9/16] max-h-72 w-auto max-w-full rounded-xl bg-muted object-contain"
+              />
             )}
 
             {tooLong ? (

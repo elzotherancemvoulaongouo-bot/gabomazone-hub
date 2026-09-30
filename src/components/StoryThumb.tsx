@@ -52,5 +52,11 @@ export function StoryThumb({
     );
   }
 
-  return <UserAvatar avatarPath={fallbackAvatar} name={fallbackName} className={cn("size-16", className)} />;
+  return (
+    <UserAvatar
+      avatarPath={fallbackAvatar}
+      name={fallbackName}
+      className={cn("size-16", className)}
+    />
+  );
 }

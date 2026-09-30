@@ -73,7 +73,13 @@ export function VoiceRecorder({
       <div className="flex w-full items-center gap-2 rounded-xl border border-border/70 p-2">
         <audio src={clip.url} controls className="h-9 min-w-0 flex-1" />
         <span className="text-xs text-muted-foreground">{formatDuration(clip.duration)}</span>
-        <Button type="button" variant="ghost" size="icon" aria-label="Supprimer la note vocale" onClick={discard}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="Supprimer la note vocale"
+          onClick={discard}
+        >
           <Trash2 className="size-4" />
         </Button>
         <Button
@@ -97,7 +103,13 @@ export function VoiceRecorder({
       <div className="flex w-full items-center gap-3 rounded-xl border border-primary/40 p-2">
         <span className="size-2 animate-pulse rounded-full bg-primary" />
         <span className="flex-1 text-sm">Enregistrement… {formatDuration(seconds)}</span>
-        <Button type="button" size="icon" variant="secondary" aria-label="Arrêter l'enregistrement" onClick={stop}>
+        <Button
+          type="button"
+          size="icon"
+          variant="secondary"
+          aria-label="Arrêter l'enregistrement"
+          onClick={stop}
+        >
           <Square className="size-4" />
         </Button>
       </div>
@@ -105,7 +117,14 @@ export function VoiceRecorder({
   }
 
   return (
-    <Button type="button" size="icon" variant="secondary" aria-label="Enregistrer une note vocale" onClick={start} disabled={disabled}>
+    <Button
+      type="button"
+      size="icon"
+      variant="secondary"
+      aria-label="Enregistrer une note vocale"
+      onClick={start}
+      disabled={disabled}
+    >
       <Mic className="size-5" />
     </Button>
   );

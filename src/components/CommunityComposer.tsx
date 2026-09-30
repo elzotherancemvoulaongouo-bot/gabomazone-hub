@@ -47,7 +47,8 @@ export function CommunityComposer({
     [files],
   );
 
-  const asCommunity = Boolean(pageId) || (Boolean(groupId) && identity === "community" && canPostAsCommunity);
+  const asCommunity =
+    Boolean(pageId) || (Boolean(groupId) && identity === "community" && canPostAsCommunity);
 
   const publish = useMutation({
     mutationFn: async () => {
@@ -164,10 +165,18 @@ export function CommunityComposer({
           Photos ou vidéo
           <input
             type="file"
-             accept={`${PHOTO_ACCEPT},${VIDEO_ACCEPT}`}
+            accept={`${PHOTO_ACCEPT},${VIDEO_ACCEPT}`}
             multiple
             className="hidden"
-             onChange={(e) => { const accepted = Array.from(e.target.files ?? []).filter((file) => { const error = validatePostFile(file); if (error) toast.error(error); return !error; }); setFiles((prev) => [...prev, ...accepted]); e.target.value = ""; }}
+            onChange={(e) => {
+              const accepted = Array.from(e.target.files ?? []).filter((file) => {
+                const error = validatePostFile(file);
+                if (error) toast.error(error);
+                return !error;
+              });
+              setFiles((prev) => [...prev, ...accepted]);
+              e.target.value = "";
+            }}
           />
         </label>
         <div className="flex items-center gap-2">
@@ -185,7 +194,11 @@ export function CommunityComposer({
               Annuler
             </Button>
           ) : null}
-          <Button type="submit" size="sm" disabled={publish.isPending || (!caption.trim() && files.length === 0)}>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={publish.isPending || (!caption.trim() && files.length === 0)}
+          >
             <Send className="mr-1 size-4" /> Publier
           </Button>
         </div>
