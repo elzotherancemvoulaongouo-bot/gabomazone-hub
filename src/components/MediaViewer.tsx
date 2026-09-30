@@ -269,10 +269,7 @@ export function MediaViewer({ post, posts, kind, index, userId, onClose }: Props
                 kind="video"
                 initialIndex={item.id === post.id ? index : 0}
                 active={activeId === item.id && !commentsId}
-                preload={
-                  position <= videos.findIndex((video) => video.id === activeId) + 2 &&
-                  position >= videos.findIndex((video) => video.id === activeId) - 1
-                }
+                preload={position === videos.findIndex((video) => video.id === activeId) + 1}
                 userId={userId}
                 saved={(savedIds ?? []).includes(item.id)}
                 following={(followingIds ?? []).includes(item.user_id)}
@@ -558,12 +555,20 @@ function ViewerSlide({
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center">
-            <Play className="size-10" />
-            <p className="text-sm">
-              {mediaError || isError
-                ? "Cette vidéo ne peut pas être lue sur cet appareil."
-                : "Chargement de la vidéo…"}
-            </p>
+            {src && !mediaError ? (
+              <video
+                src={src}
+                muted
+                playsInline
+                preload="metadata"
+                className="absolute inset-0 size-full object-contain"
+              />
+            ) : null}
+            {mediaError || isError ? (
+              <p className="relative text-sm">Cette vidéo ne peut pas être lue sur cet appareil.</p>
+            ) : (
+              <span className="relative size-10 animate-spin rounded-full border-4 border-viewer-foreground/30 border-t-viewer-foreground" aria-label="Chargement de la vidéo" />
+            )}
           </div>
         )
       ) : (

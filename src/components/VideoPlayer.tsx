@@ -20,6 +20,7 @@ export function VideoPlayer({
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [ratio, setRatio] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Autoplay / pause selon la visibilité
   useEffect(() => {
@@ -114,7 +115,17 @@ export function VideoPlayer({
           const el = e.currentTarget;
           setProgress(el.duration ? (el.currentTime / el.duration) * 100 : 0);
         }}
+        onWaiting={() => setLoading(true)}
+        onPlaying={() => setLoading(false)}
+        onCanPlay={() => setLoading(false)}
       />
+      {loading && (
+        <span
+          aria-label="Chargement de la vidéo"
+          className="pointer-events-none absolute left-1/2 top-1/2 size-10 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-4 border-background/30 border-t-background"
+        />
+      )}
+
 
       <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-foreground/75 px-2 pb-2 pt-3 text-background">
         <Button
