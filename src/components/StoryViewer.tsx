@@ -5,6 +5,8 @@ import { useSignedUrl, timeAgo } from "@/lib/media";
 import { deleteStory, markStorySeen, STORY_BACKGROUNDS, type StoryGroup } from "@/lib/stories";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { claimPlayback, playWithSound, useSound } from "@/lib/sound";
+import { Volume2, VolumeX } from "lucide-react";
 
 const IMAGE_DURATION = 5000;
 const LONG_PRESS_MS = 180;
@@ -26,6 +28,8 @@ export function StoryViewer({
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { muted, blocked, toggle: toggleMute } = useSound();
+  useEffect(() => { if (videoRef.current) videoRef.current.muted = muted; }, [muted]);
   const elapsedRef = useRef(0);
   const pressTimer = useRef<number | null>(null);
 
@@ -98,11 +102,7 @@ export function StoryViewer({
     if (!video) return;
     if (paused) video.pause();
     else
-      void video.play().catch(() => {
-        // Autoplay avec son bloqué : on relance en muet.
-        video.muted = true;
-        void video.play().catch(() => undefined);
-      });
+      { claimPlayback(video); void playWithSound(video); }
   }, [paused, mediaUrl]);
 
   // Clavier
@@ -197,6 +197,7 @@ export function StoryViewer({
               src={mediaUrl}
               autoPlay
               playsInline
+              data-app-video
                className="size-full object-contain"
               onTimeUpdate={(e) => {
                 const el = e.currentTarget;
@@ -204,6 +205,17 @@ export function StoryViewer({
               }}
               onEnded={next}
             />
+          ) : null
+        ) : null}
+        {story.media_type === "video" && mediaUrl ? (
+          <>
+            {blocked && <button type="button" onClick={toggleMute} className="absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-black">🔇 Touchez pour activer le son</button>}
+            <button type="button" onClick={toggleMute} aria-label={muted ? "Activer le son" : "Couper le son"} className="absolute bottom-24 right-3 z-20 rounded-full bg-black/60 p-2 text-white">{muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}</button>
+          </>
+        ) : null}
+        {story.media_path && mediaUrl ? (
+          story.media_type === "video" ? (
+            null
           ) : (
             <img src={mediaUrl} alt={story.caption ?? "statut"} className="size-full object-contain" />
           )

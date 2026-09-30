@@ -1,3 +1,4 @@
+import { claimPlayback, playWithSound, useSound } from "@/lib/sound";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -119,7 +120,7 @@ function Reel({ post, userId, active, saved, following, followPending, onFollow,
   const video = useRef<HTMLVideoElement>(null);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [paused, setPaused] = useState(false);
-  const [muted, setMuted] = useState(true);
+  const { muted, toggle: toggleMute } = useSound();
   const [mediaError, setMediaError] = useState(false);
   const [likeOverride, setLikeOverride] = useState<boolean | null>(null);
   const queryClient = useQueryClient();
@@ -140,8 +141,9 @@ function Reel({ post, userId, active, saved, following, followPending, onFollow,
     const element = video.current;
     if (!element) return;
     if (!active || paused) { element.pause(); return; }
-    element.play().catch(() => undefined);
+    claimPlayback(element); void playWithSound(element);
   }, [active, paused, src]);
+  useEffect(() => { if (video.current) video.current.muted = muted; }, [muted]);
 
   useEffect(() => { setMediaError(false); }, [path]);
 
@@ -167,7 +169,7 @@ function Reel({ post, userId, active, saved, following, followPending, onFollow,
   }
 
   return <>
-    {active && src && !mediaError ? <video ref={video} src={src} loop muted={muted} playsInline preload="auto" onError={() => setMediaError(true)} onClick={(event) => videoClick(event.detail)} className="absolute inset-0 size-full object-contain" aria-label="Lire ou mettre en pause la vidéo" /> : <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center"><Play className="size-10" /><p className="text-sm">{mediaError || urlError ? "Cette vidéo ne peut pas être lue sur cet appareil." : "Chargement de la vidéo…"}</p></div>}
+    {active && src && !mediaError ? <video ref={video} src={src} loop data-app-video playsInline preload="auto" onError={() => setMediaError(true)} onClick={(event) => videoClick(event.detail)} className="absolute inset-0 size-full object-contain" aria-label="Lire ou mettre en pause la vidéo" /> : <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center"><Play className="size-10" /><p className="text-sm">{mediaError || urlError ? "Cette vidéo ne peut pas être lue sur cet appareil." : "Chargement de la vidéo…"}</p></div>}
     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-foreground/80 to-transparent" />
     <div className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-4 right-20 z-10 min-w-0 space-y-2 text-background">
       {profile ? <Link to="/u/$username" params={{ username: profile }} className="block truncate font-semibold">{post.author?.display_name || profile}</Link> : <span className="block truncate font-semibold">Créateur</span>}
@@ -184,7 +186,7 @@ function Reel({ post, userId, active, saved, following, followPending, onFollow,
         <Link to="/u/$username" params={{ username: profile }} aria-label={`Voir le profil de ${post.author?.display_name || profile}`}><UserAvatar avatarPath={post.author?.avatar_url} name={profile} className="size-11 ring-2 ring-background" /></Link>
         {post.user_id !== userId && !following && <Button size="icon" aria-label={`S’abonner à ${post.author?.display_name || profile}`} title="S’abonner" disabled={followPending} onClick={onFollow} className="absolute -bottom-2 left-1/2 size-6 -translate-x-1/2 rounded-full border-2 border-foreground p-0"><Plus className="size-4" /></Button>}
       </div>}
-      <Button variant="ghost" size="icon" aria-label={muted ? "Activer le son" : "Couper le son"} onClick={() => setMuted(!muted)} className="text-background hover:bg-background/20 hover:text-background">{muted ? <VolumeX className="size-6" /> : <Volume2 className="size-6" />}</Button>
+      <Button variant="ghost" size="icon" aria-label={muted ? "Activer le son" : "Couper le son"} onClick={toggleMute} className="text-background hover:bg-background/20 hover:text-background">{muted ? <VolumeX className="size-6" /> : <Volume2 className="size-6" />}</Button>
       <Button variant="ghost" size="icon" aria-label={paused ? "Lire la vidéo" : "Mettre en pause"} onClick={playPause} className="text-background hover:bg-background/20 hover:text-background">{paused ? <Play className="size-5" /> : <Pause className="size-5" />}</Button>
     </div>
   </>;

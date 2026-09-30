@@ -1,3 +1,4 @@
+import { claimPlayback, playWithSound, useSound } from "@/lib/sound";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -135,7 +136,7 @@ function ViewerSlide({ post, kind, initialIndex, active, preload, userId, saved,
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [expanded, setExpanded] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const { muted, blocked, toggle: toggleMute } = useSound();
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -155,8 +156,9 @@ function ViewerSlide({ post, kind, initialIndex, active, preload, userId, saved,
     const { error } = await request;
     if (error) throw error;
   }, onMutate: setLikeOverride, onError: () => { setLikeOverride(null); toast.error("Action impossible"); }, onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["post", post.id] }); queryClient.invalidateQueries({ queryKey: ["feed"] }); queryClient.invalidateQueries({ queryKey: ["viewer-recommended-videos"] }); } });
-  useEffect(() => { const el = video.current; if (!el) return; if (!active || paused) { el.pause(); return; } el.muted = muted; el.play().catch(() => { el.muted = true; setMuted(true); el.play().catch(() => undefined); }); }, [active, paused, src, muted]);
-  const tryPlay = useCallback(() => { const el = video.current; if (el && active && !paused) el.play().catch(() => undefined); }, [active, paused]);
+  useEffect(() => { const el = video.current; if (!el) return; if (!active || paused) { el.pause(); return; } claimPlayback(el); void playWithSound(el); }, [active, paused, src]);
+  useEffect(() => { if (video.current) video.current.muted = muted; }, [muted]);
+  const tryPlay = useCallback(() => { const el = video.current; if (el && active && !paused && el.paused) void playWithSound(el); }, [active, paused]);
   useEffect(() => { setMediaError(false); }, [current?.path]);
   useEffect(() => () => { if (clickTimer.current) clearTimeout(clickTimer.current); video.current?.pause(); }, []);
   const changeImage = (next: number) => { if (next >= 0 && next < media.length) { setIndex(next); setZoom(1); setOffset({ x: 0, y: 0 }); } };
@@ -185,10 +187,11 @@ function ViewerSlide({ post, kind, initialIndex, active, preload, userId, saved,
     else if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)) changeImage(index + (dx < 0 ? 1 : -1));
   };
   return <div className="relative h-dvh w-full overflow-hidden bg-viewer text-viewer-foreground">
-    {kind === "video" ? active && src && !mediaError ? <video ref={video} src={src} muted={muted} loop playsInline autoPlay preload="auto" onError={() => setMediaError(true)} onClick={(event) => videoClick(event.detail)} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)} onCanPlay={tryPlay} onTimeUpdate={(event) => setProgress(event.currentTarget.currentTime)} className="absolute inset-0 size-full object-contain" aria-label="Lire ou mettre en pause la vidéo" /> : <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center"><Play className="size-10" /><p className="text-sm">{mediaError || isError ? "Cette vidéo ne peut pas être lue sur cet appareil." : "Chargement de la vidéo…"}</p></div>
+    {kind === "video" ? active && src && !mediaError ? <video ref={video} src={src} data-app-video loop playsInline autoPlay preload="auto" onError={() => setMediaError(true)} onClick={(event) => videoClick(event.detail)} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)} onCanPlay={tryPlay} onTimeUpdate={(event) => setProgress(event.currentTarget.currentTime)} className="absolute inset-0 size-full object-contain" aria-label="Lire ou mettre en pause la vidéo" /> : <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center"><Play className="size-10" /><p className="text-sm">{mediaError || isError ? "Cette vidéo ne peut pas être lue sur cet appareil." : "Chargement de la vidéo…"}</p></div>
       : <div className="absolute inset-0 flex items-center justify-center overflow-hidden touch-none" onTouchStart={gestureStart} onTouchMove={gestureMove} onTouchEnd={gestureEnd} onDoubleClick={toggleZoom} onWheel={(event) => { if (event.ctrlKey) { setZoom((value) => Math.max(1, Math.min(4, value - event.deltaY * 0.01))); } }}>
         {src ? <img src={src} alt={post.caption || "Photo"} draggable={false} className="max-h-full max-w-full select-none object-contain" style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})` }} /> : <p className="text-sm">{isError ? "Photo indisponible" : "Chargement de la photo…"}</p>}
       </div>}
+    {kind === "video" && active && blocked && !paused && <button type="button" onClick={toggleMute} className="absolute left-1/2 top-[max(4rem,env(safe-area-inset-top))] z-20 -translate-x-1/2 rounded-full bg-viewer-foreground/90 px-4 py-2 text-sm font-semibold text-viewer">🔇 Touchez pour activer le son</button>}
     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-viewer/90 to-transparent" />
     {kind === "image" && media.length > 1 && <><span className="absolute left-1/2 top-[max(1rem,env(safe-area-inset-top))] z-10 -translate-x-1/2 text-sm">{index + 1}/{media.length}</span><Button variant="ghost" size="icon" disabled={index === 0} aria-label="Photo précédente" onClick={() => changeImage(index - 1)} className="absolute left-2 top-1/2 z-10 text-viewer-foreground hover:bg-viewer-foreground/20">‹</Button><Button variant="ghost" size="icon" disabled={index === media.length - 1} aria-label="Photo suivante" onClick={() => changeImage(index + 1)} className="absolute right-2 top-1/2 z-10 text-viewer-foreground hover:bg-viewer-foreground/20">›</Button></>}
     <div className="absolute bottom-[max(3.75rem,env(safe-area-inset-bottom))] left-3 right-20 z-10 min-w-0 space-y-1 text-viewer-foreground sm:left-5">
@@ -204,7 +207,7 @@ function ViewerSlide({ post, kind, initialIndex, active, preload, userId, saved,
       <Button variant="ghost" size="icon" aria-label={saved ? "Retirer des enregistrements" : "Enregistrer"} onClick={onSave} className="text-viewer-foreground hover:bg-viewer-foreground/20 hover:text-viewer-foreground"><Bookmark className={`size-6 ${saved ? "fill-primary text-primary" : ""}`} /></Button>
       <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Options du média" className="text-viewer-foreground hover:bg-viewer-foreground/20 hover:text-viewer-foreground"><MoreHorizontal className="size-6" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem asChild><Link to="/p/$postId" params={{ postId: post.id }} onClick={onClose}>Voir la publication</Link></DropdownMenuItem><DropdownMenuItem onSelect={share}>Partager le lien</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
       {profile && <div className="relative my-2"><Link to="/u/$username" params={{ username: profile }} onClick={onClose} aria-label={`Voir le profil de ${profile}`}><UserAvatar avatarPath={post.author?.avatar_url} name={profile} className="size-10 ring-2 ring-viewer-foreground" /></Link>{post.user_id !== userId && !following && <Button size="icon" aria-label={`S’abonner à ${profile}`} disabled={followPending} onClick={onFollow} className="absolute -bottom-2 left-1/2 size-6 -translate-x-1/2 rounded-full p-0"><Plus className="size-4" /></Button>}</div>}
-      {kind === "video" && <Button variant="ghost" size="icon" aria-label={muted ? "Activer le son" : "Couper le son"} onClick={() => setMuted(!muted)} className="text-viewer-foreground hover:bg-viewer-foreground/20 hover:text-viewer-foreground">{muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}</Button>}
+      {kind === "video" && <Button variant="ghost" size="icon" aria-label={muted ? "Activer le son" : "Couper le son"} onClick={toggleMute} className="text-viewer-foreground hover:bg-viewer-foreground/20 hover:text-viewer-foreground">{muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}</Button>}
       {kind === "video" && <Button variant="ghost" size="icon" aria-label={paused ? "Lire la vidéo" : "Mettre en pause"} onClick={() => setPaused(!paused)} className="text-viewer-foreground hover:bg-viewer-foreground/20 hover:text-viewer-foreground">{paused ? <Play className="size-5" /> : <Pause className="size-5" />}</Button>}
     </div>
     {kind === "video" && <input type="range" min={0} max={duration || 1} step={0.1} value={progress} onChange={(event) => { if (video.current) video.current.currentTime = Number(event.target.value); setProgress(Number(event.target.value)); }} aria-label="Progression de la vidéo" className="absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-3 right-3 z-10 h-2 w-[calc(100%-1.5rem)] accent-primary" />}
