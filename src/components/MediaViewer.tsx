@@ -154,7 +154,8 @@ function ViewerSlide({ post, kind, initialIndex, active, preload, userId, saved,
     const { error } = await request;
     if (error) throw error;
   }, onMutate: setLikeOverride, onError: () => { setLikeOverride(null); toast.error("Action impossible"); }, onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["post", post.id] }); queryClient.invalidateQueries({ queryKey: ["feed"] }); queryClient.invalidateQueries({ queryKey: ["viewer-recommended-videos"] }); } });
-  useEffect(() => { const el = video.current; if (!el) return; if (!active || paused) el.pause(); else el.play().catch(() => undefined); }, [active, paused, src]);
+  useEffect(() => { const el = video.current; if (!el) return; if (!active || paused) { el.pause(); return; } el.muted = muted; el.play().catch(() => { el.muted = true; setMuted(true); el.play().catch(() => undefined); }); }, [active, paused, src, muted]);
+  const tryPlay = useCallback(() => { const el = video.current; if (el && active && !paused) el.play().catch(() => undefined); }, [active, paused]);
   useEffect(() => { setMediaError(false); }, [current?.path]);
   useEffect(() => () => { if (clickTimer.current) clearTimeout(clickTimer.current); video.current?.pause(); }, []);
   const changeImage = (next: number) => { if (next >= 0 && next < media.length) { setIndex(next); setZoom(1); setOffset({ x: 0, y: 0 }); } };
