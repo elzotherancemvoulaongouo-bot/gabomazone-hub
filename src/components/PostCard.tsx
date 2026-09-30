@@ -40,6 +40,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { ReportDialog } from "@/components/ReportDialog";
 
 export type FeedPost = {
   id: string;
@@ -89,13 +90,14 @@ export function PostCard({
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const isOwner = post.user_id === currentUserId;
   const liked = post.likes.some((l) => l.user_id === currentUserId);
   const likeCount = post.likes.length;
   const commentCount = post.comments[0]?.count ?? 0;
   const { data: savedIds } = useSavedPostIds(currentUserId);
   const saved = (savedIds ?? []).includes(post.id);
-  const { toggleSave, hidePost, reportPost } = usePostActions(currentUserId);
+  const { toggleSave, hidePost } = usePostActions(currentUserId);
   const { block } = useBlockActions(currentUserId);
 
   const mediaItems =
@@ -249,11 +251,7 @@ export function PostCard({
                   <DropdownMenuItem onSelect={() => hidePost.mutate(post.id)}>
                     <EyeOff className="mr-2 size-4" /> Masquer la publication
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() =>
-                      reportPost.mutate({ postId: post.id, reason: "contenu_inapproprie" })
-                    }
-                  >
+                  <DropdownMenuItem onSelect={() => setReportOpen(true)}>
                     <Flag className="mr-2 size-4" /> Signaler
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -286,6 +284,13 @@ export function PostCard({
             </DropdownMenuContent>
           </DropdownMenu>
 
+          <ReportDialog
+            open={reportOpen}
+            onOpenChange={setReportOpen}
+            userId={currentUserId}
+            targetType="post"
+            targetId={post.id}
+          />
           <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
             <AlertDialogContent>
               <AlertDialogHeader>
