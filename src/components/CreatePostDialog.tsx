@@ -30,6 +30,8 @@ export function CreatePostDialog({
   groupId,
   startWithCamera = false,
   startWithPicker = false,
+  pickerAccept = "image/*,video/*",
+  inline = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -41,6 +43,8 @@ export function CreatePostDialog({
   groupId?: string | null;
   startWithCamera?: boolean;
   startWithPicker?: boolean;
+  pickerAccept?: string;
+  inline?: boolean;
 }) {
   const queryClient = useQueryClient();
   const [caption, setCaption] = useState("");
@@ -49,6 +53,9 @@ export function CreatePostDialog({
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [cameraOpen, setCameraOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const draftsRef = useRef<Draft[]>([]);
+  draftsRef.current = drafts;
+  useEffect(() => () => { draftsRef.current.forEach((draft) => URL.revokeObjectURL(draft.url)); }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -86,6 +93,7 @@ export function CreatePostDialog({
   function reset() {
     setCaption("");
     setLocation("");
+    drafts.forEach((draft) => URL.revokeObjectURL(draft.url));
     setDrafts([]);
   }
 
@@ -117,30 +125,25 @@ export function CreatePostDialog({
     onError: (err) => toast.error(err instanceof Error ? err.message : "Publication impossible"),
   });
 
-  return (
-    <>
-      <Dialog open={open} onOpenChange={(next) => !publish.isPending && onOpenChange(next)}>
-        <DialogContent className="max-h-[92dvh] gap-3 overflow-y-auto sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="font-display">Créer une publication</DialogTitle>
-          </DialogHeader>
-
+  const editor = <>
           <div className="flex items-center gap-3">
             <UserAvatar avatarPath={avatarPath} name={displayName} />
             <div className="flex min-w-0 flex-wrap gap-1.5">
               {VISIBILITIES.map(({ value, label, icon: Icon }) => (
-                <button
+                <Button
                   key={value}
                   type="button"
                   onClick={() => setVisibility(value)}
+                  variant="outline"
+                  size="sm"
                   className={cn(
-                    "flex items-center gap-1 rounded-full border border-border/70 px-3 py-1 text-xs",
+                    "h-8 gap-1 rounded-full border-border/70 px-2 text-xs",
                     visibility === value && "border-primary text-primary",
                   )}
                 >
                   <Icon className="size-3.5" />
                   {label}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -158,37 +161,37 @@ export function CreatePostDialog({
           {drafts.length > 0 ? (
             <div className="grid grid-cols-2 gap-2">
               {drafts.map((draft, index) => (
-                <div key={draft.id} className="relative overflow-hidden rounded-xl border border-border/70">
+                <div key={draft.id} className="relative min-w-0 overflow-hidden rounded-lg border border-border/70">
                   {draft.kind === "video" ? (
                     <video src={draft.url} className="aspect-square w-full object-cover" controls playsInline />
                   ) : (
                     <img src={draft.url} alt="Média sélectionné" className="aspect-square w-full object-cover" />
                   )}
-                  <button
+                  <Button
                     type="button"
                     aria-label="Retirer ce média"
-                    onClick={() => setDrafts((prev) => prev.filter((d) => d.id !== draft.id))}
-                    className="absolute right-1.5 top-1.5 rounded-full bg-background/85 p-1.5"
+                    onClick={() => { URL.revokeObjectURL(draft.url); setDrafts((prev) => prev.filter((d) => d.id !== draft.id)); }}
+                    variant="secondary" size="icon" className="absolute right-1.5 top-1.5 size-8 rounded-full"
                   >
                     <X className="size-4" />
-                  </button>
+                  </Button>
                   <div className="absolute bottom-1.5 left-1.5 flex gap-1">
-                    <button
+                    <Button
                       type="button"
                       aria-label="Déplacer vers la gauche"
                       onClick={() => move(index, -1)}
-                      className="rounded-full bg-background/85 p-1.5"
+                      variant="secondary" size="icon" className="size-8 rounded-full"
                     >
                       <ArrowLeft className="size-4" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       aria-label="Déplacer vers la droite"
                       onClick={() => move(index, 1)}
-                      className="rounded-full bg-background/85 p-1.5"
+                      variant="secondary" size="icon" className="size-8 rounded-full"
                     >
                       <ArrowRight className="size-4" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -229,7 +232,7 @@ export function CreatePostDialog({
           <input
             ref={fileRef}
             type="file"
-            accept="image/*,video/*"
+            accept={pickerAccept}
             multiple
             className="hidden"
             onChange={(e) => {
@@ -237,8 +240,19 @@ export function CreatePostDialog({
               e.target.value = "";
             }}
           />
+  </>;
+
+  return (
+    <>
+      {inline ? <div className="space-y-3" aria-label="Créer une publication">
+        <div className="flex items-center justify-between"><h2 className="font-display text-base font-semibold">Créer une publication</h2><Button variant="ghost" size="icon" aria-label="Fermer la publication" onClick={() => onOpenChange(false)}><X className="size-5" /></Button></div>
+        {editor}
+      </div> : <Dialog open={open} onOpenChange={(next) => !publish.isPending && onOpenChange(next)}>
+        <DialogContent className="max-h-[92dvh] gap-3 overflow-y-auto sm:max-w-lg">
+          <DialogHeader><DialogTitle className="font-display">Créer une publication</DialogTitle></DialogHeader>
+          {editor}
         </DialogContent>
-      </Dialog>
+      </Dialog>}
 
       <CameraCapture
         open={cameraOpen}
