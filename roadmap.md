@@ -10,4 +10,4 @@
 - [x] Vérifier les envois et l'affichage sur petit écran.
 - [x] Rétablir la visionneuse verticale type Reels pour les vidéos, depuis Explorer et Vidéos, avec actions et lecture active uniquement.
 - [x] Vérifier la visionneuse sur mobile et ordinateur sans changer le fil classique.
-- [ ] Finaliser la visionneuse verticale : actions ordonnées à droite, abonnement par le + du créateur, nom/description/son en bas à gauche, double-clic J’aime et lecture limitée à la vidéo visible ; vérifier mobile et ordinateur.
+- [x] Finaliser la visionneuse verticale : actions ordonnées à droite, abonnement par le + du créateur, nom/description/son en bas à gauche, double-clic J’aime et lecture limitée à la vidéo visible ; vérifier mobile et ordinateur.
