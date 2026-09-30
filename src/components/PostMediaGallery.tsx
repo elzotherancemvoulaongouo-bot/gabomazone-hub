@@ -14,7 +14,7 @@ export function PostMediaGallery({ items, alt, className }: { items: PostMediaIt
   const visible = items.slice(0, 4);
   return <>
     <div className={cn(single ? "w-full" : "grid grid-cols-2 gap-1 overflow-hidden", items.length === 3 && "[&>*:first-child]:row-span-2", className)}>
-      {visible.map((item, index) => <div key={`${item.path}-${index}`} className={cn("relative min-w-0 overflow-hidden bg-muted", !single && (items.length === 2 ? "aspect-square" : "aspect-square"), items.length === 3 && index === 0 && "row-span-2 !aspect-auto")}>
+      {visible.map((item, index) => <div key={`${item.path}-${index}`} className={cn("relative min-w-0 overflow-hidden bg-muted", !single && "aspect-square", items.length === 3 && index === 0 && "row-span-2 !aspect-auto")}>
         {item.media_type === "video" ? <Media path={item.path} type="video" alt={alt} className="w-full" /> : <Button variant="ghost" type="button" onClick={() => setViewer(index)} aria-label={`Ouvrir le média ${index + 1}`} className={cn("block h-auto w-full rounded-none p-0", !single && "size-full")} style={single ? { aspectRatio: singleRatio } : undefined}>
           <Media path={item.path} type="image" alt={alt} onImageLoad={(image) => { if (single) setSingleRatio(Math.max(4 / 5, Math.min(1.91, image.naturalWidth / image.naturalHeight))); }} className="size-full object-cover" />
         </Button>}

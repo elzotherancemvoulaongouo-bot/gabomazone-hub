@@ -50,3 +50,26 @@ export async function prepareFeedPhoto(file: File): Promise<File> {
   const blob = await canvasBlob(canvas);
   return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.jpg`, { type: "image/jpeg" });
 }
+
+/** Story canvas remains 9:16 without cropping the original subject; safe bands stay clear. */
+export async function prepareStoryPhoto(file: File): Promise<File> {
+  const error = validateImage(file);
+  if (error) throw new Error(error);
+  const image = await loadImage(file);
+  const canvas = document.createElement("canvas");
+  canvas.width = 1080;
+  canvas.height = 1920;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Conversion impossible sur cet appareil.");
+  context.fillStyle = "#101010";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  const safeTop = 180;
+  const safeBottom = 260;
+  const areaHeight = canvas.height - safeTop - safeBottom;
+  const scale = Math.min(canvas.width / image.naturalWidth, areaHeight / image.naturalHeight);
+  const width = image.naturalWidth * scale;
+  const height = image.naturalHeight * scale;
+  context.drawImage(image, (canvas.width - width) / 2, safeTop + (areaHeight - height) / 2, width, height);
+  const blob = await canvasBlob(canvas);
+  return new File([blob], `story-${Date.now()}.jpg`, { type: "image/jpeg" });
+}

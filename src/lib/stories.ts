@@ -154,12 +154,13 @@ export async function createStory(input: {
   let mediaPath: string | null = null;
   let mediaType: string | null = null;
   if (input.file) {
-    const { validatePostFile } = await import("@/lib/image-processing");
+    const { validatePostFile, prepareStoryPhoto } = await import("@/lib/image-processing");
     const validation = validatePostFile(input.file);
     if (validation) throw new Error(validation);
-    const ext = input.file.name.split(".").pop() ?? "bin";
+    const prepared = input.file.type.startsWith("image/") ? await prepareStoryPhoto(input.file) : input.file;
+    const ext = prepared.name.split(".").pop() ?? "bin";
     mediaPath = `${input.userId}/${crypto.randomUUID()}.${ext}`;
-    const { error: uploadError } = await supabase.storage.from("media").upload(mediaPath, input.file, { contentType: input.file.type, upsert: false });
+    const { error: uploadError } = await supabase.storage.from("media").upload(mediaPath, prepared, { contentType: prepared.type, upsert: false });
     if (uploadError) throw uploadError;
     mediaType = input.file.type.startsWith("video/") ? "video" : "image";
   }
