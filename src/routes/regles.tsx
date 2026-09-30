@@ -77,7 +77,11 @@ function RulesPage() {
         <h2 className="text-lg font-semibold">Contact</h2>
         <p>
           Pour toute question ou contestation, utilisez « Signaler un problème » dans les
-          Paramètres.
+          Paramètres, ou écrivez-nous à{" "}
+          <a href="mailto:Zonegaboma@gmail.com" className="font-medium text-primary underline">
+            Zonegaboma@gmail.com
+          </a>
+          .
         </p>
       </section>
     </main>
