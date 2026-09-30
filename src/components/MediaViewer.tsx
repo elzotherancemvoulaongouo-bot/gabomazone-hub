@@ -10,7 +10,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/Avatar";
 import { POST_SELECT } from "@/lib/posts";
-import { getSignedUrl, timeAgo, useSignedUrl } from "@/lib/media";
+import { timeAgo, useSignedUrl } from "@/lib/media";
 import { usePostActions, useSavedPostIds } from "@/lib/social";
 import type { FeedPost } from "@/components/PostCard";
 
@@ -96,10 +96,10 @@ export function MediaViewer({ post, posts, kind, index, userId, onClose }: Props
       if (point && start && start.y < 90 && point.clientY - start.y > 130 && Math.abs(point.clientX - start.x) < 100 && scrollRef.current?.scrollTop === 0) onClose();
       touch.current = null;
     }} className="h-dvh snap-y snap-mandatory overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      {videos.map((item) => <section key={item.id} data-post-id={item.id} className="relative h-dvh w-full snap-start snap-always overflow-hidden">
-        <ViewerSlide post={item} kind="video" initialIndex={0} active={activeId === item.id && !commentsId} userId={userId} saved={(savedIds ?? []).includes(item.id)} following={(followingIds ?? []).includes(item.user_id)} followPending={follow.isPending} onFollow={() => follow.mutate(item.user_id)} onSave={() => toggleSave.mutate({ postId: item.id, saved: (savedIds ?? []).includes(item.id) })} onComments={() => setCommentsId(item.id)} onClose={onClose} />
+      {videos.map((item, position) => <section key={item.id} data-post-id={item.id} className="relative h-dvh w-full snap-start snap-always overflow-hidden">
+        <ViewerSlide post={item} kind="video" initialIndex={0} active={activeId === item.id && !commentsId} preload={position <= videos.findIndex((video) => video.id === activeId) + 2 && position >= videos.findIndex((video) => video.id === activeId) - 1} userId={userId} saved={(savedIds ?? []).includes(item.id)} following={(followingIds ?? []).includes(item.user_id)} followPending={follow.isPending} onFollow={() => follow.mutate(item.user_id)} onSave={() => toggleSave.mutate({ postId: item.id, saved: (savedIds ?? []).includes(item.id) })} onComments={() => setCommentsId(item.id)} onClose={onClose} />
       </section>)}
-    </div> : <ViewerSlide post={post} kind="image" initialIndex={index} active={!commentsId} userId={userId} saved={(savedIds ?? []).includes(post.id)} following={(followingIds ?? []).includes(post.user_id)} followPending={follow.isPending} onFollow={() => follow.mutate(post.user_id)} onSave={() => toggleSave.mutate({ postId: post.id, saved: (savedIds ?? []).includes(post.id) })} onComments={() => setCommentsId(post.id)} onClose={onClose} />}
+    </div> : <ViewerSlide post={post} kind="image" initialIndex={index} active={!commentsId} preload userId={userId} saved={(savedIds ?? []).includes(post.id)} following={(followingIds ?? []).includes(post.user_id)} followPending={follow.isPending} onFollow={() => follow.mutate(post.user_id)} onSave={() => toggleSave.mutate({ postId: post.id, saved: (savedIds ?? []).includes(post.id) })} onComments={() => setCommentsId(post.id)} onClose={onClose} />}
     <Sheet open={Boolean(commentsId)} onOpenChange={(open) => { if (!open) setCommentsId(null); }}>
       <SheetContent side="bottom" className="z-[110] mx-auto flex h-[min(72dvh,650px)] max-w-2xl flex-col rounded-t-lg p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <SheetHeader><SheetTitle>Commentaires</SheetTitle></SheetHeader>
@@ -110,8 +110,8 @@ export function MediaViewer({ post, posts, kind, index, userId, onClose }: Props
   </div>;
 }
 
-function ViewerSlide({ post, kind, initialIndex, active, userId, saved, following, followPending, onFollow, onSave, onComments, onClose }: {
-  post: FeedPost; kind: "image" | "video"; initialIndex: number; active: boolean; userId: string; saved: boolean; following: boolean; followPending: boolean; onFollow: () => void; onSave: () => void; onComments: () => void; onClose: () => void;
+function ViewerSlide({ post, kind, initialIndex, active, preload, userId, saved, following, followPending, onFollow, onSave, onComments, onClose }: {
+  post: FeedPost; kind: "image" | "video"; initialIndex: number; active: boolean; preload: boolean; userId: string; saved: boolean; following: boolean; followPending: boolean; onFollow: () => void; onSave: () => void; onComments: () => void; onClose: () => void;
 }) {
   const media = mediaOf(post).filter((item) => item.media_type === kind);
   const [index, setIndex] = useState(Math.min(initialIndex, Math.max(0, media.length - 1)));
@@ -129,7 +129,7 @@ function ViewerSlide({ post, kind, initialIndex, active, userId, saved, followin
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const queryClient = useQueryClient();
   const current = media[index];
-  const { data: src, isError } = useSignedUrl(active || kind === "image" ? current?.path : null);
+  const { data: src, isError } = useSignedUrl(preload ? current?.path : null);
   const likedFromPost = post.likes.some((like) => like.user_id === userId);
   const liked = likeOverride ?? likedFromPost;
   const count = post.likes.length + (likeOverride === null || likeOverride === likedFromPost ? 0 : likeOverride ? 1 : -1);
@@ -139,7 +139,6 @@ function ViewerSlide({ post, kind, initialIndex, active, userId, saved, followin
     if (error) throw error;
   }, onMutate: setLikeOverride, onError: () => { setLikeOverride(null); toast.error("Action impossible"); }, onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["post", post.id] }); queryClient.invalidateQueries({ queryKey: ["feed"] }); queryClient.invalidateQueries({ queryKey: ["viewer-recommended-videos"] }); } });
   useEffect(() => { const el = video.current; if (!el) return; if (!active || paused) el.pause(); else el.play().catch(() => undefined); }, [active, paused, src]);
-  useEffect(() => { if (!active || !current?.path || kind !== "video") return; const next = media[index + 1]; if (next) void getSignedUrl(next.path).then((url) => { const preload = document.createElement("video"); preload.preload = "metadata"; preload.src = url; }).catch(() => undefined); }, [active, current?.path, kind, index, media]);
   useEffect(() => () => { if (clickTimer.current) clearTimeout(clickTimer.current); video.current?.pause(); }, []);
   const changeImage = (next: number) => { if (next >= 0 && next < media.length) { setIndex(next); setZoom(1); setOffset({ x: 0, y: 0 }); } };
   const toggleZoom = () => { setZoom((value) => value > 1 ? 1 : 2); setOffset({ x: 0, y: 0 }); };
