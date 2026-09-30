@@ -1,0 +1,10 @@
+CREATE TABLE public.events (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organizer_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE, title text NOT NULL CHECK (length(trim(title)) BETWEEN 1 AND 120), description text, location text, starts_at timestamptz NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.events TO authenticated;
+GRANT ALL ON public.events TO service_role;
+ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Members can view events" ON public.events FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Members create own events" ON public.events FOR INSERT TO authenticated WITH CHECK (organizer_id = auth.uid());
+CREATE POLICY "Organizers update own events" ON public.events FOR UPDATE TO authenticated USING (organizer_id = auth.uid()) WITH CHECK (organizer_id = auth.uid());
+CREATE POLICY "Organizers delete own events" ON public.events FOR DELETE TO authenticated USING (organizer_id = auth.uid());
+CREATE OR REPLACE FUNCTION public.events_set_updated_at() RETURNS trigger LANGUAGE plpgsql SET search_path = public AS $$ BEGIN NEW.updated_at = now(); RETURN NEW; END; $$;
+CREATE TRIGGER events_updated_at BEFORE UPDATE ON public.events FOR EACH ROW EXECUTE FUNCTION public.events_set_updated_at();
