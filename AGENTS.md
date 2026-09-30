@@ -16,3 +16,4 @@
 - Normalize feed and story uploads through the shared browser media helper and crop profile/community images through the shared crop dialog; this keeps validation, ratios and legacy signed paths consistent across entry points.
 - Keep the classic friends feed with PostCard and its original media ratios; use a separate shareable vertical snap viewer for discovery videos and the Videos shortcut, so Reels playback does not alter ordinary posts.
 - Keep the shareable /watch/$postId viewer fed by the post query and public video list; this preserves direct links while allowing one visible video at a time.
+- Share buttons call shareContent() from src/lib/share.ts with /s/$kind/$id public preview links; one ShareSheet fallback is mounted in __root, so native share, fallback and signed-out previews stay consistent.
