@@ -26,6 +26,7 @@ export function StoryViewer({
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const elapsedRef = useRef(0);
   const pressTimer = useRef<number | null>(null);
 
   const group = groups[groupIndex];
@@ -33,6 +34,7 @@ export function StoryViewer({
   const { data: mediaUrl } = useSignedUrl(story?.media_path);
 
   const next = useCallback(() => {
+    elapsedRef.current = 0;
     setProgress(0);
     const current = groups[groupIndex];
     if (current && storyIndex + 1 < current.stories.length) {
@@ -48,6 +50,7 @@ export function StoryViewer({
   }, [groupIndex, storyIndex, groups, onClose]);
 
   const previous = useCallback(() => {
+    elapsedRef.current = 0;
     setProgress(0);
     if (storyIndex > 0) {
       setStoryIndex(storyIndex - 1);
@@ -71,14 +74,13 @@ export function StoryViewer({
   // Minuterie des images (avec pause/reprise exacte)
   useEffect(() => {
     if (!story || story.media_type === "video") return;
-    let elapsed = 0;
     let last = performance.now();
     let raf = 0;
     const tick = (now: number) => {
       const delta = now - last;
       last = now;
-      if (!paused) elapsed += delta;
-      const ratio = Math.min(1, elapsed / IMAGE_DURATION);
+      if (!paused) elapsedRef.current += delta;
+      const ratio = Math.min(1, elapsedRef.current / IMAGE_DURATION);
       setProgress(ratio * 100);
       if (ratio >= 1) {
         next();

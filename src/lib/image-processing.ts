@@ -1,5 +1,5 @@
 export const PHOTO_ACCEPT = "image/jpeg,image/png,image/webp";
-export const VIDEO_ACCEPT = "video/mp4,video/quicktime,video/webm";
+export const VIDEO_ACCEPT = "video/mp4,video/quicktime";
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 
