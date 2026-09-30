@@ -1,5 +1,4 @@
-- [ ] Réorganiser l’en-tête mobile : recherche, notifications, messages uniques et menu plein écran.
-- [ ] Ajouter le menu avec profil, raccourcis, réglages dépliables, aide et déconnexion.
-- [ ] Ajouter la recherche ouverte, historique/suggestions et résultats filtrés en onglets.
-- [ ] Relier les raccourcis à leurs pages réelles et compléter Vidéos et Événements.
-- [ ] Vérifier mobile, messagerie et état de compilation.
+- [x] En-tête, menu, recherche et messagerie mobile (travail précédent).
+- [x] Explorer : filtres, recommandations distinctes et miniatures ouvrant la visionneuse.
+- [x] Visionneuse verticale plein écran : lecture exclusive, actions, commentaires, abonnement.
+- [x] Barre basse préservée sans doublon Messages ; navigation et petits écrans vérifiés.
