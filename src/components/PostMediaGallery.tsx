@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 export type PostMediaItem = { path: string; media_type: string | null };
 
-export function PostMediaGallery({ items, alt, className, post, posts }: { items: PostMediaItem[]; alt: string; className?: string; post: FeedPost; posts?: FeedPost[] }) {
+export function PostMediaGallery({ items, alt, className, post, posts }: { items: PostMediaItem[]; alt: string; className?: string; post: FeedPost; posts?: FeedPost[] | undefined }) {
   const viewer = useMediaViewer();
   const [singleRatio, setSingleRatio] = useState(1);
   if (!items.length) return null;

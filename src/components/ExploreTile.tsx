@@ -2,11 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { Play } from "lucide-react";
 import { useSignedUrl } from "@/lib/media";
 import { useMediaViewer } from "@/components/MediaViewerContext";
-import type { FeedPost } from "@/components/PostCard";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPost } from "@/lib/posts";
 
-export function ExploreTile({ post, posts }: { post: { id: string; caption: string | null; media_url: string | null; media_type: string | null }; posts?: FeedPost[] }) {
+export function ExploreTile({ post, posts }: { post: { id: string; caption: string | null; media_url: string | null; media_type: string | null }; posts?: import("@/components/PostCard").FeedPost[] | undefined }) {
   const { data: url } = useSignedUrl(post.media_url);
   const viewer = useMediaViewer();
   const { refetch } = useQuery({ queryKey: ["post", post.id], queryFn: () => fetchPost(post.id), enabled: false });

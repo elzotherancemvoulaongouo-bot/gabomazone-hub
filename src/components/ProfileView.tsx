@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchUserPosts } from "@/lib/posts";
+import { fetchPost, fetchUserPosts } from "@/lib/posts";
 import { Media } from "@/components/Media";
 import { UserAvatar } from "@/components/Avatar";
 import { PostCard } from "@/components/PostCard";

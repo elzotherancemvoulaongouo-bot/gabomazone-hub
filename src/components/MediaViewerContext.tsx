@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import type { FeedPost } from "@/components/PostCard";
 import { MediaViewer } from "@/components/MediaViewer";
 
-type Selection = { post: FeedPost; kind: "video" | "image"; index: number; posts?: FeedPost[] };
+type Selection = { post: FeedPost; kind: "video" | "image"; index: number; posts?: FeedPost[] | undefined };
 type ViewerContextValue = { open: (selection: Selection) => void };
 const ViewerContext = createContext<ViewerContextValue | null>(null);
 

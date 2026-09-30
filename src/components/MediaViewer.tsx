@@ -125,7 +125,7 @@ function ViewerSlide({ post, kind, initialIndex, active, userId, saved, followin
   const [mediaError, setMediaError] = useState(false);
   const [likeOverride, setLikeOverride] = useState<boolean | null>(null);
   const video = useRef<HTMLVideoElement>(null);
-  const imageGesture = useRef<{ x: number; y: number; distance?: number } | null>(null);
+  const imageGesture = useRef<{ x: number; y: number; distance?: number | undefined } | null>(null);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const queryClient = useQueryClient();
   const current = media[index];
