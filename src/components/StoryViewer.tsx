@@ -29,7 +29,7 @@ export function StoryViewer({
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { muted, blocked, toggle: toggleMute } = useSound();
+  const { muted, toggle: toggleMute } = useSound();
   useEffect(() => {
     if (videoRef.current) videoRef.current.muted = muted;
   }, [muted]);

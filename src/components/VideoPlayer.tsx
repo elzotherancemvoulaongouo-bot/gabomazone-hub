@@ -16,7 +16,7 @@ export function VideoPlayer({
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
-  const { muted, blocked, toggle: toggleMute } = useSound();
+  const { muted, toggle: toggleMute } = useSound();
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [ratio, setRatio] = useState<number | null>(null);

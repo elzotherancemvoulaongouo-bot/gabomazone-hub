@@ -397,7 +397,7 @@ function ViewerSlide({
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [expanded, setExpanded] = useState(false);
-  const { muted, blocked, toggle: toggleMute } = useSound();
+  const { muted, toggle: toggleMute } = useSound();
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
