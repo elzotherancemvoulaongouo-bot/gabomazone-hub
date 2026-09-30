@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
+import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated/events'
 import { Route as AuthenticatedExploreRouteImport } from './routes/_authenticated/explore'
 import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
 import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
@@ -21,6 +22,7 @@ import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedPagesRouteImport } from './routes/_authenticated/pages'
+import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated/videos'
 import { Route as AuthenticatedGSlugRouteImport } from './routes/_authenticated/g.$slug'
 import { Route as AuthenticatedGroupSettingsSlugRouteImport } from './routes/_authenticated/group-settings.$slug'
 import { Route as AuthenticatedMConversationIdRouteImport } from './routes/_authenticated/m.$conversationId'
@@ -50,6 +52,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedCreateRoute = AuthenticatedCreateRouteImport.update({
   id: '/create',
   path: '/create',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEventsRoute = AuthenticatedEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedExploreRoute = AuthenticatedExploreRouteImport.update({
@@ -91,6 +98,11 @@ const AuthenticatedNotificationsRoute =
 const AuthenticatedPagesRoute = AuthenticatedPagesRouteImport.update({
   id: '/pages',
   path: '/pages',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedVideosRoute = AuthenticatedVideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedGSlugRoute = AuthenticatedGSlugRouteImport.update({
@@ -160,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/create': typeof AuthenticatedCreateRoute
+  '/events': typeof AuthenticatedEventsRoute
   '/explore': typeof AuthenticatedExploreRoute
   '/feed': typeof AuthenticatedFeedRoute
   '/friends': typeof AuthenticatedFriendsRoute
@@ -168,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/pages': typeof AuthenticatedPagesRoute
+  '/videos': typeof AuthenticatedVideosRoute
   '/g/$slug': typeof AuthenticatedGSlugRoute
   '/group-settings/$slug': typeof AuthenticatedGroupSettingsSlugRoute
   '/m/$conversationId': typeof AuthenticatedMConversationIdRoute
@@ -184,6 +198,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/create': typeof AuthenticatedCreateRoute
+  '/events': typeof AuthenticatedEventsRoute
   '/explore': typeof AuthenticatedExploreRoute
   '/feed': typeof AuthenticatedFeedRoute
   '/friends': typeof AuthenticatedFriendsRoute
@@ -192,6 +207,7 @@ export interface FileRoutesByTo {
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/pages': typeof AuthenticatedPagesRoute
+  '/videos': typeof AuthenticatedVideosRoute
   '/g/$slug': typeof AuthenticatedGSlugRoute
   '/group-settings/$slug': typeof AuthenticatedGroupSettingsSlugRoute
   '/m/$conversationId': typeof AuthenticatedMConversationIdRoute
@@ -210,6 +226,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
+  '/_authenticated/events': typeof AuthenticatedEventsRoute
   '/_authenticated/explore': typeof AuthenticatedExploreRoute
   '/_authenticated/feed': typeof AuthenticatedFeedRoute
   '/_authenticated/friends': typeof AuthenticatedFriendsRoute
@@ -218,6 +235,7 @@ export interface FileRoutesById {
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/pages': typeof AuthenticatedPagesRoute
+  '/_authenticated/videos': typeof AuthenticatedVideosRoute
   '/_authenticated/g/$slug': typeof AuthenticatedGSlugRoute
   '/_authenticated/group-settings/$slug': typeof AuthenticatedGroupSettingsSlugRoute
   '/_authenticated/m/$conversationId': typeof AuthenticatedMConversationIdRoute
@@ -236,6 +254,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/create'
+    | '/events'
     | '/explore'
     | '/feed'
     | '/friends'
@@ -244,6 +263,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/notifications'
     | '/pages'
+    | '/videos'
     | '/g/$slug'
     | '/group-settings/$slug'
     | '/m/$conversationId'
@@ -260,6 +280,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/create'
+    | '/events'
     | '/explore'
     | '/feed'
     | '/friends'
@@ -268,6 +289,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/notifications'
     | '/pages'
+    | '/videos'
     | '/g/$slug'
     | '/group-settings/$slug'
     | '/m/$conversationId'
@@ -285,6 +307,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/create'
+    | '/_authenticated/events'
     | '/_authenticated/explore'
     | '/_authenticated/feed'
     | '/_authenticated/friends'
@@ -293,6 +316,7 @@ export interface FileRouteTypes {
     | '/_authenticated/messages'
     | '/_authenticated/notifications'
     | '/_authenticated/pages'
+    | '/_authenticated/videos'
     | '/_authenticated/g/$slug'
     | '/_authenticated/group-settings/$slug'
     | '/_authenticated/m/$conversationId'
@@ -340,6 +364,13 @@ declare module '@tanstack/react-router' {
       path: '/create'
       fullPath: '/create'
       preLoaderRoute: typeof AuthenticatedCreateRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/events': {
+      id: '/_authenticated/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof AuthenticatedEventsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/explore': {
@@ -396,6 +427,13 @@ declare module '@tanstack/react-router' {
       path: '/pages'
       fullPath: '/pages'
       preLoaderRoute: typeof AuthenticatedPagesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/videos': {
+      id: '/_authenticated/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof AuthenticatedVideosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/g/$slug': {
@@ -480,6 +518,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
+  AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
   AuthenticatedExploreRoute: typeof AuthenticatedExploreRoute
   AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
   AuthenticatedFriendsRoute: typeof AuthenticatedFriendsRoute
@@ -488,6 +527,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPagesRoute: typeof AuthenticatedPagesRoute
+  AuthenticatedVideosRoute: typeof AuthenticatedVideosRoute
   AuthenticatedGSlugRoute: typeof AuthenticatedGSlugRoute
   AuthenticatedGroupSettingsSlugRoute: typeof AuthenticatedGroupSettingsSlugRoute
   AuthenticatedMConversationIdRoute: typeof AuthenticatedMConversationIdRoute
@@ -503,6 +543,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
+  AuthenticatedEventsRoute: AuthenticatedEventsRoute,
   AuthenticatedExploreRoute: AuthenticatedExploreRoute,
   AuthenticatedFeedRoute: AuthenticatedFeedRoute,
   AuthenticatedFriendsRoute: AuthenticatedFriendsRoute,
@@ -511,6 +552,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPagesRoute: AuthenticatedPagesRoute,
+  AuthenticatedVideosRoute: AuthenticatedVideosRoute,
   AuthenticatedGSlugRoute: AuthenticatedGSlugRoute,
   AuthenticatedGroupSettingsSlugRoute: AuthenticatedGroupSettingsSlugRoute,
   AuthenticatedMConversationIdRoute: AuthenticatedMConversationIdRoute,

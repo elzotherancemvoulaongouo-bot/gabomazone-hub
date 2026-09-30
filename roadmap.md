@@ -1,0 +1,5 @@
+- [ ] Réorganiser l’en-tête mobile : recherche, notifications, messages uniques et menu plein écran.
+- [ ] Ajouter le menu avec profil, raccourcis, réglages dépliables, aide et déconnexion.
+- [ ] Ajouter la recherche ouverte, historique/suggestions et résultats filtrés en onglets.
+- [ ] Relier les raccourcis à leurs pages réelles et compléter Vidéos et Événements.
+- [ ] Vérifier mobile, messagerie et état de compilation.
