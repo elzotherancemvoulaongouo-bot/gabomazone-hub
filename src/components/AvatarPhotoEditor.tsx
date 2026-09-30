@@ -13,7 +13,7 @@ export function AvatarPhotoEditor({ path, name, userId, onSave, label = "Changer
   const [file, setFile] = useState<File | null>(null);
   return <div className="flex min-w-0 items-center gap-3">
     <UserAvatar avatarPath={path} name={name} className="size-20 rounded-full" />
-    <Button asChild variant="secondary" size="sm"><label className="cursor-pointer"><Camera className="mr-2 size-4" />{label}
+    <Button asChild variant="secondary" size="sm" className="min-w-0 whitespace-normal text-left"><label className="cursor-pointer"><Camera className="mr-2 size-4 shrink-0" />{label}
       <input type="file" accept={PHOTO_ACCEPT} className="hidden" onChange={async (event) => { const selected = event.target.files?.[0]; event.target.value = ""; if (!selected) return; const error = await checkCropFile(selected, AVATAR_CROP); if (error) toast.error(error); else setFile(selected); }} />
     </label></Button>
     <ImageCropDialog file={file} spec={AVATAR_CROP} onClose={() => setFile(null)} onSave={async (blob) => {

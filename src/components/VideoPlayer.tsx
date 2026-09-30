@@ -14,13 +14,11 @@ export function VideoPlayer({
   src,
   className,
   autoPlayOnVisible = true,
-  onOpen,
   startMuted = true,
 }: {
   src: string;
   className?: string | undefined;
   autoPlayOnVisible?: boolean;
-  onOpen?: () => void;
   startMuted?: boolean;
 }) {
   const ref = useRef<HTMLVideoElement>(null);

@@ -129,8 +129,8 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
       }}
     >
       <div className="space-y-4">
-        <CoverPhoto path={coverPath} editable userId={userId} onSave={(value) => { setCoverPath(value); }} />
-        <AvatarPhotoEditor path={avatarPath} name={form.username} userId={userId} onSave={(value) => { setAvatarPath(value); }} />
+        <CoverPhoto path={coverPath} editable userId={userId} onSave={async (value) => { const { error } = await supabase.from("profiles").update({ cover_url: value }).eq("id", userId); if (error) throw error; setCoverPath(value); await queryClient.invalidateQueries({ queryKey: ["profile"] }); }} />
+        <AvatarPhotoEditor path={avatarPath} name={form.username} userId={userId} onSave={async (value) => { const { error } = await supabase.from("profiles").update({ avatar_url: value }).eq("id", userId); if (error) throw error; setAvatarPath(value); await queryClient.invalidateQueries({ queryKey: ["profile"] }); }} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
