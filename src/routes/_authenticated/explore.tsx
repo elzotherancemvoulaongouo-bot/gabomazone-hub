@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { fetchFeed } from "@/lib/posts";
-import { fetchGroups, fetchPages } from "@/lib/communities";
 import { supabase } from "@/integrations/supabase/client";
 import { UserAvatar } from "@/components/Avatar";
 import { Media } from "@/components/Media";
