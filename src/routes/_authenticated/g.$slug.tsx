@@ -1,3 +1,4 @@
+import { buildShareUrl, shareContent } from "@/lib/share";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -78,29 +79,19 @@ function GroupDetail() {
     onError: (err) => toast.error(err instanceof Error ? err.message : "Action impossible"),
   });
 
-  async function share(invite = false) {
-    const url = typeof window !== "undefined" ? `${window.location.origin}/g/${slug}` : `/g/${slug}`;
-    try {
-      if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({
-          title: group?.name ?? "Gabomazone",
-          text: invite ? `Rejoins le groupe ${group?.name} sur Gabomazone` : "",
-          url,
-        });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      toast.success(invite ? "Lien d'invitation copié" : "Lien du groupe copié");
-    } catch {
-      /* partage annulé */
-    }
+  function share(invite = false) {
+    void shareContent({
+      title: group?.name ?? "Gabomazone",
+      text: invite ? `Rejoins le groupe ${group?.name} sur Gabomazone` : "",
+      url: buildShareUrl("g", slug),
+    });
   }
 
   if (isPending) return <Skeleton className="h-64 w-full rounded-2xl" />;
   if (!group) return <p className="text-sm text-muted-foreground">Groupe introuvable.</p>;
 
   const canSeeContent = isMember || !group.is_private;
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/g/${slug}` : `/g/${slug}`;
+  const shareUrl = buildShareUrl("g", slug);
   const needle = term.trim().toLowerCase();
   const allPosts = (posts.data ?? []).filter((p) => !needle || (p.caption ?? "").toLowerCase().includes(needle));
   const photos = allPosts.filter((p) => p.media_url && p.media_type !== "video");

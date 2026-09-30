@@ -1,3 +1,4 @@
+import { buildShareUrl, shareContent } from "@/lib/share";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -90,25 +91,15 @@ function PageDetail() {
     onError: (err) => toast.error(err instanceof Error ? err.message : "Action impossible"),
   });
 
-  async function share() {
-    const url = typeof window !== "undefined" ? `${window.location.origin}/pg/${slug}` : `/pg/${slug}`;
-    try {
-      if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title: page?.name ?? "Gabomazone", url });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      toast.success("Lien de la page copié");
-    } catch {
-      /* partage annulé */
-    }
+  function share() {
+    void shareContent({ title: page?.name ?? "Gabomazone", url: buildShareUrl("pg", slug) });
   }
 
   if (isPending) return <Skeleton className="h-64 w-full rounded-2xl" />;
   if (!page) return <p className="text-sm text-muted-foreground">Page introuvable.</p>;
 
   const actionButtons = parseActionButtons(page.action_buttons);
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/pg/${slug}` : `/pg/${slug}`;
+  const shareUrl = buildShareUrl("pg", slug);
   const needle = term.trim().toLowerCase();
   const allPosts = (posts.data ?? []).filter((p) => !needle || (p.caption ?? "").toLowerCase().includes(needle));
   const photos = allPosts.filter((p) => p.media_url && p.media_type !== "video");

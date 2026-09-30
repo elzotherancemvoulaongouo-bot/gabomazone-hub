@@ -34,6 +34,7 @@ import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedSettingsSectionRouteImport } from './routes/_authenticated/settings.$section'
 import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated/u.$username'
 import { Route as AuthenticatedWatchPostIdRouteImport } from './routes/_authenticated/watch.$postId'
+import { Route as SKindIdRouteImport } from './routes/s.$kind.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -167,6 +168,11 @@ const AuthenticatedWatchPostIdRoute =
     path: '/watch/$postId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const SKindIdRoute = SKindIdRouteImport.update({
+  id: '/s/$kind/$id',
+  path: '/s/$kind/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/settings/$section': typeof AuthenticatedSettingsSectionRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
   '/watch/$postId': typeof AuthenticatedWatchPostIdRoute
+  '/s/$kind/$id': typeof SKindIdRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -218,6 +225,7 @@ export interface FileRoutesByTo {
   '/settings/$section': typeof AuthenticatedSettingsSectionRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
   '/watch/$postId': typeof AuthenticatedWatchPostIdRoute
+  '/s/$kind/$id': typeof SKindIdRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRoutesById {
@@ -246,6 +254,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/$section': typeof AuthenticatedSettingsSectionRoute
   '/_authenticated/u/$username': typeof AuthenticatedUUsernameRoute
   '/_authenticated/watch/$postId': typeof AuthenticatedWatchPostIdRoute
+  '/s/$kind/$id': typeof SKindIdRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -274,6 +283,7 @@ export interface FileRouteTypes {
     | '/settings/$section'
     | '/u/$username'
     | '/watch/$postId'
+    | '/s/$kind/$id'
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/settings/$section'
     | '/u/$username'
     | '/watch/$postId'
+    | '/s/$kind/$id'
     | '/settings'
   id:
     | '__root__'
@@ -327,6 +338,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/$section'
     | '/_authenticated/u/$username'
     | '/_authenticated/watch/$postId'
+    | '/s/$kind/$id'
     | '/_authenticated/settings/'
   fileRoutesById: FileRoutesById
 }
@@ -334,6 +346,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  SKindIdRoute: typeof SKindIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -513,6 +526,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWatchPostIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/s/$kind/$id': {
+      id: '/s/$kind/$id'
+      path: '/s/$kind/$id'
+      fullPath: '/s/$kind/$id'
+      preLoaderRoute: typeof SKindIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -573,6 +593,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  SKindIdRoute: SKindIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
