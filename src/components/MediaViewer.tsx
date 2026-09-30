@@ -145,7 +145,7 @@ function ViewerSlide({ post, kind, initialIndex, active, preload, userId, saved,
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const queryClient = useQueryClient();
   const current = media[index];
-  const { data: src, isError } = useSignedUrl(preload ? current?.path : null);
+  const { data: src, isError } = useSignedUrl(kind === "video" && active ? current?.path : preload ? current?.path : null);
   const likedFromPost = post.likes.some((like) => like.user_id === userId);
   const liked = likeOverride ?? likedFromPost;
   const count = post.likes.length + (likeOverride === null || likeOverride === likedFromPost ? 0 : likeOverride ? 1 : -1);
@@ -183,7 +183,7 @@ function ViewerSlide({ post, kind, initialIndex, active, preload, userId, saved,
     else if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)) changeImage(index + (dx < 0 ? 1 : -1));
   };
   return <div className="relative h-dvh w-full overflow-hidden bg-viewer text-viewer-foreground">
-    {kind === "video" ? active && src && !mediaError ? <video ref={video} src={src} muted={muted} loop playsInline preload="auto" onError={() => setMediaError(true)} onClick={(event) => videoClick(event.detail)} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)} onTimeUpdate={(event) => setProgress(event.currentTarget.currentTime)} className="absolute inset-0 size-full object-contain" aria-label="Lire ou mettre en pause la vidéo" /> : <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center"><Play className="size-10" /><p className="text-sm">{mediaError || isError ? "Cette vidéo ne peut pas être lue sur cet appareil." : "Chargement de la vidéo…"}</p></div>
+    {kind === "video" ? active && src && !mediaError ? <video ref={video} src={src} muted={muted} loop playsInline autoPlay preload="auto" onError={() => setMediaError(true)} onClick={(event) => videoClick(event.detail)} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)} onTimeUpdate={(event) => setProgress(event.currentTarget.currentTime)} className="absolute inset-0 size-full object-contain" aria-label="Lire ou mettre en pause la vidéo" /> : <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center"><Play className="size-10" /><p className="text-sm">{mediaError || isError ? "Cette vidéo ne peut pas être lue sur cet appareil." : "Chargement de la vidéo…"}</p></div>
       : <div className="absolute inset-0 flex items-center justify-center overflow-hidden touch-none" onTouchStart={gestureStart} onTouchMove={gestureMove} onTouchEnd={gestureEnd} onDoubleClick={toggleZoom} onWheel={(event) => { if (event.ctrlKey) { setZoom((value) => Math.max(1, Math.min(4, value - event.deltaY * 0.01))); } }}>
         {src ? <img src={src} alt={post.caption || "Photo"} draggable={false} className="max-h-full max-w-full select-none object-contain" style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})` }} /> : <p className="text-sm">{isError ? "Photo indisponible" : "Chargement de la photo…"}</p>}
       </div>}
