@@ -13,3 +13,5 @@
 - Keep search results on the existing /explore route and use dedicated routes for video and events shortcuts, because each menu destination must have a shareable page.
 - Keep discovery recommendations separate from the friends feed and open their media in the shared /watch/$postId viewer, so search and discovery remain shareable without duplicating playback behavior.
 - Keep the camera in its isolated body portal and transfer captures into the inline feed composer, so other overlays cannot obscure capture and selected media remains ready to publish.
+- Normalize feed and story uploads through the shared browser media helper and crop profile/community images through the shared crop dialog; this keeps validation, ratios and legacy signed paths consistent across entry points.
+- Keep discovery and video shortcuts on their shareable pages but render posts with the ordinary PostCard, not a vertical snap viewer; the product has no Reels experience.

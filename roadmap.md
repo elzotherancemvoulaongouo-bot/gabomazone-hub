@@ -4,3 +4,7 @@
 - [x] Publication : caméra et galerie ajoutent plusieurs miniatures retirables avec légende et bouton actif.
 - [x] Vérifier qu’une nouvelle publication apparaît dans le fil.
 - [x] Vérifier petits écrans et navigation sans erreur.
+- [ ] Harmoniser l'envoi et l'affichage des photos/vidéos du fil (ratios, compression, grille, commandes vidéo), sans lecture Reels.
+- [ ] Stories 9:16 : photo 5 s et vidéo 60 s ; contrôler formats et limites.
+- [ ] Recadrer avatars et couvertures profil/page/groupe avec validations et ratios distincts.
+- [ ] Vérifier les envois et l'affichage sur petit écran.
