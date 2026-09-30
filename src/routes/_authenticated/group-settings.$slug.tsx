@@ -10,6 +10,8 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserAvatar } from "@/components/Avatar";
+import { AvatarPhotoEditor } from "@/components/AvatarPhotoEditor";
+import { CoverPhoto } from "@/components/CoverPhoto";
 import {
   approveMember,
   deleteGroup,
@@ -99,6 +101,8 @@ function GroupSettings() {
   return (
     <section className="space-y-6">
       <h1 className="font-display text-2xl font-bold">Paramètres du groupe</h1>
+      <CoverPhoto kind="group" path={group.cover_url ?? null} editable userId={user.id} onSave={async (value) => { await updateGroup(group.id, { cover_url: value }); await queryClient.invalidateQueries({ queryKey: ["group", slug] }); }} />
+      <AvatarPhotoEditor path={group.avatar_url} name={group.name} userId={user.id} label="Changer la photo" onSave={async (path) => { await updateGroup(group.id, { avatar_url: path }); await queryClient.invalidateQueries({ queryKey: ["group", slug] }); }} />
 
       <form
         className="space-y-3"

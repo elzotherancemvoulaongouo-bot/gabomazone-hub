@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Media } from "@/components/Media";
 import { fetchPost, updatePost, uploadPostMedia } from "@/lib/posts";
+import { PHOTO_ACCEPT, VIDEO_ACCEPT, validatePostFile } from "@/lib/image-processing";
 
 export const Route = createFileRoute("/_authenticated/post-edit/$postId")({
   head: () => ({
@@ -124,10 +125,11 @@ function EditPostPage() {
         )}
         <input
           type="file"
-          accept="image/*,video/*"
+           accept={`${PHOTO_ACCEPT},${VIDEO_ACCEPT}`}
           className="hidden"
           onChange={(e) => {
             const selected = e.target.files?.[0] ?? null;
+            if (selected) { const error = validatePostFile(selected); if (error) { toast.error(error); e.target.value = ""; return; } }
             setFile(selected);
             setPreview(selected ? URL.createObjectURL(selected) : null);
             if (selected) setRemoveMedia(false);

@@ -13,6 +13,7 @@ import { useCreateStory, STORY_BACKGROUNDS } from "@/lib/stories";
 import { loadVideoMeta, trimVideo, MAX_STORY_VIDEO_SECONDS } from "@/lib/story-video";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { validatePostFile } from "@/lib/image-processing";
 
 export type StoryDraft = { mode: "text" } | { mode: "media"; file: File };
 
@@ -68,10 +69,11 @@ export function CreateStoryDialog({
       return;
     }
     try {
+      if (file) { const validation = validatePostFile(file); if (validation) throw new Error(validation); }
       let finalFile = file;
       if (file && tooLong) {
         setTrimProgress(0);
-        toast.info("Découpage des 30 secondes sélectionnées…");
+         toast.info("Découpage des 60 secondes sélectionnées…");
         finalFile = await trimVideo(file, trimStart, setTrimProgress);
         setTrimProgress(null);
       }
@@ -143,10 +145,10 @@ export function CreateStoryDialog({
                 src={previewUrl}
                 controls
                 playsInline
-                className="max-h-72 w-full rounded-xl bg-black"
+                 className="mx-auto aspect-[9/16] max-h-72 w-auto max-w-full rounded-xl bg-muted object-contain"
               />
             ) : (
-              <img src={previewUrl} alt="Aperçu" className="max-h-72 w-full rounded-xl object-contain" />
+               <img src={previewUrl} alt="Aperçu" className="mx-auto aspect-[9/16] max-h-72 w-auto max-w-full rounded-xl bg-muted object-contain" />
             )}
 
             {tooLong ? (

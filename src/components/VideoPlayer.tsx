@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Maximize2, Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /** Gestionnaire global : une seule vidéo en lecture automatique à la fois. */
@@ -14,13 +15,11 @@ export function VideoPlayer({
   src,
   className,
   autoPlayOnVisible = true,
-  onOpen,
   startMuted = true,
 }: {
   src: string;
   className?: string | undefined;
   autoPlayOnVisible?: boolean;
-  onOpen?: () => void;
   startMuted?: boolean;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -41,8 +40,8 @@ export function VideoPlayer({
         if (!entry) return;
         if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
           claimPlayback(el);
-          // Son activé automatiquement ; repli en muet si le navigateur le bloque.
-          const wantMuted = userMuteChoice.current ?? false;
+          // La lecture automatique commence toujours en muet.
+          const wantMuted = userMuteChoice.current ?? true;
           el.muted = wantMuted;
           setMuted(wantMuted);
           el.play().catch(() => {
@@ -105,10 +104,9 @@ export function VideoPlayer({
 
   return (
     <div
-      className={cn("relative w-full overflow-hidden bg-black", className)}
+      className={cn("relative w-full overflow-hidden bg-foreground", className)}
       style={{
-        aspectRatio: ratio ? `${ratio}` : "16 / 9",
-        maxHeight: "80dvh",
+         aspectRatio: ratio ? `${Math.max(4 / 5, Math.min(16 / 9, ratio))}` : "16 / 9",
       }}
     >
       <video
@@ -118,8 +116,8 @@ export function VideoPlayer({
         loop
         playsInline
         preload="metadata"
-        className="absolute inset-0 h-full w-full object-contain"
-        onClick={() => (onOpen ? onOpen() : toggle())}
+         className="absolute inset-0 h-full w-full object-contain"
+         onClick={toggle}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         onLoadedMetadata={(e) => {
@@ -135,15 +133,15 @@ export function VideoPlayer({
         }}
       />
 
-      <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-gradient-to-t from-black/70 to-transparent px-2 pb-2 pt-6">
-        <button
+       <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-foreground/75 px-2 pb-2 pt-3 text-background">
+          <Button variant="ghost" size="icon"
           type="button"
           onClick={toggle}
           aria-label={playing ? "Mettre en pause" : "Lire la vidéo"}
-          className="rounded-full p-2 text-white"
+           className="shrink-0 text-background hover:bg-background/20 hover:text-background"
         >
           {playing ? <Pause className="size-5" /> : <Play className="size-5" />}
-        </button>
+         </Button>
         <input
           type="range"
           min={0}
@@ -154,22 +152,22 @@ export function VideoPlayer({
           aria-label="Progression de la vidéo"
           className="h-1 flex-1 cursor-pointer accent-primary"
         />
-        <button
+         <Button variant="ghost" size="icon"
           type="button"
           onClick={toggleMute}
           aria-label={muted ? "Activer le son" : "Couper le son"}
-          className="rounded-full p-2 text-white"
+           className="shrink-0 text-background hover:bg-background/20 hover:text-background"
         >
           {muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
-        </button>
-        <button
+         </Button>
+         <Button variant="ghost" size="icon"
           type="button"
           onClick={fullscreen}
           aria-label="Plein écran"
-          className="rounded-full p-2 text-white"
+           className="shrink-0 text-background hover:bg-background/20 hover:text-background"
         >
           <Maximize2 className="size-5" />
-        </button>
+         </Button>
       </div>
     </div>
   );

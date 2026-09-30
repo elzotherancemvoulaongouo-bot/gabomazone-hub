@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 
 import { createPost, uploadPostMedia } from "@/lib/posts";
 import { UserAvatar } from "@/components/Avatar";
+import { PHOTO_ACCEPT, VIDEO_ACCEPT, validatePostFile } from "@/lib/image-processing";
 
 type Identity = "community" | "member";
 
@@ -163,10 +164,10 @@ export function CommunityComposer({
           Photos ou vidéo
           <input
             type="file"
-            accept="image/*,video/*"
+             accept={`${PHOTO_ACCEPT},${VIDEO_ACCEPT}`}
             multiple
             className="hidden"
-            onChange={(e) => setFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])])}
+             onChange={(e) => { const accepted = Array.from(e.target.files ?? []).filter((file) => { const error = validatePostFile(file); if (error) toast.error(error); return !error; }); setFiles((prev) => [...prev, ...accepted]); e.target.value = ""; }}
           />
         </label>
         <div className="flex items-center gap-2">

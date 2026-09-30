@@ -120,11 +120,15 @@ export async function fetchGroupPosts(groupId: string) {
 }
 
 export async function uploadPostMedia(userId: string, file: File) {
-  const ext = file.name.split(".").pop() ?? "bin";
+  const { prepareFeedPhoto, validatePostFile } = await import("@/lib/image-processing");
+  const validation = validatePostFile(file);
+  if (validation) throw new Error(validation);
+  const prepared = file.type.startsWith("image/") ? await prepareFeedPhoto(file) : file;
+  const ext = prepared.name.split(".").pop() ?? "bin";
   const path = `${userId}/${crypto.randomUUID()}.${ext}`;
   const { error } = await supabase.storage
     .from(MEDIA_BUCKET)
-    .upload(path, file, { contentType: file.type, upsert: false });
+    .upload(path, prepared, { contentType: prepared.type, upsert: false });
   if (error) throw error;
   return { path, type: file.type.startsWith("video") ? "video" : "image" };
 }

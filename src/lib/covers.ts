@@ -4,9 +4,9 @@ import { getSignedUrl } from "@/lib/media";
 
 export const COVERS_BUCKET = "covers";
 export const COVER_PREFIX = "covers:";
-export const COVER_MAX_BYTES = 5 * 1024 * 1024;
+export const COVER_MAX_BYTES = 10 * 1024 * 1024;
 export const COVER_ACCEPT = "image/jpeg,image/png,image/webp";
-export const COVER_RATIO = 8 / 3;
+export const COVER_RATIO = 851 / 315;
 
 const ALLOWED = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
@@ -15,7 +15,7 @@ export function validateCoverFile(file: File) {
     return "Format non pris en charge. Utilisez une image JPG, PNG ou WEBP.";
   }
   if (file.size > COVER_MAX_BYTES) {
-    return `Image trop lourde (${(file.size / 1024 / 1024).toFixed(1)} Mo). Maximum : 5 Mo.`;
+    return `Image trop lourde (${(file.size / 1024 / 1024).toFixed(1)} Mo). Maximum : 10 Mo.`;
   }
   return null;
 }
