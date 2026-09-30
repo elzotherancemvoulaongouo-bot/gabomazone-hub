@@ -12,6 +12,7 @@ export function Media({
   onOpenVideo,
   autoPlay = true,
   eager = false,
+  onImageLoad,
 }: {
   path: string | null;
   type: string | null;
@@ -22,6 +23,7 @@ export function Media({
   autoPlay?: boolean;
   /** Charge le média immédiatement (visionneuse plein écran) au lieu d'attendre la visibilité. */
   eager?: boolean;
+  onImageLoad?: (image: HTMLImageElement) => void;
 }) {
   const holder = useRef<HTMLDivElement>(null);
   const [near, setNear] = useState(eager);
@@ -76,6 +78,7 @@ export function Media({
       alt={alt}
       loading="lazy"
       decoding="async"
+      onLoad={(event) => onImageLoad?.(event.currentTarget)}
       className={className}
     />
   );

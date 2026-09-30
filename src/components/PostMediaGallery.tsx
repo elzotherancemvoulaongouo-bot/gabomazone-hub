@@ -8,6 +8,7 @@ export type PostMediaItem = { path: string; media_type: string | null };
 
 export function PostMediaGallery({ items, alt, className }: { items: PostMediaItem[]; alt: string; className?: string; onOpenVideo?: () => void }) {
   const [viewer, setViewer] = useState<number | null>(null);
+  const [singleRatio, setSingleRatio] = useState(1);
   if (!items.length) return null;
   const single = items.length === 1;
   const visible = items.slice(0, 4);
@@ -15,7 +16,7 @@ export function PostMediaGallery({ items, alt, className }: { items: PostMediaIt
     <div className={cn(single ? "w-full" : "grid grid-cols-2 gap-1 overflow-hidden", items.length === 3 && "[&>*:first-child]:row-span-2", className)}>
       {visible.map((item, index) => <div key={`${item.path}-${index}`} className={cn("relative min-w-0 overflow-hidden bg-muted", !single && (items.length === 2 ? "aspect-square" : "aspect-square"), items.length === 3 && index === 0 && "row-span-2 !aspect-auto")}>
         {item.media_type === "video" ? <Media path={item.path} type="video" alt={alt} className="w-full" /> : <Button variant="ghost" type="button" onClick={() => setViewer(index)} aria-label={`Ouvrir le média ${index + 1}`} className={cn("block h-auto w-full rounded-none p-0", !single && "size-full")}>
-          <Media path={item.path} type="image" alt={alt} className={cn("w-full object-cover", single ? "max-h-[80dvh] min-h-40 aspect-[4/5] sm:aspect-square" : "size-full")} />
+          <Media path={item.path} type="image" alt={alt} onImageLoad={(image) => { if (single) setSingleRatio(Math.max(4 / 5, Math.min(1.91, image.naturalWidth / image.naturalHeight))); }} className={cn("w-full object-cover", !single && "size-full")} />
         </Button>}
         {index === 3 && items.length > 4 ? <Button variant="secondary" onClick={() => setViewer(3)} className="absolute inset-0 size-full rounded-none bg-background/70 text-2xl font-bold">+{items.length - 4}</Button> : null}
       </div>)}
