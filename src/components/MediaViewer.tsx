@@ -397,7 +397,7 @@ function ViewerSlide({
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [expanded, setExpanded] = useState(false);
-  const { muted, blocked, toggle: toggleMute } = useSound();
+  const { muted, toggle: toggleMute } = useSound();
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -591,15 +591,6 @@ function ViewerSlide({
             <p className="text-sm">{isError ? "Photo indisponible" : "Chargement de la photo…"}</p>
           )}
         </div>
-      )}
-      {kind === "video" && active && blocked && !paused && (
-        <button
-          type="button"
-          onClick={toggleMute}
-          className="absolute left-1/2 top-[max(4rem,env(safe-area-inset-top))] z-20 -translate-x-1/2 rounded-full bg-viewer-foreground/90 px-4 py-2 text-sm font-semibold text-viewer"
-        >
-          🔇 Touchez pour activer le son
-        </button>
       )}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-viewer/90 to-transparent" />
       {kind === "image" && media.length > 1 && (

@@ -16,7 +16,7 @@ export function VideoPlayer({
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
-  const { muted, blocked, toggle: toggleMute } = useSound();
+  const { muted, toggle: toggleMute } = useSound();
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [ratio, setRatio] = useState<number | null>(null);
@@ -116,15 +116,6 @@ export function VideoPlayer({
         }}
       />
 
-      {blocked && playing && (
-        <button
-          type="button"
-          onClick={toggleMute}
-          className="absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-full bg-foreground/80 px-4 py-2 text-sm font-semibold text-background"
-        >
-          🔇 Touchez pour activer le son
-        </button>
-      )}
       <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-foreground/75 px-2 pb-2 pt-3 text-background">
         <Button
           variant="ghost"

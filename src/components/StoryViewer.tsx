@@ -29,7 +29,7 @@ export function StoryViewer({
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { muted, blocked, toggle: toggleMute } = useSound();
+  const { muted, toggle: toggleMute } = useSound();
   useEffect(() => {
     if (videoRef.current) videoRef.current.muted = muted;
   }, [muted]);
@@ -227,15 +227,6 @@ export function StoryViewer({
         ) : null}
         {story.media_type === "video" && mediaUrl ? (
           <>
-            {blocked && (
-              <button
-                type="button"
-                onClick={toggleMute}
-                className="absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-black"
-              >
-                🔇 Touchez pour activer le son
-              </button>
-            )}
             <button
               type="button"
               onClick={toggleMute}
