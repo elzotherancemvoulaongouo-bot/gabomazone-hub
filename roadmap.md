@@ -1,4 +1,4 @@
 - [x] En-tête, menu, recherche et messagerie mobile (travail précédent).
 - [x] Explorer : filtres, recommandations distinctes et miniatures ouvrant la visionneuse.
 - [x] Visionneuse verticale plein écran : lecture exclusive, actions, commentaires, abonnement.
-- [ ] Vérifier barre basse et navigation sur petit écran.
+- [x] Barre basse préservée sans doublon Messages ; navigation et petits écrans vérifiés.

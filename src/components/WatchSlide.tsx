@@ -23,6 +23,7 @@ export function WatchSlide({ post, userId, active }: { post: FeedPost; userId: s
   const [draft, setDraft] = useState("");
   const [likedOverride, setLikedOverride] = useState<boolean | null>(null);
   const [hidden, setHidden] = useState(false);
+  const [mutePreference, setMutePreference] = useState<boolean | null>(null);
   const media = post.media?.length ? [...post.media].sort((a,b) => a.position - b.position)[0] : null;
   const path = media?.path ?? post.media_url;
   const type = media?.media_type ?? post.media_type;
@@ -59,12 +60,12 @@ export function WatchSlide({ post, userId, active }: { post: FeedPost; userId: s
   useEffect(() => {
     const el = video.current;
     if (!el) return;
-    if (active && !commentsOpen && !document.hidden) { el.muted = muted; el.play().catch(() => { el.muted = true; setMuted(true); void el.play().catch(() => undefined); }); }
+    if (active && !commentsOpen && !document.hidden) { el.muted = mutePreference ?? false; el.play().catch(() => { el.muted = true; setMuted(true); void el.play().catch(() => undefined); }); }
     else el.pause();
     const visibility = () => { if (document.hidden) el.pause(); else if (active && !commentsOpen) void el.play().catch(() => undefined); };
     document.addEventListener("visibilitychange", visibility);
     return () => { el.pause(); document.removeEventListener("visibilitychange", visibility); };
-  }, [active, commentsOpen, url, muted]);
+  }, [active, commentsOpen, url, mutePreference]);
   async function share() {
     const link = `${window.location.origin}/watch/${post.id}`;
     try { if (navigator.share) await navigator.share({ url: link, text: post.caption ?? "" }); else { await navigator.clipboard.writeText(link); toast.success("Lien copié"); } } catch { /* Cancelled by user. */ }
@@ -81,7 +82,7 @@ export function WatchSlide({ post, userId, active }: { post: FeedPost; userId: s
       <Button variant="ghost" size="icon" aria-label={saved ? "Retirer des enregistrements" : "Enregistrer"} className="size-11 rounded-full bg-foreground/60 text-background hover:bg-foreground/80 hover:text-background" onClick={() => toggleSave.mutate({ postId: post.id, saved })}><Bookmark className={`size-7 ${saved ? "fill-primary text-primary" : ""}`} /></Button>
       <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Options" className="size-11 rounded-full bg-foreground/60 text-background hover:bg-foreground/80 hover:text-background"><MoreHorizontal className="size-7" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onSelect={() => void share()}>Copier ou partager le lien</DropdownMenuItem>{post.user_id !== userId && <><DropdownMenuItem onSelect={() => { setHidden(true); hidePost.mutate(post.id); }}>Masquer la publication</DropdownMenuItem><DropdownMenuItem onSelect={() => reportPost.mutate({ postId: post.id, reason: "contenu_inapproprie" })}><Flag className="mr-2 size-4" />Signaler</DropdownMenuItem></>}</DropdownMenuContent></DropdownMenu>
     </div>
-    <div className="absolute bottom-7 left-4 right-20 z-10 min-w-0 sm:left-6"><Link to="/u/$username" params={{ username: post.author?.username ?? "" }} className="block truncate font-semibold">{post.author?.display_name || post.author?.username || "Gabomazone"}</Link>{post.caption && <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-sm">{post.caption}</p>}{type === "video" && <Button size="sm" variant="ghost" className="mt-1 -ml-2 text-background hover:bg-background/20 hover:text-background" onClick={() => setMuted(!muted)}>{muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />} Son {muted ? "désactivé" : "activé"}</Button>}</div>
+    <div className="absolute bottom-7 left-4 right-20 z-10 min-w-0 sm:left-6"><Link to="/u/$username" params={{ username: post.author?.username ?? "" }} className="block truncate font-semibold">{post.author?.display_name || post.author?.username || "Gabomazone"}</Link>{post.caption && <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-sm">{post.caption}</p>}{type === "video" && <Button size="sm" variant="ghost" className="mt-1 -ml-2 text-background hover:bg-background/20 hover:text-background" onClick={() => { const next = !video.current?.muted; setMutePreference(next); setMuted(next); }}>{muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />} Son {muted ? "désactivé" : "activé"}</Button>}</div>
     <Sheet open={commentsOpen} onOpenChange={setCommentsOpen}><SheetContent side="bottom" className="mx-auto flex h-[min(70dvh,650px)] max-w-2xl flex-col rounded-t-2xl p-4"><SheetTitle>Commentaires</SheetTitle><div className="min-h-0 flex-1 space-y-4 overflow-y-auto pt-3">{commentsPending ? <p>Chargement…</p> : comments?.length ? comments.map((comment) => <div key={comment.id} className="flex items-start gap-2"><UserAvatar avatarPath={comment.author?.avatar_url} name={comment.author?.username} className="size-8" /><p className="min-w-0 break-words text-sm"><strong>{comment.author?.username}</strong> {comment.content}</p></div>) : <p className="text-sm text-muted-foreground">Soyez le premier à commenter.</p>}</div><form className="flex gap-2" onSubmit={(event) => { event.preventDefault(); if (draft.trim()) addComment.mutate(); }}><Input aria-label="Ajouter un commentaire" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Ajouter un commentaire…" /><Button type="submit" disabled={!draft.trim() || addComment.isPending}>Envoyer</Button></form></SheetContent></Sheet>
   </section>;
 }
