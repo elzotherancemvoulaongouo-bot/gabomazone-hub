@@ -39,8 +39,6 @@ export function FeedComposer({
         >
           Que voulez-vous publier ?
         </Button>
-      </div>
-
       </div>}
 
       {mode ? null : <div className="mt-3 grid grid-cols-3 gap-1 border-t border-border/60 pt-2">
@@ -65,8 +63,6 @@ export function FeedComposer({
         >
           <Camera className="size-5 text-primary" /> Caméra
         </Button>
-      </div>
-
       </div>}
 
       {mode ? (

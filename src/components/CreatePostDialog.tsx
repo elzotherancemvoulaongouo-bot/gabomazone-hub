@@ -171,7 +171,7 @@ export function CreatePostDialog({
                     type="button"
                     aria-label="Retirer ce média"
                     onClick={() => { URL.revokeObjectURL(draft.url); setDrafts((prev) => prev.filter((d) => d.id !== draft.id)); }}
-                    className="absolute right-1.5 top-1.5 rounded-full bg-background/85 p-1.5"
+                    variant="secondary" size="icon" className="absolute right-1.5 top-1.5 size-8 rounded-full"
                   >
                     <X className="size-4" />
                   </Button>
