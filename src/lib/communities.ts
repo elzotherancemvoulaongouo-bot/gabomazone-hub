@@ -29,7 +29,6 @@ export type GroupRow = {
   category: string | null;
   is_private: boolean;
   created_at: string;
-
 };
 
 export type GroupMemberRow = {
@@ -78,7 +77,8 @@ export async function fetchMyPages(userId: string) {
   const admin = await supabase.from("page_admins").select("page_id").eq("user_id", userId);
   if (admin.error) throw admin.error;
   const ids = (admin.data ?? []).map((r) => r.page_id);
-  const filter = ids.length > 0 ? `owner_id.eq.${userId},id.in.(${ids.join(",")})` : `owner_id.eq.${userId}`;
+  const filter =
+    ids.length > 0 ? `owner_id.eq.${userId},id.in.(${ids.join(",")})` : `owner_id.eq.${userId}`;
   const { data, error } = await supabase.from("pages").select("*").or(filter);
   if (error) throw error;
   return (data ?? []) as PageRow[];
@@ -94,7 +94,12 @@ export async function createPage(ownerId: string, values: { name: string; descri
   const slug = await uniqueSlug("pages", values.name);
   const { data, error } = await supabase
     .from("pages")
-    .insert({ owner_id: ownerId, name: values.name.trim(), description: values.description?.trim() || null, slug })
+    .insert({
+      owner_id: ownerId,
+      name: values.name.trim(),
+      description: values.description?.trim() || null,
+      slug,
+    })
     .select("*")
     .single();
   if (error) throw error;
@@ -112,7 +117,10 @@ export async function deletePage(id: string) {
 }
 
 export async function fetchPageFollowers(pageId: string) {
-  const { data, error } = await supabase.from("page_followers").select("user_id").eq("page_id", pageId);
+  const { data, error } = await supabase
+    .from("page_followers")
+    .select("user_id")
+    .eq("page_id", pageId);
   if (error) throw error;
   return (data ?? []).map((r) => r.user_id as string);
 }
@@ -134,9 +142,10 @@ export async function fetchPageFollowerProfiles(pageId: string) {
   return ids.map((id) => ({ user_id: id, profile: byId.get(id) ?? null })) as FollowerProfile[];
 }
 
-
 export async function followPage(pageId: string, userId: string) {
-  const { error } = await supabase.from("page_followers").insert({ page_id: pageId, user_id: userId });
+  const { error } = await supabase
+    .from("page_followers")
+    .insert({ page_id: pageId, user_id: userId });
   if (error) throw error;
 }
 
@@ -155,7 +164,10 @@ export type AdminRow = {
 };
 
 export async function fetchPageAdmins(pageId: string) {
-  const { data, error } = await supabase.from("page_admins").select("user_id").eq("page_id", pageId);
+  const { data, error } = await supabase
+    .from("page_admins")
+    .select("user_id")
+    .eq("page_id", pageId);
   if (error) throw error;
   const ids = (data ?? []).map((r) => r.user_id as string);
   if (ids.length === 0) return [] as AdminRow[];
@@ -209,7 +221,8 @@ export async function fetchMyGroups(userId: string) {
     .eq("status", "approved");
   if (mem.error) throw mem.error;
   const ids = (mem.data ?? []).map((r) => r.group_id);
-  const filter = ids.length > 0 ? `owner_id.eq.${userId},id.in.(${ids.join(",")})` : `owner_id.eq.${userId}`;
+  const filter =
+    ids.length > 0 ? `owner_id.eq.${userId},id.in.(${ids.join(",")})` : `owner_id.eq.${userId}`;
   const { data, error } = await supabase.from("groups").select("*").or(filter);
   if (error) throw error;
   return (data ?? []) as GroupRow[];
@@ -270,7 +283,10 @@ export async function fetchGroupMembers(groupId: string) {
   const profiles = await supabase
     .from("profiles")
     .select("id, username, display_name, avatar_url")
-    .in("id", rows.map((r) => r.user_id));
+    .in(
+      "id",
+      rows.map((r) => r.user_id),
+    );
   if (profiles.error) throw profiles.error;
   const byId = new Map((profiles.data ?? []).map((p) => [p.id, p]));
   return rows.map((r) => ({ ...r, profile: byId.get(r.user_id) ?? null }));

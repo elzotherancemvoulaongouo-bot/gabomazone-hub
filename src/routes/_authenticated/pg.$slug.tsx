@@ -4,7 +4,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
-import { ActionButtonEditor, AdminIcons, CommunityMoreButton, InviteFriendsDialog, PageActionButtons } from "@/components/CommunityActions";
+import {
+  ActionButtonEditor,
+  AdminIcons,
+  CommunityMoreButton,
+  InviteFriendsDialog,
+  PageActionButtons,
+} from "@/components/CommunityActions";
 import { parseActionButtons } from "@/lib/community-actions";
 import { Globe, Mail, MapPin, Phone, Settings, Store, ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
@@ -39,7 +45,10 @@ export const Route = createFileRoute("/_authenticated/pg/$slug")({
   }),
   // Préchargement dès le toucher du lien (defaultPreload "intent").
   loader: ({ context, params }) => {
-    void context.queryClient.prefetchQuery({ queryKey: ["page", params.slug], queryFn: () => fetchPageBySlug(params.slug) });
+    void context.queryClient.prefetchQuery({
+      queryKey: ["page", params.slug],
+      queryFn: () => fetchPageBySlug(params.slug),
+    });
   },
   component: PageDetail,
 });
@@ -54,7 +63,10 @@ function PageDetail() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [term, setTerm] = useState("");
 
-  const { data: page, isPending } = useQuery({ queryKey: ["page", slug], queryFn: () => fetchPageBySlug(slug) });
+  const { data: page, isPending } = useQuery({
+    queryKey: ["page", slug],
+    queryFn: () => fetchPageBySlug(slug),
+  });
   const followers = useQuery({
     queryKey: ["page-followers", page?.id],
     queryFn: () => fetchPageFollowerProfiles(page!.id),
@@ -85,8 +97,9 @@ function PageDetail() {
 
   const followerList = followers.data ?? [];
   const isFollowing = followerList.some((f) => f.user_id === user.id);
-  const isAdmin =
-    Boolean(page && (page.owner_id === user.id || (admins.data ?? []).some((a) => a.user_id === user.id)));
+  const isAdmin = Boolean(
+    page && (page.owner_id === user.id || (admins.data ?? []).some((a) => a.user_id === user.id)),
+  );
 
   const toggleFollow = useMutation({
     mutationFn: () =>
@@ -99,7 +112,14 @@ function PageDetail() {
       queryClient.setQueryData(key, (old: typeof followerList | undefined) =>
         isFollowing
           ? (old ?? []).filter((f) => f.user_id !== user.id)
-          : [...(old ?? []), { user_id: user.id, profile: me.data ?? null } as unknown as (typeof followerList)[number]]);
+          : [
+              ...(old ?? []),
+              {
+                user_id: user.id,
+                profile: me.data ?? null,
+              } as unknown as (typeof followerList)[number],
+            ],
+      );
       return { previous };
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["page-followers", page?.id] }),
@@ -119,7 +139,9 @@ function PageDetail() {
   const actionButtons = parseActionButtons(page.action_buttons);
   const shareUrl = buildShareUrl("pg", slug);
   const needle = term.trim().toLowerCase();
-  const allPosts = (posts.data ?? []).filter((p) => !needle || (p.caption ?? "").toLowerCase().includes(needle));
+  const allPosts = (posts.data ?? []).filter(
+    (p) => !needle || (p.caption ?? "").toLowerCase().includes(needle),
+  );
   const photos = allPosts.filter((p) => p.media_url && p.media_type !== "video");
   const videos = allPosts.filter((p) => p.media_type === "video");
 
@@ -155,7 +177,8 @@ function PageDetail() {
           <div className="min-w-0 flex-1">
             <h1 className="truncate font-display text-2xl font-bold">{page.name}</h1>
             <p className="text-xs text-muted-foreground">
-              {page.category ? `${page.category} · ` : ""}@{page.slug} · {followerList.length} abonné(s)
+              {page.category ? `${page.category} · ` : ""}@{page.slug} · {followerList.length}{" "}
+              abonné(s)
             </p>
           </div>
           {isAdmin ? (
@@ -195,17 +218,54 @@ function PageDetail() {
             onSearch={() => setSearchOpen(true)}
             onLeave={() => toggleFollow.mutate()}
             adminItems={[
-              { key: "edit", label: "Modifier la page", icon: AdminIcons.Pencil, onClick: () => navigate({ to: "/page-settings/$slug", params: { slug: page.slug } }) },
-              { key: "action", label: "Modifier le bouton d'action", icon: AdminIcons.MousePointerClick, onClick: () => setEditorOpen(true) },
-              { key: "settings", label: "Paramètres", icon: AdminIcons.Settings, onClick: () => navigate({ to: "/page-settings/$slug", params: { slug: page.slug } }) },
-              { key: "roles", label: "Gérer les rôles", icon: AdminIcons.Shield, onClick: () => navigate({ to: "/page-settings/$slug", params: { slug: page.slug } }) },
+              {
+                key: "edit",
+                label: "Modifier la page",
+                icon: AdminIcons.Pencil,
+                onClick: () =>
+                  navigate({ to: "/page-settings/$slug", params: { slug: page.slug } }),
+              },
+              {
+                key: "action",
+                label: "Modifier le bouton d'action",
+                icon: AdminIcons.MousePointerClick,
+                onClick: () => setEditorOpen(true),
+              },
+              {
+                key: "settings",
+                label: "Paramètres",
+                icon: AdminIcons.Settings,
+                onClick: () =>
+                  navigate({ to: "/page-settings/$slug", params: { slug: page.slug } }),
+              },
+              {
+                key: "roles",
+                label: "Gérer les rôles",
+                icon: AdminIcons.Shield,
+                onClick: () =>
+                  navigate({ to: "/page-settings/$slug", params: { slug: page.slug } }),
+              },
             ]}
           />
         </div>
         {searchOpen ? (
           <div className="flex gap-2">
-            <Input autoFocus value={term} onChange={(e) => setTerm(e.target.value)} placeholder="Rechercher dans la page" aria-label="Rechercher dans la page" />
-            <Button variant="ghost" onClick={() => { setTerm(""); setSearchOpen(false); }}>Fermer</Button>
+            <Input
+              autoFocus
+              value={term}
+              onChange={(e) => setTerm(e.target.value)}
+              placeholder="Rechercher dans la page"
+              aria-label="Rechercher dans la page"
+            />
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setTerm("");
+                setSearchOpen(false);
+              }}
+            >
+              Fermer
+            </Button>
           </div>
         ) : null}
       </header>
@@ -260,7 +320,9 @@ function PageDetail() {
           ) : allPosts.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucune publication pour le moment.</p>
           ) : (
-            allPosts.map((p) => <PostCard key={p.id} post={p} currentUserId={user.id} contextPosts={allPosts} />)
+            allPosts.map((p) => (
+              <PostCard key={p.id} post={p} currentUserId={user.id} contextPosts={allPosts} />
+            ))
           )}
         </TabsContent>
 
@@ -270,7 +332,8 @@ function PageDetail() {
             <ul className="space-y-2 text-xs text-muted-foreground">
               {page.city || page.country ? (
                 <li className="flex items-center gap-2">
-                  <MapPin className="size-4" /> {[page.city, page.country].filter(Boolean).join(", ")}
+                  <MapPin className="size-4" />{" "}
+                  {[page.city, page.country].filter(Boolean).join(", ")}
                 </li>
               ) : null}
               {page.phone ? (

@@ -28,7 +28,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { UserAvatar } from "@/components/Avatar";
 import { getOrCreateConversation } from "@/lib/messages";
 import {
@@ -72,7 +78,8 @@ export function PageActionButtons({
   const list: ActionButton[] = buttons.length > 0 ? buttons : [{ type: "message" }];
   const openChat = useMutation({
     mutationFn: () => getOrCreateConversation(meId, ownerId),
-    onSuccess: (conversationId) => navigate({ to: "/m/$conversationId", params: { conversationId } }),
+    onSuccess: (conversationId) =>
+      navigate({ to: "/m/$conversationId", params: { conversationId } }),
     onError: (err) => toast.error(err instanceof Error ? err.message : "Discussion impossible"),
   });
 
@@ -155,7 +162,8 @@ export function ActionButtonEditor({
     mutationFn: () => {
       for (const b of draft) {
         const opt = actionOption(b.type);
-        if (opt.needs !== "none" && !(b.value ?? "").trim()) throw new Error(`Renseignez la valeur pour « ${opt.label} »`);
+        if (opt.needs !== "none" && !(b.value ?? "").trim())
+          throw new Error(`Renseignez la valeur pour « ${opt.label} »`);
       }
       return saveActionButtons(pageId, draft);
     },
@@ -184,12 +192,20 @@ export function ActionButtonEditor({
         <DialogHeader>
           <DialogTitle>Modifier le bouton d'action</DialogTitle>
         </DialogHeader>
-        <p className="text-xs text-muted-foreground">Choisissez jusqu'à 2 boutons. Sans choix, « Message » est affiché.</p>
+        <p className="text-xs text-muted-foreground">
+          Choisissez jusqu'à 2 boutons. Sans choix, « Message » est affiché.
+        </p>
         <div className="flex flex-wrap gap-2">
           {ACTION_BUTTON_OPTIONS.map((o) => {
             const on = draft.some((b) => b.type === o.type);
             return (
-              <Button key={o.type} type="button" size="sm" variant={on ? "default" : "outline"} onClick={() => toggle(o.type)}>
+              <Button
+                key={o.type}
+                type="button"
+                size="sm"
+                variant={on ? "default" : "outline"}
+                onClick={() => toggle(o.type)}
+              >
                 {o.label}
               </Button>
             );
@@ -206,7 +222,9 @@ export function ActionButtonEditor({
                 value={b.value ?? ""}
                 placeholder={o.placeholder}
                 onChange={(e) =>
-                  setDraft((prev) => prev.map((x) => (x.type === b.type ? { ...x, value: e.target.value } : x)))
+                  setDraft((prev) =>
+                    prev.map((x) => (x.type === b.type ? { ...x, value: e.target.value } : x)),
+                  )
                 }
               />
             </div>
@@ -215,13 +233,19 @@ export function ActionButtonEditor({
         <div className="space-y-2">
           <p className="text-xs font-semibold text-muted-foreground">Aperçu</p>
           <div className="flex gap-2 rounded-2xl border border-border/70 p-3">
-            <Button className="flex-1" type="button">Suivre</Button>
+            <Button className="flex-1" type="button">
+              Suivre
+            </Button>
             <PageActionButtons buttons={draft} ownerId={ownerId} meId={meId} preview />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Annuler</Button>
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>Enregistrer</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            Annuler
+          </Button>
+          <Button onClick={() => save.mutate()} disabled={save.isPending}>
+            Enregistrer
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -254,8 +278,16 @@ export function InviteFriendsDialog({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const inviteKey = ["community-invites", target.pageId ?? target.groupId, userId];
 
-  const friends = useQuery({ queryKey: ["my-friends", userId], queryFn: () => fetchMyFriends(userId), enabled: open });
-  const sent = useQuery({ queryKey: inviteKey, queryFn: () => fetchSentInvites(userId, target), enabled: open });
+  const friends = useQuery({
+    queryKey: ["my-friends", userId],
+    queryFn: () => fetchMyFriends(userId),
+    enabled: open,
+  });
+  const sent = useQuery({
+    queryKey: inviteKey,
+    queryFn: () => fetchSentInvites(userId, target),
+    enabled: open,
+  });
 
   useEffect(() => {
     if (!open) {
@@ -269,7 +301,10 @@ export function InviteFriendsDialog({
   const eligible = (friends.data ?? []).filter((f) => !exclude.has(f.id));
   const q = search.trim().toLowerCase();
   const visible = eligible.filter(
-    (f) => !q || f.username.toLowerCase().includes(q) || (f.display_name ?? "").toLowerCase().includes(q),
+    (f) =>
+      !q ||
+      f.username.toLowerCase().includes(q) ||
+      (f.display_name ?? "").toLowerCase().includes(q),
   );
   const selectable = visible.filter((f) => !sentSet.has(f.id));
   const allSelected = selectable.length > 0 && selectable.every((f) => selected.has(f.id));
@@ -285,7 +320,10 @@ export function InviteFriendsDialog({
   });
 
   function shareLink() {
-    const text = kind === "page" ? `Suis la page ${name} sur Gabomazone` : `Rejoins le groupe ${name} sur Gabomazone`;
+    const text =
+      kind === "page"
+        ? `Suis la page ${name} sur Gabomazone`
+        : `Rejoins le groupe ${name} sur Gabomazone`;
     void shareContent({ title: name, text, url: shareUrl });
   }
 
@@ -294,10 +332,17 @@ export function InviteFriendsDialog({
       <DialogContent className="flex max-h-[90vh] flex-col">
         <DialogHeader>
           <DialogTitle>
-            {kind === "page" ? "Inviter des amis à suivre cette page" : "Inviter des amis à rejoindre ce groupe"}
+            {kind === "page"
+              ? "Inviter des amis à suivre cette page"
+              : "Inviter des amis à rejoindre ce groupe"}
           </DialogTitle>
         </DialogHeader>
-        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher un ami" aria-label="Rechercher un ami" />
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Rechercher un ami"
+          aria-label="Rechercher un ami"
+        />
         <div className="flex items-center justify-between text-sm">
           <label className="flex items-center gap-2">
             <Checkbox
@@ -327,7 +372,9 @@ export function InviteFriendsDialog({
                 <li key={f.id}>
                   <label className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-secondary">
                     <UserAvatar avatarPath={f.avatar_url} name={f.username} />
-                    <span className="min-w-0 flex-1 truncate text-sm">{f.display_name || f.username}</span>
+                    <span className="min-w-0 flex-1 truncate text-sm">
+                      {f.display_name || f.username}
+                    </span>
                     {already ? (
                       <span className="text-xs text-muted-foreground">Invitation envoyée</span>
                     ) : (
@@ -365,7 +412,13 @@ export function InviteFriendsDialog({
 
 /* ---------------- ⋯ sheet ---------------- */
 
-export type MoreItem = { key: string; label: string; icon: typeof Phone; onClick: () => void; destructive?: boolean };
+export type MoreItem = {
+  key: string;
+  label: string;
+  icon: typeof Phone;
+  onClick: () => void;
+  destructive?: boolean;
+};
 
 export function CommunityMoreButton({
   userId,
@@ -402,7 +455,8 @@ export function CommunityMoreButton({
   const saved = (flags.data ?? []).includes("saved");
 
   const flag = useMutation({
-    mutationFn: ({ f, on }: { f: "saved" | "blocked"; on: boolean }) => setFlag(userId, target, f, on),
+    mutationFn: ({ f, on }: { f: "saved" | "blocked"; on: boolean }) =>
+      setFlag(userId, target, f, on),
     onSuccess: async (_d, { f, on }) => {
       await queryClient.invalidateQueries({ queryKey: flagsKey });
       if (f === "saved") toast.success(on ? "Enregistré" : "Retiré des enregistrements");
@@ -460,20 +514,48 @@ export function CommunityMoreButton({
       icon: saved ? BookmarkCheck : Bookmark,
       onClick: () => flag.mutate({ f: "saved", on: !saved }),
     },
-    { key: "search", label: kind === "page" ? "Rechercher dans la page" : "Rechercher dans le groupe", icon: Search, onClick: onSearch },
+    {
+      key: "search",
+      label: kind === "page" ? "Rechercher dans la page" : "Rechercher dans le groupe",
+      icon: Search,
+      onClick: onSearch,
+    },
     ...(isAdmin ? adminItems : []),
-    ...(!isAdmin ? [{ key: "report", label: "Signaler", icon: Flag, onClick: () => setReportOpen(true) }] : []),
+    ...(!isAdmin
+      ? [{ key: "report", label: "Signaler", icon: Flag, onClick: () => setReportOpen(true) }]
+      : []),
     ...(isMember && onLeave && !isAdmin
-      ? [{ key: "leave", label: kind === "page" ? "Ne plus suivre" : "Quitter le groupe", icon: LogOut, onClick: onLeave, destructive: true }]
+      ? [
+          {
+            key: "leave",
+            label: kind === "page" ? "Ne plus suivre" : "Quitter le groupe",
+            icon: LogOut,
+            onClick: onLeave,
+            destructive: true,
+          },
+        ]
       : []),
     ...(!isAdmin
-      ? [{ key: "block", label: "Bloquer", icon: Ban, onClick: () => flag.mutate({ f: "blocked", on: true }), destructive: true }]
+      ? [
+          {
+            key: "block",
+            label: "Bloquer",
+            icon: Ban,
+            onClick: () => flag.mutate({ f: "blocked", on: true }),
+            destructive: true,
+          },
+        ]
       : []),
   ];
 
   return (
     <>
-      <Button variant="secondary" size="icon" aria-label="Plus d'options" onClick={() => setOpen(true)}>
+      <Button
+        variant="secondary"
+        size="icon"
+        aria-label="Plus d'options"
+        onClick={() => setOpen(true)}
+      >
         <MoreHorizontal className="size-5" />
       </Button>
       <Sheet open={open} onOpenChange={setOpen}>
@@ -502,10 +584,18 @@ export function CommunityMoreButton({
           <DialogHeader>
             <DialogTitle>Signaler {kind === "page" ? "cette page" : "ce groupe"}</DialogTitle>
           </DialogHeader>
-          <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Raison (spam, arnaque, contenu choquant…)" />
+          <Input
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Raison (spam, arnaque, contenu choquant…)"
+          />
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setReportOpen(false)}>Annuler</Button>
-            <Button onClick={() => report.mutate()} disabled={report.isPending}>Envoyer</Button>
+            <Button variant="ghost" onClick={() => setReportOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={() => report.mutate()} disabled={report.isPending}>
+              Envoyer
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

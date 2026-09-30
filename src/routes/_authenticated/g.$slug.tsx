@@ -4,7 +4,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
-import { AdminIcons, CommunityMoreButton, InviteFriendsDialog } from "@/components/CommunityActions";
+import {
+  AdminIcons,
+  CommunityMoreButton,
+  InviteFriendsDialog,
+} from "@/components/CommunityActions";
 import { Lock, Settings, Share2, UserPlus, Users } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,7 +27,10 @@ export const Route = createFileRoute("/_authenticated/g/$slug")({
   head: () => ({
     meta: [
       { title: "Groupe — Gabomazone" },
-      { name: "description", content: "Rejoignez ce groupe et suivez ses discussions sur Gabomazone." },
+      {
+        name: "description",
+        content: "Rejoignez ce groupe et suivez ses discussions sur Gabomazone.",
+      },
       { property: "og:title", content: "Groupe — Gabomazone" },
       { property: "og:description", content: "Un groupe de la communauté Gabomazone." },
       { property: "og:type", content: "website" },
@@ -31,7 +38,10 @@ export const Route = createFileRoute("/_authenticated/g/$slug")({
     ],
   }),
   loader: ({ context, params }) => {
-    void context.queryClient.prefetchQuery({ queryKey: ["group", params.slug], queryFn: () => fetchGroupBySlug(params.slug) });
+    void context.queryClient.prefetchQuery({
+      queryKey: ["group", params.slug],
+      queryFn: () => fetchGroupBySlug(params.slug),
+    });
   },
   component: GroupDetail,
 });
@@ -45,7 +55,10 @@ function GroupDetail() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [term, setTerm] = useState("");
 
-  const { data: group, isPending } = useQuery({ queryKey: ["group", slug], queryFn: () => fetchGroupBySlug(slug) });
+  const { data: group, isPending } = useQuery({
+    queryKey: ["group", slug],
+    queryFn: () => fetchGroupBySlug(slug),
+  });
   const members = useQuery({
     queryKey: ["group-members", group?.id],
     queryFn: () => fetchGroupMembers(group!.id),
@@ -86,7 +99,15 @@ function GroupDetail() {
       queryClient.setQueryData(key, (old: M[] | undefined) =>
         membership
           ? (old ?? []).filter((m) => m.user_id !== user.id)
-          : [...(old ?? []), { user_id: user.id, role: "member", status: group?.is_private ? "pending" : "approved" } as unknown as M]);
+          : [
+              ...(old ?? []),
+              {
+                user_id: user.id,
+                role: "member",
+                status: group?.is_private ? "pending" : "approved",
+              } as unknown as M,
+            ],
+      );
       return { previous };
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["group-members", group?.id] }),
@@ -110,7 +131,9 @@ function GroupDetail() {
   const canSeeContent = isMember || !group.is_private;
   const shareUrl = buildShareUrl("g", slug);
   const needle = term.trim().toLowerCase();
-  const allPosts = (posts.data ?? []).filter((p) => !needle || (p.caption ?? "").toLowerCase().includes(needle));
+  const allPosts = (posts.data ?? []).filter(
+    (p) => !needle || (p.caption ?? "").toLowerCase().includes(needle),
+  );
   const photos = allPosts.filter((p) => p.media_url && p.media_type !== "video");
   const videos = allPosts.filter((p) => p.media_type === "video");
 
@@ -141,7 +164,11 @@ function GroupDetail() {
             />
           ) : (
             <span className="relative z-10 flex size-24 shrink-0 items-center justify-center rounded-full bg-secondary ring-4 ring-background shadow-md sm:size-28">
-              {group.is_private ? <Lock className="size-10 text-primary" /> : <Users className="size-10 text-primary" />}
+              {group.is_private ? (
+                <Lock className="size-10 text-primary" />
+              ) : (
+                <Users className="size-10 text-primary" />
+              )}
             </span>
           )}
           <div className="min-w-0 flex-1">
@@ -177,7 +204,11 @@ function GroupDetail() {
                     : "Rejoindre"}
             </Button>
           )}
-          <Button variant="secondary" className="flex-1" onClick={() => (isMember ? setInviteOpen(true) : share(true))}>
+          <Button
+            variant="secondary"
+            className="flex-1"
+            onClick={() => (isMember ? setInviteOpen(true) : share(true))}
+          >
             <UserPlus className="mr-2 size-4" /> Inviter
           </Button>
           <Button variant="secondary" className="flex-1" onClick={() => share(false)}>
@@ -195,16 +226,48 @@ function GroupDetail() {
             onSearch={() => setSearchOpen(true)}
             onLeave={() => toggleMembership.mutate()}
             adminItems={[
-              { key: "edit", label: "Modifier le groupe", icon: AdminIcons.Pencil, onClick: () => navigate({ to: "/group-settings/$slug", params: { slug: group.slug } }) },
-              { key: "settings", label: "Paramètres", icon: AdminIcons.Settings, onClick: () => navigate({ to: "/group-settings/$slug", params: { slug: group.slug } }) },
-              { key: "roles", label: "Gérer les rôles", icon: AdminIcons.Shield, onClick: () => navigate({ to: "/group-settings/$slug", params: { slug: group.slug } }) },
+              {
+                key: "edit",
+                label: "Modifier le groupe",
+                icon: AdminIcons.Pencil,
+                onClick: () =>
+                  navigate({ to: "/group-settings/$slug", params: { slug: group.slug } }),
+              },
+              {
+                key: "settings",
+                label: "Paramètres",
+                icon: AdminIcons.Settings,
+                onClick: () =>
+                  navigate({ to: "/group-settings/$slug", params: { slug: group.slug } }),
+              },
+              {
+                key: "roles",
+                label: "Gérer les rôles",
+                icon: AdminIcons.Shield,
+                onClick: () =>
+                  navigate({ to: "/group-settings/$slug", params: { slug: group.slug } }),
+              },
             ]}
           />
         </div>
         {searchOpen ? (
           <div className="flex gap-2">
-            <Input autoFocus value={term} onChange={(e) => setTerm(e.target.value)} placeholder="Rechercher dans le groupe" aria-label="Rechercher dans le groupe" />
-            <Button variant="ghost" onClick={() => { setTerm(""); setSearchOpen(false); }}>Fermer</Button>
+            <Input
+              autoFocus
+              value={term}
+              onChange={(e) => setTerm(e.target.value)}
+              placeholder="Rechercher dans le groupe"
+              aria-label="Rechercher dans le groupe"
+            />
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setTerm("");
+                setSearchOpen(false);
+              }}
+            >
+              Fermer
+            </Button>
           </div>
         ) : null}
       </header>
@@ -219,7 +282,9 @@ function GroupDetail() {
         name={group.name}
       />
 
-      {group.description ? <p className="px-1 text-sm leading-relaxed">{group.description}</p> : null}
+      {group.description ? (
+        <p className="px-1 text-sm leading-relaxed">{group.description}</p>
+      ) : null}
 
       <Tabs defaultValue="posts">
         <TabsList className="w-full justify-start overflow-x-auto">
@@ -253,13 +318,19 @@ function GroupDetail() {
           ) : allPosts.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucune publication pour le moment.</p>
           ) : (
-            allPosts.map((p) => <PostCard key={p.id} post={p} currentUserId={user.id} contextPosts={allPosts} />)
+            allPosts.map((p) => (
+              <PostCard key={p.id} post={p} currentUserId={user.id} contextPosts={allPosts} />
+            ))
           )}
         </TabsContent>
 
         <TabsContent value="about" className="pt-4">
           <div className="space-y-2 rounded-2xl border border-border/70 brand-surface p-4 text-sm">
-            {group.description ? <p>{group.description}</p> : <p className="text-muted-foreground">Aucune description.</p>}
+            {group.description ? (
+              <p>{group.description}</p>
+            ) : (
+              <p className="text-muted-foreground">Aucune description.</p>
+            )}
             <p className="text-xs text-muted-foreground">
               {group.is_private ? "Groupe privé" : "Groupe public"} · {approvedCount} membre(s)
             </p>

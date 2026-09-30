@@ -52,7 +52,7 @@ export function ProfileView({ profile }: { profile: ProfileRow }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isMe = user?.id === profile.id;
-  
+
   const { data, isPending } = useQuery({
     queryKey: ["user-posts", profile.id],
     queryFn: () => fetchUserPosts(profile.id),
@@ -120,7 +120,16 @@ export function ProfileView({ profile }: { profile: ProfileRow }) {
               <MessageButton profileId={profile.id} />
             </>
           )}
-          <Button variant="secondary" size="sm" onClick={() => void shareContent({ title: `${profile.display_name ?? profile.username} sur Gabomazone`, url: buildShareUrl("u", profile.username) })}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() =>
+              void shareContent({
+                title: `${profile.display_name ?? profile.username} sur Gabomazone`,
+                url: buildShareUrl("u", profile.username),
+              })
+            }
+          >
             <Share2 className="mr-1 size-4" /> Partager
           </Button>
         </div>
@@ -144,7 +153,12 @@ export function ProfileView({ profile }: { profile: ProfileRow }) {
             <p className="text-center text-sm text-muted-foreground">Aucune publication.</p>
           ) : (
             posts.map((post) => (
-              <PostCard key={post.id} post={post} currentUserId={user?.id ?? ""} contextPosts={posts} />
+              <PostCard
+                key={post.id}
+                post={post}
+                currentUserId={user?.id ?? ""}
+                contextPosts={posts}
+              />
             ))
           )}
         </TabsContent>
@@ -179,9 +193,11 @@ export function ProfileView({ profile }: { profile: ProfileRow }) {
                 </a>
               </li>
             )}
-            {!place && years === null && !profile.contact_email && !profile.phone && !profile.website && (
-              <li>Aucune information renseignée.</li>
-            )}
+            {!place &&
+              years === null &&
+              !profile.contact_email &&
+              !profile.phone &&
+              !profile.website && <li>Aucune information renseignée.</li>}
           </ul>
         </TabsContent>
 
@@ -201,7 +217,12 @@ function MediaGrid({
   items,
   empty,
 }: {
-  items: { id: string; media_url: string | null; media_type: string | null; caption: string | null }[];
+  items: {
+    id: string;
+    media_url: string | null;
+    media_type: string | null;
+    caption: string | null;
+  }[];
   empty: string;
 }) {
   const viewer = useMediaViewer();
@@ -214,7 +235,26 @@ function MediaGrid({
           key={post.id}
           to="/p/$postId"
           params={{ postId: post.id }}
-          onClick={async (event) => { if (!post.media_url || !viewer || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); const selected = await fetchPost(post.id); if (selected) viewer.open({ post: selected, posts: (await fetchUserPosts(selected.user_id)), kind: post.media_type === "video" ? "video" : "image", index: 0 }); }}
+          onClick={async (event) => {
+            if (
+              !post.media_url ||
+              !viewer ||
+              event.metaKey ||
+              event.ctrlKey ||
+              event.shiftKey ||
+              event.altKey
+            )
+              return;
+            event.preventDefault();
+            const selected = await fetchPost(post.id);
+            if (selected)
+              viewer.open({
+                post: selected,
+                posts: await fetchUserPosts(selected.user_id),
+                kind: post.media_type === "video" ? "video" : "image",
+                index: 0,
+              });
+          }}
           className="aspect-square overflow-hidden rounded-md"
         >
           <Media

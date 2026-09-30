@@ -12,7 +12,7 @@ export function loadVideoMeta(file: File): Promise<{ duration: number; url: stri
 }
 
 /**
-   * Découpe une vidéo à 60 s max en réencodant le segment choisi (audio conservé).
+ * Découpe une vidéo à 60 s max en réencodant le segment choisi (audio conservé).
  * Fonctionne dans les navigateurs mobiles modernes via MediaRecorder + captureStream.
  */
 export async function trimVideo(
@@ -30,13 +30,15 @@ export async function trimVideo(
     video.onerror = () => reject(new Error("Vidéo illisible"));
   });
 
-  const capture = (video as HTMLVideoElement & {
+  const capture = video as HTMLVideoElement & {
     captureStream?: () => MediaStream;
     mozCaptureStream?: () => MediaStream;
-  });
+  };
   const getStream = capture.captureStream ?? capture.mozCaptureStream;
   if (typeof getStream !== "function" || typeof MediaRecorder === "undefined") {
-     throw new Error("Découpage impossible sur cet appareil : choisissez une vidéo de 60 s maximum.");
+    throw new Error(
+      "Découpage impossible sur cet appareil : choisissez une vidéo de 60 s maximum.",
+    );
   }
 
   video.currentTime = startSeconds;
@@ -45,8 +47,8 @@ export async function trimVideo(
   });
 
   const stream = getStream.call(video);
-  const mimeType = ["video/webm;codecs=vp8,opus", "video/webm", "video/mp4"].find(
-    (type) => MediaRecorder.isTypeSupported?.(type),
+  const mimeType = ["video/webm;codecs=vp8,opus", "video/webm", "video/mp4"].find((type) =>
+    MediaRecorder.isTypeSupported?.(type),
   );
   const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
   const chunks: BlobPart[] = [];

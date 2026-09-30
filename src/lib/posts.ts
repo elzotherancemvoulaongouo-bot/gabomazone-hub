@@ -5,7 +5,6 @@ import { MEDIA_BUCKET } from "@/lib/media";
 export const POST_SELECT =
   "id, user_id, page_id, group_id, as_community, media_url, media_type, caption, location, visibility, created_at, media:post_media(path, media_type, position), author:profiles!posts_author_profile_fkey(username, display_name, avatar_url), page:pages!posts_page_id_fkey(name, slug, avatar_url), group:groups!posts_group_id_fkey(name, slug, avatar_url), likes(user_id), comments(count)";
 
-
 export type NewPostMedia = { path: string; type: string };
 
 /** Crée une publication avec un ou plusieurs médias (le premier reste dans media_url). */
@@ -135,7 +134,12 @@ export async function uploadPostMedia(userId: string, file: File) {
 
 export async function updatePost(
   postId: string,
-  values: { caption: string | null; location: string | null; media_url?: string | null; media_type?: string | null },
+  values: {
+    caption: string | null;
+    location: string | null;
+    media_url?: string | null;
+    media_type?: string | null;
+  },
 ) {
   const { error } = await supabase.from("posts").update(values).eq("id", postId);
   if (error) throw error;

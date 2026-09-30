@@ -83,7 +83,6 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-
   const save = useMutation({
     mutationFn: async () => {
       const username = form.username.trim().toLowerCase();
@@ -129,20 +128,61 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
       }}
     >
       <div className="space-y-4">
-        <CoverPhoto path={coverPath} editable userId={userId} onSave={async (value) => { const { error } = await supabase.from("profiles").update({ cover_url: value }).eq("id", userId); if (error) throw error; setCoverPath(value); await queryClient.invalidateQueries({ queryKey: ["profile"] }); }} />
-        <AvatarPhotoEditor path={avatarPath} name={form.username} userId={userId} onSave={async (value) => { const { error } = await supabase.from("profiles").update({ avatar_url: value }).eq("id", userId); if (error) throw error; setAvatarPath(value); await queryClient.invalidateQueries({ queryKey: ["profile"] }); }} />
+        <CoverPhoto
+          path={coverPath}
+          editable
+          userId={userId}
+          onSave={async (value) => {
+            const { error } = await supabase
+              .from("profiles")
+              .update({ cover_url: value })
+              .eq("id", userId);
+            if (error) throw error;
+            setCoverPath(value);
+            await queryClient.invalidateQueries({ queryKey: ["profile"] });
+          }}
+        />
+        <AvatarPhotoEditor
+          path={avatarPath}
+          name={form.username}
+          userId={userId}
+          onSave={async (value) => {
+            const { error } = await supabase
+              .from("profiles")
+              .update({ avatar_url: value })
+              .eq("id", userId);
+            if (error) throw error;
+            setAvatarPath(value);
+            await queryClient.invalidateQueries({ queryKey: ["profile"] });
+          }}
+        />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field id="username" label="Pseudo" value={form.username} onChange={(v) => set("username", v)} />
+        <Field
+          id="username"
+          label="Pseudo"
+          value={form.username}
+          onChange={(v) => set("username", v)}
+        />
         <Field
           id="display_name"
           label="Nom affiché"
           value={form.display_name}
           onChange={(v) => set("display_name", v)}
         />
-        <Field id="first_name" label="Prénom" value={form.first_name} onChange={(v) => set("first_name", v)} />
-        <Field id="last_name" label="Nom" value={form.last_name} onChange={(v) => set("last_name", v)} />
+        <Field
+          id="first_name"
+          label="Prénom"
+          value={form.first_name}
+          onChange={(v) => set("first_name", v)}
+        />
+        <Field
+          id="last_name"
+          label="Nom"
+          value={form.last_name}
+          onChange={(v) => set("last_name", v)}
+        />
         <Field
           id="birthdate"
           label="Date de naissance"
@@ -153,7 +193,13 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
         <Field id="gender" label="Genre" value={form.gender} onChange={(v) => set("gender", v)} />
         <Field id="country" label="Pays" value={form.country} onChange={(v) => set("country", v)} />
         <Field id="city" label="Ville" value={form.city} onChange={(v) => set("city", v)} />
-        <Field id="phone" label="Téléphone" type="tel" value={form.phone} onChange={(v) => set("phone", v)} />
+        <Field
+          id="phone"
+          label="Téléphone"
+          type="tel"
+          value={form.phone}
+          onChange={(v) => set("phone", v)}
+        />
         <Field
           id="contact_email"
           label="E-mail de contact"
@@ -161,7 +207,12 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
           value={form.contact_email}
           onChange={(v) => set("contact_email", v)}
         />
-        <Field id="website" label="Site web" value={form.website} onChange={(v) => set("website", v)} />
+        <Field
+          id="website"
+          label="Site web"
+          value={form.website}
+          onChange={(v) => set("website", v)}
+        />
       </div>
 
       <div className="space-y-2">
@@ -176,7 +227,7 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
         />
       </div>
 
-       <Button type="submit" className="h-12 w-full" disabled={save.isPending}>
+      <Button type="submit" className="h-12 w-full" disabled={save.isPending}>
         {save.isPending ? "Enregistrement…" : "Enregistrer"}
       </Button>
     </form>

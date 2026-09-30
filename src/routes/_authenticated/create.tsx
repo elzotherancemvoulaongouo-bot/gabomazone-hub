@@ -39,7 +39,14 @@ function CreatePage() {
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0] ?? null;
-    if (selected) { const error = validatePostFile(selected); if (error) { toast.error(error); e.target.value = ""; return; } }
+    if (selected) {
+      const error = validatePostFile(selected);
+      if (error) {
+        toast.error(error);
+        e.target.value = "";
+        return;
+      }
+    }
     if (preview) URL.revokeObjectURL(preview);
     setFile(selected);
     setPreview(selected ? URL.createObjectURL(selected) : null);
@@ -52,7 +59,12 @@ function CreatePage() {
     setUploading(true);
     try {
       const media = file ? [await uploadPostMedia(user.id, file)] : [];
-      await createPost({ userId: user.id, media, caption: text || null, location: location.trim() || null });
+      await createPost({
+        userId: user.id,
+        media,
+        caption: text || null,
+        location: location.trim() || null,
+      });
 
       await queryClient.invalidateQueries({ queryKey: ["feed"] });
       toast.success("Publication en ligne !");
@@ -94,7 +106,7 @@ function CreatePage() {
         )}
         <input
           type="file"
-           accept={`${PHOTO_ACCEPT},${VIDEO_ACCEPT}`}
+          accept={`${PHOTO_ACCEPT},${VIDEO_ACCEPT}`}
           className="hidden"
           onChange={onFileChange}
         />

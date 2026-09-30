@@ -30,8 +30,13 @@ export const Route = createFileRoute("/_authenticated/feed")({
 
 function FeedPage() {
   const { user } = Route.useRouteContext();
-  const { posts: allPosts, isPending, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useInfiniteFeed();
+  const {
+    posts: allPosts,
+    isPending,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteFeed();
   const { data: hidden } = useHiddenPostIds(user.id);
   const { data: blocked } = useBlockedIds(user.id);
   const { data: settings } = useSettings(user.id);
@@ -68,7 +73,11 @@ function FeedPage() {
         </>
       ) : posts.length > 0 ? (
         posts.map((post, index) => (
-          <LazyMount key={post.id} keepMounted={index < 3} placeholderHeight={post.media_url ? 520 : 200}>
+          <LazyMount
+            key={post.id}
+            keepMounted={index < 3}
+            placeholderHeight={post.media_url ? 520 : 200}
+          >
             <PostCard post={post} currentUserId={user.id} contextPosts={posts} />
           </LazyMount>
         ))

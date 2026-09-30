@@ -3,7 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchUnreadMessagesCount } from "@/lib/messages";
 
-export type NotificationType = "message" | "friend_accepted" | "like" | "comment" | "page_invite" | "group_invite";
+export type NotificationType =
+  "message" | "friend_accepted" | "like" | "comment" | "page_invite" | "group_invite";
 
 export type NotificationRow = {
   id: string;
@@ -37,7 +38,6 @@ export async function fetchNotifications() {
   if (error) throw error;
   return (data ?? []) as unknown as NotificationRow[];
 }
-
 
 export async function markAllNotificationsRead() {
   const { error } = await supabase

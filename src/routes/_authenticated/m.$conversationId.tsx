@@ -70,7 +70,12 @@ function ThreadPage() {
       .channel(`messages-${conversationId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` },
+        {
+          event: "*",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
         () => {
           queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
           queryClient.invalidateQueries({ queryKey: ["conversations"] });
@@ -126,10 +131,16 @@ function ThreadPage() {
           </Link>
         </Button>
         {peer ? (
-          <Link to="/u/$username" params={{ username: peer.username }} className="flex items-center gap-3">
+          <Link
+            to="/u/$username"
+            params={{ username: peer.username }}
+            className="flex items-center gap-3"
+          >
             <UserAvatar avatarPath={peer.avatar_url} name={peer.username} />
             <span>
-              <span className="block text-sm font-semibold">{peer.display_name || peer.username}</span>
+              <span className="block text-sm font-semibold">
+                {peer.display_name || peer.username}
+              </span>
               <span className="block text-xs text-muted-foreground">@{peer.username}</span>
             </span>
           </Link>
@@ -151,7 +162,9 @@ function ThreadPage() {
                 <div
                   className={cn(
                     "max-w-[80%] rounded-2xl px-3 py-2 text-sm",
-                    mine ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground",
+                    mine
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-secondary-foreground",
                   )}
                 >
                   {m.kind === "voice" && m.audio_path ? (

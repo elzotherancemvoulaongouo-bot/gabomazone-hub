@@ -40,7 +40,9 @@ export function usePostActions(userId: string) {
           .eq("user_id", userId);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("saved_posts").insert({ post_id: postId, user_id: userId });
+        const { error } = await supabase
+          .from("saved_posts")
+          .insert({ post_id: postId, user_id: userId });
         if (error) throw error;
       }
     },
@@ -53,7 +55,9 @@ export function usePostActions(userId: string) {
 
   const hidePost = useMutation({
     mutationFn: async (postId: string) => {
-      const { error } = await supabase.from("hidden_posts").insert({ post_id: postId, user_id: userId });
+      const { error } = await supabase
+        .from("hidden_posts")
+        .insert({ post_id: postId, user_id: userId });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -71,8 +75,7 @@ export function usePostActions(userId: string) {
       if (error) throw error;
     },
     onSuccess: () => toast.success("Merci, votre signalement a été transmis."),
-    onError: (err) =>
-      toast.error(err instanceof Error ? err.message : "Signalement impossible"),
+    onError: (err) => toast.error(err instanceof Error ? err.message : "Signalement impossible"),
   });
 
   return { toggleSave, hidePost, reportPost };
@@ -85,13 +88,20 @@ export function useBlockedUsers(userId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("blocked_users")
-        .select("blocked_id, created_at, profile:profiles!inner(id, username, display_name, avatar_url)")
+        .select(
+          "blocked_id, created_at, profile:profiles!inner(id, username, display_name, avatar_url)",
+        )
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as unknown as {
         blocked_id: string;
         created_at: string;
-        profile: { id: string; username: string; display_name: string | null; avatar_url: string | null };
+        profile: {
+          id: string;
+          username: string;
+          display_name: string | null;
+          avatar_url: string | null;
+        };
       }[];
     },
     enabled: Boolean(userId),

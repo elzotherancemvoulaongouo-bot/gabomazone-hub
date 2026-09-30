@@ -25,7 +25,10 @@ export const Route = createFileRoute("/_authenticated/notifications")({
           "Vos alertes Gabomazone : nouveaux messages, demandes d'amis acceptées, j'aime et commentaires.",
       },
       { property: "og:title", content: "Notifications — Gabomazone" },
-      { property: "og:description", content: "Suivez toute l'activité de votre compte Gabomazone." },
+      {
+        property: "og:description",
+        content: "Suivez toute l'activité de votre compte Gabomazone.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -57,7 +60,12 @@ function NotificationsPage() {
       <div className="flex items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-bold">Notifications</h1>
         {unread > 0 ? (
-          <Button variant="ghost" size="sm" onClick={() => readAll.mutate()} disabled={readAll.isPending}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => readAll.mutate()}
+            disabled={readAll.isPending}
+          >
             Tout marquer comme lu
           </Button>
         ) : null}
@@ -108,14 +116,20 @@ function NotificationItem({ notification: n }: { notification: NotificationRow }
         {n.preview ? <p className="truncate text-xs text-muted-foreground">{n.preview}</p> : null}
         <p className="text-xs text-muted-foreground">{timeAgo(n.created_at)}</p>
       </div>
-      <Icon className={cn("size-5 shrink-0", n.read_at ? "text-muted-foreground" : "text-primary")} />
+      <Icon
+        className={cn("size-5 shrink-0", n.read_at ? "text-muted-foreground" : "text-primary")}
+      />
     </div>
   );
 
   if (n.type === "message" && n.conversation_id) {
     return (
       <li>
-        <Link to="/m/$conversationId" params={{ conversationId: n.conversation_id }} onClick={onOpen}>
+        <Link
+          to="/m/$conversationId"
+          params={{ conversationId: n.conversation_id }}
+          onClick={onOpen}
+        >
           {body}
         </Link>
       </li>
@@ -142,9 +156,5 @@ function NotificationItem({ notification: n }: { notification: NotificationRow }
       </li>
     );
   }
-  return (
-    <li onClick={onOpen}>
-      {body}
-    </li>
-  );
+  return <li onClick={onOpen}>{body}</li>;
 }

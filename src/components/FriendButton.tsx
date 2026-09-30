@@ -43,7 +43,12 @@ export function FriendButton({ profileId }: { profileId: string }) {
 
   if (state === "friends") {
     return (
-      <Button variant="secondary" size="sm" disabled={busy} onClick={() => mutation.mutate("remove")}>
+      <Button
+        variant="secondary"
+        size="sm"
+        disabled={busy}
+        onClick={() => mutation.mutate("remove")}
+      >
         <UserCheck className="size-4" /> Amis
       </Button>
     );
@@ -63,7 +68,12 @@ export function FriendButton({ profileId }: { profileId: string }) {
         <Button size="sm" disabled={busy} onClick={() => mutation.mutate("accept")}>
           <Check className="size-4" /> Accepter
         </Button>
-        <Button variant="outline" size="sm" disabled={busy} onClick={() => mutation.mutate("decline")}>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={busy}
+          onClick={() => mutation.mutate("decline")}
+        >
           <X className="size-4" /> Refuser
         </Button>
       </div>

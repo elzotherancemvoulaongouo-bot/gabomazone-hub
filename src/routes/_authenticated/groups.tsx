@@ -38,7 +38,10 @@ function GroupsPage() {
   const [isPrivate, setIsPrivate] = useState(false);
 
   const all = useQuery({ queryKey: ["groups"], queryFn: fetchGroups });
-  const mine = useQuery({ queryKey: ["my-groups", user.id], queryFn: () => fetchMyGroups(user.id) });
+  const mine = useQuery({
+    queryKey: ["my-groups", user.id],
+    queryFn: () => fetchMyGroups(user.id),
+  });
 
   const create = useMutation({
     mutationFn: () => createGroup(user.id, { name, description, isPrivate }),
@@ -74,7 +77,12 @@ function GroupsPage() {
         >
           <div className="space-y-2">
             <Label htmlFor="group-name">Nom du groupe</Label>
-            <Input id="group-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Amis de Libreville" />
+            <Input
+              id="group-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Amis de Libreville"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="group-desc">Description</Label>
@@ -143,7 +151,11 @@ function GroupItem({ group }: { group: GroupRow }) {
         className="flex items-center gap-3 rounded-2xl border border-border/70 brand-surface px-4 py-3"
       >
         <span className="flex size-10 items-center justify-center rounded-full bg-secondary">
-          {group.is_private ? <Lock className="size-5 text-primary" /> : <Users className="size-5 text-primary" />}
+          {group.is_private ? (
+            <Lock className="size-5 text-primary" />
+          ) : (
+            <Users className="size-5 text-primary" />
+          )}
         </span>
         <span className="min-w-0">
           <span className="block truncate text-sm font-semibold">{group.name}</span>

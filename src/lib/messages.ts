@@ -46,7 +46,10 @@ export async function fetchConversations(me: string) {
     profiles = (res.data ?? []) as FriendProfile[];
   }
   const byId = new Map(profiles.map((p) => [p.id, p]));
-  return rows.map((row) => ({ conversation: row, profile: byId.get(otherUserId(row, me)) ?? null }));
+  return rows.map((row) => ({
+    conversation: row,
+    profile: byId.get(otherUserId(row, me)) ?? null,
+  }));
 }
 
 export async function getOrCreateConversation(me: string, other: string) {
@@ -80,7 +83,11 @@ export async function fetchConversation(id: string) {
 }
 
 export async function fetchProfile(id: string) {
-  const { data, error } = await supabase.from("profiles").select(PROFILE_FIELDS).eq("id", id).single();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select(PROFILE_FIELDS)
+    .eq("id", id)
+    .single();
   if (error) throw error;
   return data as FriendProfile;
 }
@@ -88,7 +95,9 @@ export async function fetchProfile(id: string) {
 export async function fetchMessages(conversationId: string) {
   const { data, error } = await supabase
     .from("messages")
-    .select("id, conversation_id, sender_id, kind, content, audio_path, duration_seconds, read_at, created_at")
+    .select(
+      "id, conversation_id, sender_id, kind, content, audio_path, duration_seconds, read_at, created_at",
+    )
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true });
   if (error) throw error;

@@ -1,13 +1,28 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
 import type { FeedPost } from "@/components/PostCard";
 import { MediaViewer } from "@/components/MediaViewer";
 
-type Selection = { post: FeedPost; kind: "video" | "image"; index: number; posts?: FeedPost[] | undefined };
+type Selection = {
+  post: FeedPost;
+  kind: "video" | "image";
+  index: number;
+  posts?: FeedPost[] | undefined;
+};
 type ViewerContextValue = { open: (selection: Selection) => void };
 const ViewerContext = createContext<ViewerContextValue | null>(null);
 
-export function useMediaViewer() { return useContext(ViewerContext); }
+export function useMediaViewer() {
+  return useContext(ViewerContext);
+}
 
 export function MediaViewerProvider({ children, userId }: { children: ReactNode; userId: string }) {
   const [selection, setSelection] = useState<Selection | null>(null);
@@ -37,11 +52,20 @@ export function MediaViewerProvider({ children, userId }: { children: ReactNode;
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, [selection]);
-  return <ViewerContext.Provider value={{ open }}>
-    {children}
-    {selection && typeof document !== "undefined" && createPortal(
-      <MediaViewer key={`${selection.post.id}-${selection.kind}`} {...selection} userId={userId} onClose={close} />,
-      document.body,
-    )}
-  </ViewerContext.Provider>;
+  return (
+    <ViewerContext.Provider value={{ open }}>
+      {children}
+      {selection &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <MediaViewer
+            key={`${selection.post.id}-${selection.kind}`}
+            {...selection}
+            userId={userId}
+            onClose={close}
+          />,
+          document.body,
+        )}
+    </ViewerContext.Provider>
+  );
 }

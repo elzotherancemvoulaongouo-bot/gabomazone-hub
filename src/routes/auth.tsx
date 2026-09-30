@@ -33,7 +33,11 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const router = useRouter();
-  const goAfterLogin = () => { const t = consumeAfterLogin(); if (t) router.history.replace(t); else navigate({ to: "/feed", replace: true }); };
+  const goAfterLogin = () => {
+    const t = consumeAfterLogin();
+    if (t) router.history.replace(t);
+    else navigate({ to: "/feed", replace: true });
+  };
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -119,7 +123,10 @@ function AuthPage() {
           Partagez vos photos, vidéos et moments avec la communauté.
         </p>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4 rounded-2xl border border-border/70 p-5 brand-surface">
+        <form
+          onSubmit={handleSubmit}
+          className="mt-8 space-y-4 rounded-2xl border border-border/70 p-5 brand-surface"
+        >
           {notice && (
             <p className="rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm text-foreground">
               {notice}
@@ -175,9 +182,7 @@ function AuthPage() {
             onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
             className="w-full text-center text-sm text-muted-foreground hover:text-primary"
           >
-            {mode === "signin"
-              ? "Pas encore de compte ? S'inscrire"
-              : "Déjà membre ? Se connecter"}
+            {mode === "signin" ? "Pas encore de compte ? S'inscrire" : "Déjà membre ? Se connecter"}
           </button>
         </form>
       </div>

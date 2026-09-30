@@ -24,7 +24,10 @@ export const Route = createFileRoute("/_authenticated/page-settings/$slug")({
   head: () => ({
     meta: [
       { title: "Paramètres de la page — Gabomazone" },
-      { name: "description", content: "Gérez les informations, le logo et les administrateurs de votre page." },
+      {
+        name: "description",
+        content: "Gérez les informations, le logo et les administrateurs de votre page.",
+      },
       { property: "og:title", content: "Paramètres de la page — Gabomazone" },
       { property: "og:description", content: "Configurez votre page Gabomazone." },
       { property: "og:type", content: "website" },
@@ -40,7 +43,10 @@ function PageSettings() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: page, isPending } = useQuery({ queryKey: ["page", slug], queryFn: () => fetchPageBySlug(slug) });
+  const { data: page, isPending } = useQuery({
+    queryKey: ["page", slug],
+    queryFn: () => fetchPageBySlug(slug),
+  });
   const admins = useQuery({
     queryKey: ["page-admins", page?.id],
     queryFn: () => fetchPageAdmins(page!.id),
@@ -93,7 +99,6 @@ function PageSettings() {
     onError: (err) => toast.error(err instanceof Error ? err.message : "Enregistrement impossible"),
   });
 
-
   const addAdmin = useMutation({
     mutationFn: () => addPageAdminByUsername(page!.id, newAdmin),
     onSuccess: async () => {
@@ -136,8 +141,25 @@ function PageSettings() {
     <section className="space-y-6">
       <h1 className="font-display text-2xl font-bold">Paramètres de la page</h1>
 
-      <CoverPhoto path={page.cover_url ?? null} editable userId={user.id} onSave={async (value) => { await updatePage(page.id, { cover_url: value }); await queryClient.invalidateQueries({ queryKey: ["page", slug] }); }} />
-      <AvatarPhotoEditor path={page.avatar_url} name={page.name} userId={user.id} label="Changer le logo" onSave={async (path) => { await updatePage(page.id, { avatar_url: path }); await queryClient.invalidateQueries({ queryKey: ["page", slug] }); }} />
+      <CoverPhoto
+        path={page.cover_url ?? null}
+        editable
+        userId={user.id}
+        onSave={async (value) => {
+          await updatePage(page.id, { cover_url: value });
+          await queryClient.invalidateQueries({ queryKey: ["page", slug] });
+        }}
+      />
+      <AvatarPhotoEditor
+        path={page.avatar_url}
+        name={page.name}
+        userId={user.id}
+        label="Changer le logo"
+        onSave={async (path) => {
+          await updatePage(page.id, { avatar_url: path });
+          await queryClient.invalidateQueries({ queryKey: ["page", slug] });
+        }}
+      />
 
       <form
         className="space-y-3"
@@ -180,7 +202,10 @@ function PageSettings() {
             placeholder="Pseudo du membre"
             aria-label="Pseudo du nouvel administrateur"
           />
-          <Button onClick={() => addAdmin.mutate()} disabled={!newAdmin.trim() || addAdmin.isPending}>
+          <Button
+            onClick={() => addAdmin.mutate()}
+            disabled={!newAdmin.trim() || addAdmin.isPending}
+          >
             <UserPlus className="size-4" />
           </Button>
         </div>
@@ -194,7 +219,12 @@ function PageSettings() {
               <span className="min-w-0 flex-1 truncate text-sm">
                 {a.profile?.display_name || a.profile?.username}
               </span>
-              <Button variant="ghost" size="icon" onClick={() => removeAdmin.mutate(a.user_id)} aria-label="Retirer">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => removeAdmin.mutate(a.user_id)}
+                aria-label="Retirer"
+              >
                 <Trash2 className="size-4" />
               </Button>
             </li>
@@ -203,7 +233,12 @@ function PageSettings() {
       </div>
 
       {page.owner_id === user.id ? (
-        <Button variant="destructive" className="w-full" onClick={() => remove.mutate()} disabled={remove.isPending}>
+        <Button
+          variant="destructive"
+          className="w-full"
+          onClick={() => remove.mutate()}
+          disabled={remove.isPending}
+        >
           <Trash2 className="mr-2 size-4" /> Supprimer la page
         </Button>
       ) : null}
