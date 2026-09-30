@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      banned_words: {
+        Row: {
+          created_at: string
+          id: string
+          severity: string
+          word: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          severity?: string
+          word: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          severity?: string
+          word?: string
+        }
+        Relationships: []
+      }
       blocked_users: {
         Row: {
           blocked_id: string
@@ -37,6 +58,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          moderation_status: string
           post_id: string
           user_id: string
         }
@@ -44,6 +66,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          moderation_status?: string
           post_id: string
           user_id: string
         }
@@ -51,6 +74,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          moderation_status?: string
           post_id?: string
           user_id?: string
         }
@@ -483,6 +507,50 @@ export type Database = {
           },
         ]
       }
+      moderation_actions: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          moderator_id: string
+          note: string | null
+          report_id: string | null
+          target_id: string
+          target_type: string
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          moderator_id: string
+          note?: string | null
+          report_id?: string | null
+          target_id: string
+          target_type: string
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          moderator_id?: string
+          note?: string | null
+          report_id?: string | null
+          target_id?: string
+          target_type?: string
+          target_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_actions_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           actor_id: string | null
@@ -750,6 +818,7 @@ export type Database = {
           location: string | null
           media_type: string | null
           media_url: string | null
+          moderation_status: string
           page_id: string | null
           user_id: string
           visibility: string
@@ -763,6 +832,7 @@ export type Database = {
           location?: string | null
           media_type?: string | null
           media_url?: string | null
+          moderation_status?: string
           page_id?: string | null
           user_id: string
           visibility?: string
@@ -776,6 +846,7 @@ export type Database = {
           location?: string | null
           media_type?: string | null
           media_url?: string | null
+          moderation_status?: string
           page_id?: string | null
           user_id?: string
           visibility?: string
@@ -861,6 +932,45 @@ export type Database = {
           updated_at?: string
           username?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reporter_id: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_id?: string
+          target_type?: string
         }
         Relationships: []
       }
@@ -973,6 +1083,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           autoplay_videos: boolean
@@ -1063,12 +1194,47 @@ export type Database = {
         }
         Relationships: []
       }
+      user_suspensions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          reason: string | null
+          until: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reason?: string | null
+          until: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reason?: string | null
+          until?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
       is_conversation_participant: {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
@@ -1083,13 +1249,25 @@ export type Database = {
         Returns: boolean
       }
       is_group_public: { Args: { _group_id: string }; Returns: boolean }
+      is_moderator: { Args: { _user_id: string }; Returns: boolean }
       is_page_admin: {
         Args: { _page_id: string; _user_id: string }
         Returns: boolean
       }
+      is_suspended: { Args: { _user_id: string }; Returns: boolean }
+      moderate_report: {
+        Args: {
+          _action: string
+          _days?: number
+          _note?: string
+          _report_id: string
+        }
+        Returns: undefined
+      }
+      moderation_normalize: { Args: { _t: string }; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1216,6 +1394,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
