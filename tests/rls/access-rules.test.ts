@@ -126,6 +126,8 @@ describe.skipIf(!TOKEN || !USER_ID)("Membre connecté", () => {
     const { data } = await me.from("group_members").select("group_id, role").eq("user_id", uid).neq("role", "admin").limit(1);
     const row = data?.[0];
     if (!row) return;
+    const { data: isAdmin } = await me.rpc("is_group_admin", { _group_id: row.group_id, _user_id: uid });
+    if (isAdmin) return;
     const r = await me.from("group_members").update({ role: "admin" }).eq("group_id", row.group_id).eq("user_id", uid).select("role");
     expect(r.data ?? []).toHaveLength(0);
   });
