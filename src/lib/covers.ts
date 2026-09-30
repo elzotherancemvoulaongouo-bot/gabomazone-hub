@@ -15,7 +15,7 @@ export function validateCoverFile(file: File) {
     return "Format non pris en charge. Utilisez une image JPG, PNG ou WEBP.";
   }
   if (file.size > COVER_MAX_BYTES) {
-    return `Image trop lourde (${(file.size / 1024 / 1024).toFixed(1)} Mo). Maximum : 5 Mo.`;
+    return `Image trop lourde (${(file.size / 1024 / 1024).toFixed(1)} Mo). Maximum : 10 Mo.`;
   }
   return null;
 }

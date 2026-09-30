@@ -64,11 +64,11 @@ export function ImageCropDialog({ file, spec, onClose, onSave }: { file: File | 
   return <Dialog open={Boolean(file)} onOpenChange={(open) => { if (!open && !saving) onClose(); }}>
     <DialogContent className="max-h-[90dvh] max-w-lg overflow-y-auto">
       <DialogHeader><DialogTitle>Recadrer — {spec.title}</DialogTitle><DialogDescription>Déplacez la photo et ajustez le zoom. Aperçu du résultat avant enregistrement.</DialogDescription></DialogHeader>
-      <div ref={frame} className="relative mx-auto w-full touch-none overflow-hidden border border-border bg-muted" style={{ aspectRatio: ratio }}
+       <div ref={frame} className="relative mx-auto w-full touch-none overflow-hidden border border-border bg-muted" style={{ aspectRatio: ratio }}
         onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); drag.current = { x: event.clientX, y: event.clientY, ox: offset.x, oy: offset.y }; }}
         onPointerMove={(event) => { if (drag.current) setOffset(clamp(drag.current.ox + event.clientX - drag.current.x, drag.current.oy + event.clientY - drag.current.y)); }}
         onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }}>
-        {src ? <img ref={image} src={src} alt="Aperçu du recadrage" draggable={false} onLoad={() => { const g = geometry(); if (g) setOffset({ x: (g.w - g.dw) / 2, y: (g.h - g.dh) / 2 }); }} className="max-w-none origin-top-left select-none" style={{ transform: `translate(${offset.x}px, ${offset.y}px)`, width: geometry() ? `${geometry()?.dw}px` : undefined }} /> : null}
+         {src ? <img ref={image} src={src} alt="Aperçu du recadrage" draggable={false} onLoad={() => { const g = geometry(); if (g) setOffset({ x: (g.w - g.dw) / 2, y: (g.h - g.dh) / 2 }); }} className="absolute left-0 top-0 max-w-none origin-top-left select-none" style={{ transform: `translate(${offset.x}px, ${offset.y}px)`, width: geometry() ? `${geometry()?.dw}px` : undefined }} /> : null}
       </div>
       <div className="flex items-center gap-3"><span className="text-sm">Zoom</span><Slider value={[zoom]} min={1} max={3} step={0.01} className="flex-1" onValueChange={(values) => { const level = values[0] ?? 1; setZoom(level); setOffset((prev) => clamp(prev.x, prev.y, level)); }} /></div>
       <DialogFooter><Button variant="secondary" onClick={onClose} disabled={saving}>Annuler</Button><Button onClick={confirm} disabled={saving}>{saving ? "Enregistrement…" : "Enregistrer"}</Button></DialogFooter>
