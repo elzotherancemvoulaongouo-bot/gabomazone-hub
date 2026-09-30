@@ -1,10 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { fetchFeed } from "@/lib/posts";
+import { POST_SELECT } from "@/lib/posts";
+import { rankPosts } from "@/lib/feed";
+import type { FeedPost } from "@/components/PostCard";
+import { ExploreTile } from "@/components/ExploreTile";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { UserAvatar } from "@/components/Avatar";
-import { Media } from "@/components/Media";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
@@ -23,10 +27,21 @@ export const Route = createFileRoute("/_authenticated/explore")({
 
 function ExplorePage() {
   const { q } = Route.useSearch();
+  const { user } = Route.useRouteContext();
+  const [filter, setFilter] = useState("Pour vous");
   const [tab, setTab] = useState("all");
   const term = q.trim();
   const matching = `%${term.replace(/[%,()]/g, "")}%`;
-  const { data: feed, isPending: loadingPosts } = useQuery({ queryKey: ["feed"], queryFn: fetchFeed, enabled: !term });
+  const { data: discoveries, isPending: loadingPosts } = useQuery({ queryKey: ["explore-recommendations", user.id], enabled: !term, queryFn: async () => {
+    const [posts, follows, friends] = await Promise.all([
+      supabase.from("posts").select(POST_SELECT).eq("visibility", "public").order("created_at", { ascending: false }).limit(100),
+      supabase.from("follows").select("following_id").eq("follower_id", user.id),
+      supabase.from("friend_requests").select("sender_id, receiver_id").eq("status", "accepted").or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`),
+    ]);
+    if (posts.error) throw posts.error;
+    const familiar = new Set([user.id, ...(follows.data ?? []).map((row) => row.following_id), ...(friends.data ?? []).map((row) => row.sender_id === user.id ? row.receiver_id : row.sender_id)]);
+    return rankPosts((posts.data ?? [] as unknown as FeedPost[]).filter((post) => !familiar.has(post.user_id)), "popular");
+  } });
   const { data: searchedPosts, isPending: searchingPosts } = useQuery({
     queryKey: ["search-posts", term], enabled: term.length > 0,
     queryFn: async () => {
@@ -58,13 +73,19 @@ function ExplorePage() {
   }, enabled: term.length > 0 });
   const foundGroups = (groups ?? []).filter((g) => g.name.toLocaleLowerCase().includes(term.toLocaleLowerCase()));
   const foundPages = (pages ?? []).filter((p) => p.name.toLocaleLowerCase().includes(term.toLocaleLowerCase()));
-  const posts = term ? searchedPosts ?? [] : feed ?? [];
-  const postGrid = <div className="grid grid-cols-3 gap-1">{(term ? searchingPosts : loadingPosts) ? Array.from({ length: 9 }).map((_, i) => <Skeleton key={i} className="aspect-square w-full rounded-md" />) : posts.length === 0 ? <p className="col-span-3 py-6 text-sm text-muted-foreground">Aucune publication trouvée.</p> : posts.map((post) => <Link key={post.id} to="/p/$postId" params={{ postId: post.id }} className="aspect-square overflow-hidden rounded-md"><Media path={post.media_url} type={post.media_type} alt={post.caption ?? "Publication"} fallbackText={post.caption} className="size-full object-cover" /></Link>)}</div>;
+  const posts = term ? searchedPosts ?? [] : (discoveries ?? []).filter((post) => {
+    if (filter === "Photos") return post.media_type === "image";
+    if (filter === "Vidéos") return post.media_type === "video";
+    if (filter === "Groupes") return Boolean(post.group_id);
+    if (filter === "Pages") return Boolean(post.page_id);
+    return true;
+  });
+  const postGrid = <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">{(term ? searchingPosts : loadingPosts) ? Array.from({ length: 9 }).map((_, i) => <Skeleton key={i} className="aspect-[3/4] w-full rounded-md" />) : posts.length === 0 ? <p className="col-span-3 py-6 text-sm text-muted-foreground">Aucune publication trouvée.</p> : posts.map((post) => <ExploreTile key={post.id} post={post} />)}</div>;
   const peopleList = <div className="space-y-1">{loadingPeople ? <Skeleton className="h-14 w-full" /> : people?.length ? people.map((person) => <Link key={person.id} to="/u/$username" params={{ username: person.username }} className="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-secondary"><UserAvatar avatarPath={person.avatar_url} name={person.username} /><span className="min-w-0"><span className="block truncate text-sm font-medium">{person.display_name || person.username}</span><span className="block truncate text-xs text-muted-foreground">@{person.username}</span></span></Link>) : <p className="py-4 text-sm text-muted-foreground">Aucune personne trouvée.</p>}</div>;
   const groupsList = <div className="space-y-1">{loadingGroups ? <Skeleton className="h-14 w-full" /> : foundGroups.length ? foundGroups.map((g) => <Link key={g.id} to="/g/$slug" params={{ slug: g.slug }} className="flex items-center gap-3 rounded-md px-2 py-3 hover:bg-secondary"><UserAvatar avatarPath={g.avatar_url} name={g.name} /><span className="min-w-0 truncate text-sm font-medium">{g.name}</span></Link>) : <p className="py-4 text-sm text-muted-foreground">Aucun groupe trouvé.</p>}</div>;
   const pagesList = <div className="space-y-1">{loadingPages ? <Skeleton className="h-14 w-full" /> : foundPages.length ? foundPages.map((p) => <Link key={p.id} to="/pg/$slug" params={{ slug: p.slug }} className="flex items-center gap-3 rounded-md px-2 py-3 hover:bg-secondary"><UserAvatar avatarPath={p.avatar_url} name={p.name} /><span className="min-w-0 truncate text-sm font-medium">{p.name}</span></Link>) : <p className="py-4 text-sm text-muted-foreground">Aucune page trouvée.</p>}</div>;
   return <div className="space-y-4"><h1 className="font-display text-2xl font-bold">{term ? `Résultats pour « ${term} »` : "Explorer"}</h1>
-    {!term ? postGrid : <Tabs value={tab} onValueChange={setTab} className="w-full"><div className="-mx-3 overflow-x-auto px-3"><TabsList className="flex h-11 w-max min-w-full justify-start"><TabsTrigger value="all">Tout</TabsTrigger><TabsTrigger value="people">Personnes</TabsTrigger><TabsTrigger value="groups">Groupes</TabsTrigger><TabsTrigger value="pages">Pages</TabsTrigger><TabsTrigger value="posts">Publications</TabsTrigger></TabsList></div>
+    {!term ? <><div className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-1" role="group" aria-label="Filtres Explorer">{["Pour vous", "Photos", "Vidéos", "Groupes", "Pages"].map((item) => <Button key={item} size="sm" variant={filter === item ? "default" : "secondary"} className="shrink-0 rounded-full" aria-pressed={filter === item} onClick={() => setFilter(item)}>{item}</Button>)}</div>{postGrid}</> : <Tabs value={tab} onValueChange={setTab} className="w-full"><div className="-mx-3 overflow-x-auto px-3"><TabsList className="flex h-11 w-max min-w-full justify-start"><TabsTrigger value="all">Tout</TabsTrigger><TabsTrigger value="people">Personnes</TabsTrigger><TabsTrigger value="groups">Groupes</TabsTrigger><TabsTrigger value="pages">Pages</TabsTrigger><TabsTrigger value="posts">Publications</TabsTrigger></TabsList></div>
       <TabsContent value="all" className="space-y-5 pt-3"><section><h2 className="mb-2 text-sm font-semibold">Personnes</h2>{peopleList}</section><section><h2 className="mb-2 text-sm font-semibold">Groupes</h2>{groupsList}</section><section><h2 className="mb-2 text-sm font-semibold">Pages</h2>{pagesList}</section><section><h2 className="mb-2 text-sm font-semibold">Publications</h2>{postGrid}</section></TabsContent>
       <TabsContent value="people" className="pt-3">{peopleList}</TabsContent><TabsContent value="groups" className="pt-3">{groupsList}</TabsContent><TabsContent value="pages" className="pt-3">{pagesList}</TabsContent><TabsContent value="posts" className="pt-3">{postGrid}</TabsContent>
     </Tabs>}</div>;
