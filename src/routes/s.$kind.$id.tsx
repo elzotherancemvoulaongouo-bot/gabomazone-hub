@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { getSharePreview } from "@/lib/share-preview.functions";
@@ -42,16 +42,12 @@ export const Route = createFileRoute("/s/$kind/$id")({
 function SharedPreview() {
   const { preview } = Route.useLoaderData();
   const router = useRouter();
-  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session && preview) router.history.replace(preview.target);
-      else setChecking(false);
     });
   }, [preview, router]);
-
-  if (checking && preview) return <div className="min-h-screen bg-background" />;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
