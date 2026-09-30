@@ -23,7 +23,7 @@ const shortcuts = [
   { to: "/groups", label: "Groupes", icon: UsersRound },
   { to: "/pages", label: "Pages", icon: Store },
   { to: "/friends", label: "Amis", icon: Users },
-  { to: "/settings/saved", label: "Enregistrés", icon: Bookmark },
+  { to: "/settings", label: "Enregistrés", icon: Bookmark },
   { to: "/videos", label: "Vidéos", icon: Play },
   { to: "/events", label: "Événements", icon: CalendarDays },
 ] as const;
@@ -160,7 +160,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-14 w-full max-w-2xl shrink-0 items-center justify-between border-b border-border px-4"><h2 className="font-display text-2xl font-bold">Menu</h2><Button variant="ghost" size="icon" aria-label="Fermer le menu" onClick={() => setMenuOpen(false)}><X className="size-6" /></Button></div>
         <div className="mx-auto w-full max-w-2xl flex-1 overflow-y-auto px-4 pb-8 pt-4">
           <Link to="/me" onClick={() => setMenuOpen(false)} className="mb-5 flex items-center gap-3 border-b border-border pb-5"><UserAvatar avatarPath={profile?.avatar_url} name={profile?.display_name || profile?.username} className="size-14" /><span className="min-w-0"><span className="block truncate text-base font-bold">{profile?.display_name || profile?.username || "Mon profil"}</span><span className="text-sm text-muted-foreground">Voir votre profil</span></span></Link>
-          <div className="grid grid-cols-2 gap-2">{shortcuts.map(({ to, label, icon: Icon }) => <Button key={to} asChild variant="outline" className="h-16 justify-start gap-3 border-border bg-card px-4 text-sm"><Link to={to} onClick={() => setMenuOpen(false)}><Icon className="size-5 shrink-0 text-primary" />{label}</Link></Button>)}</div>
+          <div className="grid grid-cols-2 gap-2">{shortcuts.map(({ to, label, icon: Icon }) => <Button key={label} asChild variant="outline" className="h-16 justify-start gap-3 border-border bg-card px-4 text-sm"><Link to={label === "Enregistrés" ? "/settings/$section" : to} params={label === "Enregistrés" ? { section: "saved" } : undefined} onClick={() => setMenuOpen(false)}><Icon className="size-5 shrink-0 text-primary" />{label}</Link></Button>)}</div>
           <div className="mt-6 border-t border-border">
             <Button variant="ghost" className="h-14 w-full justify-start gap-3 px-1 text-base font-semibold" aria-expanded={settingsOpen} onClick={() => setSettingsOpen(!settingsOpen)}><Settings className="size-5" />Paramètres et confidentialité<ChevronDown className={`ml-auto size-5 transition-transform ${settingsOpen ? "rotate-180" : ""}`} /></Button>
             {settingsOpen && <div className="space-y-1 pb-3 pl-8"><Button asChild variant="ghost" className="w-full justify-start"><Link to="/settings" onClick={() => setMenuOpen(false)}>Tous les paramètres</Link></Button>{Object.entries(MAIN_SECTIONS).filter(([key]) => key !== "support").map(([key, section]) => <Button key={key} asChild variant="ghost" className="w-full justify-start"><Link to="/settings/$section" params={{ section: key }} onClick={() => setMenuOpen(false)}>{section.title}</Link></Button>)}</div>}
