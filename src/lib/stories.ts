@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { uploadPostMedia } from "@/lib/posts";
 
 export type Story = {
   id: string;
@@ -155,9 +154,14 @@ export async function createStory(input: {
   let mediaPath: string | null = null;
   let mediaType: string | null = null;
   if (input.file) {
-    const uploaded = await uploadPostMedia(input.userId, input.file);
-    mediaPath = uploaded.path;
-    mediaType = uploaded.type;
+    const { validatePostFile } = await import("@/lib/image-processing");
+    const validation = validatePostFile(input.file);
+    if (validation) throw new Error(validation);
+    const ext = input.file.name.split(".").pop() ?? "bin";
+    mediaPath = `${input.userId}/${crypto.randomUUID()}.${ext}`;
+    const { error: uploadError } = await supabase.storage.from("media").upload(mediaPath, input.file, { contentType: input.file.type, upsert: false });
+    if (uploadError) throw uploadError;
+    mediaType = input.file.type.startsWith("video/") ? "video" : "image";
   }
   const { error } = await supabase.from("stories").insert({
     user_id: input.userId,
