@@ -765,6 +765,12 @@ function ModerationPanel({
       </Group>
       <Group title="Signaler un problème">
         <div className="space-y-3 p-4">
+          <p className="text-xs text-muted-foreground">
+            Vous pouvez aussi nous écrire à{" "}
+            <a href="mailto:Zonegaboma@gmail.com" className="font-medium text-primary underline">
+              Zonegaboma@gmail.com
+            </a>
+          </p>
           <Textarea
             value={report}
             onChange={(e) => setReport(e.target.value)}
