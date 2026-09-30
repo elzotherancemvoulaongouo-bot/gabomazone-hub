@@ -60,9 +60,9 @@ export function WatchSlide({ post, userId, active }: { post: FeedPost; userId: s
   useEffect(() => {
     const el = video.current;
     if (!el) return;
-    if (active && !commentsOpen && !document.hidden) { el.muted = mutePreference ?? false; el.play().catch(() => { el.muted = true; setMuted(true); void el.play().catch(() => undefined); }); }
+    if (active && !commentsOpen && !document.hidden) { el.muted = mutePreference ?? false; el.play().then(() => setMuted(el.muted)).catch(() => { el.muted = true; setMuted(true); void el.play().catch(() => undefined); }); }
     else el.pause();
-    const visibility = () => { if (document.hidden) el.pause(); else if (active && !commentsOpen) void el.play().catch(() => undefined); };
+    const visibility = () => { if (document.hidden) el.pause(); else if (active && !commentsOpen) void el.play().catch(() => { el.muted = true; setMuted(true); void el.play().catch(() => undefined); }); };
     document.addEventListener("visibilitychange", visibility);
     return () => { el.pause(); document.removeEventListener("visibilitychange", visibility); };
   }, [active, commentsOpen, url, mutePreference]);
