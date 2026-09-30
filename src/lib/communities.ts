@@ -15,6 +15,7 @@ export type PageRow = {
   city: string | null;
   country: string | null;
   created_at: string;
+  action_buttons?: import("@/integrations/supabase/types").Json;
 };
 
 export type GroupRow = {

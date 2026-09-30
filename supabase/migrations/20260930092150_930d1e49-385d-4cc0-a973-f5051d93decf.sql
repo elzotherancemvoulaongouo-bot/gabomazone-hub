@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.notify_on_community_invite() FROM PUBLIC, anon, authenticated;

@@ -1,5 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { Input } from "@/components/ui/input";
+import { AdminIcons, CommunityMoreButton, InviteFriendsDialog } from "@/components/CommunityActions";
 import { Lock, Settings, Share2, UserPlus, Users } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +36,10 @@ function GroupDetail() {
   const { slug } = Route.useParams();
   const { user } = Route.useRouteContext();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [term, setTerm] = useState("");
 
   const { data: group, isPending } = useQuery({ queryKey: ["group", slug], queryFn: () => fetchGroupBySlug(slug) });
   const members = useQuery({
@@ -92,7 +100,9 @@ function GroupDetail() {
   if (!group) return <p className="text-sm text-muted-foreground">Groupe introuvable.</p>;
 
   const canSeeContent = isMember || !group.is_private;
-  const allPosts = posts.data ?? [];
+  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/g/${slug}` : `/g/${slug}`;
+  const needle = term.trim().toLowerCase();
+  const allPosts = (posts.data ?? []).filter((p) => !needle || (p.caption ?? "").toLowerCase().includes(needle));
   const photos = allPosts.filter((p) => p.media_url && p.media_type !== "video");
   const videos = allPosts.filter((p) => p.media_type === "video");
 
@@ -159,14 +169,47 @@ function GroupDetail() {
                     : "Rejoindre"}
             </Button>
           )}
-          <Button variant="secondary" className="flex-1" onClick={() => share(true)}>
+          <Button variant="secondary" className="flex-1" onClick={() => (isMember ? setInviteOpen(true) : share(true))}>
             <UserPlus className="mr-2 size-4" /> Inviter
           </Button>
           <Button variant="secondary" className="flex-1" onClick={() => share(false)}>
             <Share2 className="mr-2 size-4" /> Partager
           </Button>
+          <CommunityMoreButton
+            userId={user.id}
+            target={{ groupId: group.id }}
+            kind="group"
+            name={group.name}
+            shareUrl={shareUrl}
+            isAdmin={isAdmin}
+            isMember={Boolean(membership)}
+            onInvite={() => setInviteOpen(true)}
+            onSearch={() => setSearchOpen(true)}
+            onLeave={() => toggleMembership.mutate()}
+            adminItems={[
+              { key: "edit", label: "Modifier le groupe", icon: AdminIcons.Pencil, onClick: () => navigate({ to: "/group-settings/$slug", params: { slug: group.slug } }) },
+              { key: "settings", label: "Paramètres", icon: AdminIcons.Settings, onClick: () => navigate({ to: "/group-settings/$slug", params: { slug: group.slug } }) },
+              { key: "roles", label: "Gérer les rôles", icon: AdminIcons.Shield, onClick: () => navigate({ to: "/group-settings/$slug", params: { slug: group.slug } }) },
+            ]}
+          />
         </div>
+        {searchOpen ? (
+          <div className="flex gap-2">
+            <Input autoFocus value={term} onChange={(e) => setTerm(e.target.value)} placeholder="Rechercher dans le groupe" aria-label="Rechercher dans le groupe" />
+            <Button variant="ghost" onClick={() => { setTerm(""); setSearchOpen(false); }}>Fermer</Button>
+          </div>
+        ) : null}
       </header>
+      <InviteFriendsDialog
+        open={inviteOpen}
+        onOpenChange={setInviteOpen}
+        userId={user.id}
+        target={{ groupId: group.id }}
+        kind="group"
+        excludeIds={(members.data ?? []).map((m) => m.user_id)}
+        shareUrl={shareUrl}
+        name={group.name}
+      />
 
       {group.description ? <p className="px-1 text-sm leading-relaxed">{group.description}</p> : null}
 
