@@ -59,8 +59,9 @@ export function MediaViewer({ post, posts, kind, index, userId, onClose }: Props
   }, [kind, posts, post]);
   useEffect(() => {
     if (kind !== "video") return;
-    const target = Array.from(scrollRef.current?.children ?? []).find((child) => child.getAttribute("data-post-id") === post.id);
-    target?.scrollIntoView({ block: "start", behavior: "instant" });
+    const element = scrollRef.current;
+    const position = videos.findIndex((item) => item.id === post.id);
+    if (element && position >= 0) element.scrollTop = position * element.clientHeight;
   }, [kind, post.id]);
   useEffect(() => {
     if (kind !== "video") return;
