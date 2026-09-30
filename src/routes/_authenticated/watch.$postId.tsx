@@ -43,6 +43,6 @@ function WatchPage() {
     <div ref={scroll} aria-label="Publications à faire défiler" className="h-[calc(100dvh-8.5rem)] min-h-[320px] w-full snap-y snap-mandatory overflow-y-auto overscroll-contain scroll-smooth bg-foreground sm:h-[calc(100dvh-8.5rem)]">
       {isPending ? <Skeleton className="size-full" /> : !current ? <div className="flex size-full items-center justify-center bg-background">Publication introuvable.</div> : posts.map((post) => <WatchSlide key={post.id} post={post} userId={user.id} active={activeId === post.id} />)}
     </div>
-    <Button size="icon" variant="secondary" aria-label="Revenir en arrière" className="absolute left-3 top-3 z-20 rounded-full" onClick={() => { if (window.history.length > 1) window.history.back(); else navigate({ to: "/explore" }); }}><ArrowLeft className="size-5" /></Button>
+    <Button size="icon" variant="secondary" aria-label="Revenir en arrière" className="absolute left-3 top-3 z-20 rounded-full" onClick={() => { if (window.history.length > 1) window.history.back(); else navigate({ to: "/explore", search: { q: "" } }); }}><ArrowLeft className="size-5" /></Button>
   </div>;
 }
