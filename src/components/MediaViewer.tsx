@@ -73,9 +73,17 @@ export function MediaViewer({ post, posts, kind, index, userId, onClose }: Props
     const old = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     document.querySelectorAll("video").forEach((video) => { if (!video.closest('[data-media-viewer="true"]')) video.pause(); });
+    const pauseBackground = (event: Event) => {
+      const target = event.target;
+      if (target instanceof HTMLVideoElement && !target.closest('[data-media-viewer="true"]')) target.pause();
+    };
+    document.addEventListener("play", pauseBackground, true);
+    return () => { document.body.style.overflow = old; document.removeEventListener("play", pauseBackground, true); document.querySelectorAll('[data-media-viewer="true"] video').forEach((video) => (video as HTMLVideoElement).pause()); };
+  }, []);
+  useEffect(() => {
     const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { if (commentsId) setCommentsId(null); else onClose(); } };
     document.addEventListener("keydown", onKey);
-    return () => { document.body.style.overflow = old; document.removeEventListener("keydown", onKey); document.querySelectorAll('[data-media-viewer="true"] video').forEach((video) => (video as HTMLVideoElement).pause()); };
+    return () => document.removeEventListener("keydown", onKey);
   }, [onClose, commentsId]);
   const { data: comments } = useQuery({ queryKey: ["comments", commentsId], enabled: Boolean(commentsId), queryFn: async () => {
     const { data, error } = await supabase.from("comments").select("id, content, created_at, author:profiles!comments_author_profile_fkey(username, avatar_url)").eq("post_id", commentsId ?? "").order("created_at", { ascending: true });
