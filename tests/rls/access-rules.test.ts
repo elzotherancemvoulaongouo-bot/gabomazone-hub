@@ -132,3 +132,14 @@ describe.skipIf(!TOKEN || !USER_ID)("Membre connecté", () => {
     expect(r.data ?? []).toHaveLength(0);
   });
 });
+
+describe("profils — données personnelles", () => {
+  it("un visiteur non connecté ne peut pas lire téléphone, e-mail ni date de naissance", async () => {
+    const { createClient } = await import("@supabase/supabase-js");
+    const c = createClient(process.env.VITE_SUPABASE_URL!, process.env.VITE_SUPABASE_PUBLISHABLE_KEY!, { auth: { persistSession: false } });
+    const { error } = await c.from("profiles").select("phone, contact_email, birthdate").limit(1);
+    expect(error).not.toBeNull();
+    const ok = await c.from("profiles").select("username, avatar_url").limit(1);
+    expect(ok.error).toBeNull();
+  });
+});
