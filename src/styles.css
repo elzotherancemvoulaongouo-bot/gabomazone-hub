@@ -221,4 +221,6 @@ body[data-camera-open="true"] > *:not(#gabomazone-camera-root) {
   position: fixed;
   inset: 0;
   z-index: 2147483647;
+  pointer-events: auto !important;
+  visibility: visible !important;
 }
