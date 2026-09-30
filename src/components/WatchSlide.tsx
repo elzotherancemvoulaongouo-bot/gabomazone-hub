@@ -26,7 +26,7 @@ export function WatchSlide({ post, userId, active }: { post: FeedPost; userId: s
   const media = post.media?.length ? [...post.media].sort((a,b) => a.position - b.position)[0] : null;
   const path = media?.path ?? post.media_url;
   const type = media?.media_type ?? post.media_type;
-  const { data: url } = useSignedUrl(active ? path : null);
+  const { data: url } = useSignedUrl(path);
   const liked = post.likes.some((like) => like.user_id === userId);
   const effectiveLiked = likedOverride ?? liked;
   const count = post.likes.length + (likedOverride === null || likedOverride === liked ? 0 : likedOverride ? 1 : -1);
