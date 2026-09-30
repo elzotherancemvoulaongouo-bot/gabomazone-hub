@@ -8,3 +8,5 @@
 - [x] Stories 9:16 : photo 5 s et vidéo 60 s ; contrôler formats et limites.
 - [x] Recadrer avatars et couvertures profil/page/groupe avec validations et ratios distincts.
 - [x] Vérifier les envois et l'affichage sur petit écran.
+- [ ] Rétablir la visionneuse verticale type Reels pour les vidéos, depuis Explorer et Vidéos, avec actions et lecture active uniquement.
+- [ ] Vérifier la visionneuse sur mobile et ordinateur sans changer le fil classique.
