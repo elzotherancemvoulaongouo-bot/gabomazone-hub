@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Bookmark, Heart, MessageCircle, MoreHorizontal, Pause, Play, Share2, Volume2, VolumeX } from "lucide-react";
+import { ArrowLeft, Bookmark, Heart, MessageCircle, MoreHorizontal, Music2, Pause, Play, Plus, Share2, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,22 @@ export function ReelsViewer({ posts, initialId, userId }: { posts: FeedPost[]; i
   const queryClient = useQueryClient();
   const { data: savedIds } = useSavedPostIds(userId);
   const { toggleSave } = usePostActions(userId);
+  const { data: followingIds } = useQuery({
+    queryKey: ["following-ids", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("follows").select("following_id").eq("follower_id", userId);
+      if (error) throw error;
+      return (data ?? []).map((row) => row.following_id);
+    },
+  });
+  const follow = useMutation({
+    mutationFn: async (creatorId: string) => {
+      const { error } = await supabase.from("follows").insert({ follower_id: userId, following_id: creatorId });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["following-ids", userId] }),
+    onError: () => toast.error("Impossible de s’abonner pour le moment"),
+  });
   const { data: comments } = useQuery({
     queryKey: ["comments", commentsId], enabled: Boolean(commentsId),
     queryFn: async () => {
@@ -53,13 +69,22 @@ export function ReelsViewer({ posts, initialId, userId }: { posts: FeedPost[]; i
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
-    const observer = new IntersectionObserver((entries) => {
-      const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      const id = visible?.target.getAttribute("data-post-id");
-      if (id) setActiveId(id);
-    }, { root: container, threshold: [0.5, 0.75] });
-    for (const child of container.children) observer.observe(child);
-    return () => observer.disconnect();
+    let frame = 0;
+    const updateActive = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const center = container.getBoundingClientRect().top + container.clientHeight / 2;
+        const visible = Array.from(container.children).find((child) => {
+          const bounds = child.getBoundingClientRect();
+          return bounds.top <= center && bounds.bottom > center;
+        });
+        const id = visible?.getAttribute("data-post-id");
+        if (id) setActiveId(id);
+      });
+    };
+    container.addEventListener("scroll", updateActive, { passive: true });
+    updateActive();
+    return () => { container.removeEventListener("scroll", updateActive); cancelAnimationFrame(frame); };
   }, [posts]);
 
   useEffect(() => {
@@ -75,7 +100,7 @@ export function ReelsViewer({ posts, initialId, userId }: { posts: FeedPost[]; i
     </div>
     <div ref={scrollRef} className="h-full snap-y snap-mandatory overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {posts.map((post) => <section key={post.id} data-post-id={post.id} className="relative h-dvh w-full snap-start snap-always overflow-hidden" aria-label={`Vidéo de ${post.author?.display_name || post.author?.username || "la communauté"}`}>
-        <Reel post={post} userId={userId} active={activeId === post.id && !commentsId} saved={(savedIds ?? []).includes(post.id)} onSave={() => toggleSave.mutate({ postId: post.id, saved: (savedIds ?? []).includes(post.id) })} onComments={() => setCommentsId(post.id)} />
+        <Reel post={post} userId={userId} active={activeId === post.id && !commentsId} saved={(savedIds ?? []).includes(post.id)} following={(followingIds ?? []).includes(post.user_id)} followPending={follow.isPending} onFollow={() => follow.mutate(post.user_id)} onSave={() => toggleSave.mutate({ postId: post.id, saved: (savedIds ?? []).includes(post.id) })} onComments={() => setCommentsId(post.id)} />
       </section>)}
     </div>
     <Sheet open={Boolean(commentsId)} onOpenChange={(open) => { if (!open) setCommentsId(null); }}>
@@ -88,10 +113,11 @@ export function ReelsViewer({ posts, initialId, userId }: { posts: FeedPost[]; i
   </div>;
 }
 
-function Reel({ post, userId, active, saved, onSave, onComments }: { post: FeedPost; userId: string; active: boolean; saved: boolean; onSave: () => void; onComments: () => void }) {
+function Reel({ post, userId, active, saved, following, followPending, onFollow, onSave, onComments }: { post: FeedPost; userId: string; active: boolean; saved: boolean; following: boolean; followPending: boolean; onFollow: () => void; onSave: () => void; onComments: () => void }) {
   const path = post.media?.find((item) => item.media_type === "video")?.path ?? post.media_url;
   const { data: src } = useSignedUrl(path);
   const video = useRef<HTMLVideoElement>(null);
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [paused, setPaused] = useState(false);
   const [muted, setMuted] = useState(true);
   const [mediaError, setMediaError] = useState(false);
@@ -117,7 +143,18 @@ function Reel({ post, userId, active, saved, onSave, onComments }: { post: FeedP
     element.play().catch(() => undefined);
   }, [active, paused, src]);
 
+  useEffect(() => () => { if (clickTimer.current) clearTimeout(clickTimer.current); }, []);
+
   const playPause = () => setPaused((value) => !value);
+  const videoClick = (detail: number) => {
+    if (clickTimer.current) clearTimeout(clickTimer.current);
+    if (detail >= 2) {
+      clickTimer.current = null;
+      if (!liked && !like.isPending) like.mutate(true);
+      return;
+    }
+    clickTimer.current = setTimeout(() => { playPause(); clickTimer.current = null; }, 250);
+  };
   const profile = post.author?.username ?? "";
   async function share() {
     const url = `${window.location.origin}/watch/${post.id}`;
@@ -128,20 +165,25 @@ function Reel({ post, userId, active, saved, onSave, onComments }: { post: FeedP
   }
 
   return <>
-    {src && !mediaError ? <video ref={video} src={src} loop muted={muted} playsInline preload={active ? "auto" : "metadata"} onError={() => setMediaError(true)} onClick={playPause} onDoubleClick={() => { if (!liked) like.mutate(true); }} className="absolute inset-0 size-full object-contain" aria-label="Lire ou mettre en pause la vidéo" /> : <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center"><Play className="size-10" /><p className="text-sm">{mediaError ? "Cette ancienne vidéo ne peut pas être lue sur cet appareil." : "Chargement de la vidéo…"}</p></div>}
+    {src && !mediaError ? <video ref={video} src={src} loop muted={muted} playsInline preload={active ? "auto" : "metadata"} onError={() => setMediaError(true)} onClick={(event) => videoClick(event.detail)} className="absolute inset-0 size-full object-contain" aria-label="Lire ou mettre en pause la vidéo" /> : <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center"><Play className="size-10" /><p className="text-sm">{mediaError ? "Cette ancienne vidéo ne peut pas être lue sur cet appareil." : "Chargement de la vidéo…"}</p></div>}
     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-foreground/80 to-transparent" />
-    <div className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-4 right-20 z-10 min-w-0 space-y-2">
-      <Link to="/u/$username" params={{ username: profile }} className="flex min-w-0 items-center gap-2 font-semibold"><UserAvatar avatarPath={post.author?.avatar_url} name={profile} className="size-8" /><span className="truncate">{post.author?.display_name || profile}</span></Link>
+    <div className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-4 right-20 z-10 min-w-0 space-y-2 text-background">
+      {profile ? <Link to="/u/$username" params={{ username: profile }} className="block truncate font-semibold">{post.author?.display_name || profile}</Link> : <span className="block truncate font-semibold">Créateur</span>}
       {post.caption && <p className="line-clamp-3 break-words text-sm">{post.caption}</p>}
-      <Button variant="ghost" size="icon" aria-label={paused ? "Lire la vidéo" : "Mettre en pause"} onClick={playPause} className="text-background hover:bg-background/20 hover:text-background">{paused ? <Play className="size-5" /> : <Pause className="size-5" />}</Button>
+      <div className="flex items-center gap-2 text-xs"><Music2 className="size-4 shrink-0" /><span className="truncate">Son original · {post.author?.display_name || profile || "Créateur"}</span></div>
     </div>
-    <div className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-2 z-10 flex flex-col items-center gap-2">
-      <Button variant="ghost" size="icon" aria-label={muted ? "Activer le son" : "Couper le son"} onClick={() => setMuted(!muted)} className="text-background hover:bg-background/20 hover:text-background">{muted ? <VolumeX className="size-6" /> : <Volume2 className="size-6" />}</Button>
+    <div className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-2 z-10 flex w-14 flex-col items-center gap-2 text-background">
       <Button variant="ghost" size="icon" aria-label={liked ? "Je n'aime plus" : "J'aime"} onClick={() => like.mutate(!liked)} className="text-background hover:bg-background/20 hover:text-background"><Heart className={`size-7 ${liked ? "fill-primary text-primary" : ""}`} /></Button><span className="text-xs">{count}</span>
       <Button variant="ghost" size="icon" aria-label="Commentaires" onClick={onComments} className="text-background hover:bg-background/20 hover:text-background"><MessageCircle className="size-7" /></Button><span className="text-xs">{post.comments[0]?.count ?? 0}</span>
       <Button variant="ghost" size="icon" aria-label="Partager" onClick={share} className="text-background hover:bg-background/20 hover:text-background"><Share2 className="size-7" /></Button>
       <Button variant="ghost" size="icon" aria-label={saved ? "Retirer des enregistrements" : "Enregistrer"} onClick={onSave} className="text-background hover:bg-background/20 hover:text-background"><Bookmark className={`size-7 ${saved ? "fill-primary text-primary" : ""}`} /></Button>
       <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Options de la vidéo" className="text-background hover:bg-background/20 hover:text-background"><MoreHorizontal className="size-7" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem asChild><Link to="/p/$postId" params={{ postId: post.id }}>Voir la publication</Link></DropdownMenuItem><DropdownMenuItem onSelect={share}>Partager le lien</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
+      {profile && <div className="relative mt-1 mb-2">
+        <Link to="/u/$username" params={{ username: profile }} aria-label={`Voir le profil de ${post.author?.display_name || profile}`}><UserAvatar avatarPath={post.author?.avatar_url} name={profile} className="size-11 ring-2 ring-background" /></Link>
+        {post.user_id !== userId && !following && <Button size="icon" aria-label={`S’abonner à ${post.author?.display_name || profile}`} title="S’abonner" disabled={followPending} onClick={onFollow} className="absolute -bottom-2 left-1/2 size-6 -translate-x-1/2 rounded-full border-2 border-foreground p-0"><Plus className="size-4" /></Button>}
+      </div>}
+      <Button variant="ghost" size="icon" aria-label={muted ? "Activer le son" : "Couper le son"} onClick={() => setMuted(!muted)} className="text-background hover:bg-background/20 hover:text-background">{muted ? <VolumeX className="size-6" /> : <Volume2 className="size-6" />}</Button>
+      <Button variant="ghost" size="icon" aria-label={paused ? "Lire la vidéo" : "Mettre en pause"} onClick={playPause} className="text-background hover:bg-background/20 hover:text-background">{paused ? <Play className="size-5" /> : <Pause className="size-5" />}</Button>
     </div>
   </>;
 }
