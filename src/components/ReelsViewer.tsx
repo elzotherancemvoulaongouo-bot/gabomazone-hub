@@ -115,7 +115,7 @@ export function ReelsViewer({ posts, initialId, userId }: { posts: FeedPost[]; i
 
 function Reel({ post, userId, active, saved, following, followPending, onFollow, onSave, onComments }: { post: FeedPost; userId: string; active: boolean; saved: boolean; following: boolean; followPending: boolean; onFollow: () => void; onSave: () => void; onComments: () => void }) {
   const path = post.media?.find((item) => item.media_type === "video")?.path ?? post.media_url;
-  const { data: src } = useSignedUrl(path);
+  const { data: src, isError: urlError } = useSignedUrl(active ? path : null);
   const video = useRef<HTMLVideoElement>(null);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [paused, setPaused] = useState(false);
@@ -143,6 +143,8 @@ function Reel({ post, userId, active, saved, following, followPending, onFollow,
     element.play().catch(() => undefined);
   }, [active, paused, src]);
 
+  useEffect(() => { setMediaError(false); }, [path]);
+
   useEffect(() => () => { if (clickTimer.current) clearTimeout(clickTimer.current); }, []);
 
   const playPause = () => setPaused((value) => !value);
@@ -165,7 +167,7 @@ function Reel({ post, userId, active, saved, following, followPending, onFollow,
   }
 
   return <>
-    {src && !mediaError ? <video ref={video} src={src} loop muted={muted} playsInline preload={active ? "auto" : "metadata"} onError={() => setMediaError(true)} onClick={(event) => videoClick(event.detail)} className="absolute inset-0 size-full object-contain" aria-label="Lire ou mettre en pause la vidéo" /> : <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center"><Play className="size-10" /><p className="text-sm">{mediaError ? "Cette ancienne vidéo ne peut pas être lue sur cet appareil." : "Chargement de la vidéo…"}</p></div>}
+    {active && src && !mediaError ? <video ref={video} src={src} loop muted={muted} playsInline preload="auto" onError={() => setMediaError(true)} onClick={(event) => videoClick(event.detail)} className="absolute inset-0 size-full object-contain" aria-label="Lire ou mettre en pause la vidéo" /> : <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center"><Play className="size-10" /><p className="text-sm">{mediaError || urlError ? "Cette vidéo ne peut pas être lue sur cet appareil." : "Chargement de la vidéo…"}</p></div>}
     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-foreground/80 to-transparent" />
     <div className="absolute bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-4 right-20 z-10 min-w-0 space-y-2 text-background">
       {profile ? <Link to="/u/$username" params={{ username: profile }} className="block truncate font-semibold">{post.author?.display_name || profile}</Link> : <span className="block truncate font-semibold">Créateur</span>}
