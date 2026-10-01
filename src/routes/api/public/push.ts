@@ -102,7 +102,11 @@ export const Route = createFileRoute("/api/public/push")({
         const staleIds = subs
           .filter((_, i) => {
             const r = results[i];
-            return r.status === "rejected" && (r.reason as { statusCode?: number })?.statusCode === 410;
+            return (
+              r !== undefined &&
+              r.status === "rejected" &&
+              (r.reason as { statusCode?: number })?.statusCode === 410
+            );
           })
           .map((s) => s.id);
         if (staleIds.length > 0) {
