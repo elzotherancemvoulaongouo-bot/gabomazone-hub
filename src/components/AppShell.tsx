@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
 import { useIsModerator } from "@/lib/moderation";
 import { useApplyAppearance, useSettings } from "@/lib/settings";
+import { enablePushNotifications } from "@/lib/push";
 import { MAIN_SECTIONS } from "@/lib/settings-sections";
 import {
   useNotificationsRealtime,
@@ -103,6 +104,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const unreadMessages = useUnreadMessagesCount(user?.id);
   const { data: settings } = useSettings(user?.id);
   useApplyAppearance(settings);
+  // Abonne l'appareil aux notifications push quand le réglage est actif.
+  useEffect(() => {
+    if (user?.id && settings?.notif_push) void enablePushNotifications(user.id);
+  }, [user?.id, settings?.notif_push]);
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);

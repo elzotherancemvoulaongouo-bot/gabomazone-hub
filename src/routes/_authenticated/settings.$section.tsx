@@ -21,6 +21,7 @@ import { PostCard } from "@/components/PostCard";
 import { ProfileSettingsForm } from "@/components/settings/ProfileSettingsForm";
 import { SETTINGS_SECTIONS } from "@/lib/settings-sections";
 import { useSettings, useUpdateSettings, type UserSettings } from "@/lib/settings";
+import { disablePushNotifications, enablePushNotifications } from "@/lib/push";
 import { useBlockActions, useBlockedUsers } from "@/lib/social";
 import { POST_SELECT } from "@/lib/posts";
 import type { FeedPost } from "@/components/PostCard";
@@ -236,7 +237,14 @@ function Panel({ section, userId, email }: { section: string; userId: string; em
       <Groups first="Canaux">
         <Group title="Canaux">
           <Row label="Notifications push" hint="Sur cet appareil">
-            <Switch checked={settings.notif_push} onCheckedChange={(v) => set({ notif_push: v })} />
+            <Switch
+              checked={settings.notif_push}
+              onCheckedChange={(v) => {
+                set({ notif_push: v });
+                if (v) void enablePushNotifications(userId);
+                else void disablePushNotifications();
+              }}
+            />
           </Row>
           <Row label="Notifications par e-mail" hint={email}>
             <Switch
