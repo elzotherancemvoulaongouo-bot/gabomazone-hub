@@ -36,6 +36,7 @@ import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedSettingsSectionRouteImport } from './routes/_authenticated/settings.$section'
 import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated/u.$username'
 import { Route as AuthenticatedWatchPostIdRouteImport } from './routes/_authenticated/watch.$postId'
+import { Route as ApiPublicPushRouteImport } from './routes/api/public/push'
 import { Route as SKindIdRouteImport } from './routes/s.$kind.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -180,6 +181,11 @@ const AuthenticatedWatchPostIdRoute =
     path: '/watch/$postId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicPushRoute = ApiPublicPushRouteImport.update({
+  id: '/api/public/push',
+  path: '/api/public/push',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SKindIdRoute = SKindIdRouteImport.update({
   id: '/s/$kind/$id',
   path: '/s/$kind/$id',
@@ -212,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/settings/$section': typeof AuthenticatedSettingsSectionRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
   '/watch/$postId': typeof AuthenticatedWatchPostIdRoute
+  '/api/public/push': typeof ApiPublicPushRoute
   '/s/$kind/$id': typeof SKindIdRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
 }
@@ -241,6 +248,7 @@ export interface FileRoutesByTo {
   '/settings/$section': typeof AuthenticatedSettingsSectionRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
   '/watch/$postId': typeof AuthenticatedWatchPostIdRoute
+  '/api/public/push': typeof ApiPublicPushRoute
   '/s/$kind/$id': typeof SKindIdRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
 }
@@ -272,6 +280,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/$section': typeof AuthenticatedSettingsSectionRoute
   '/_authenticated/u/$username': typeof AuthenticatedUUsernameRoute
   '/_authenticated/watch/$postId': typeof AuthenticatedWatchPostIdRoute
+  '/api/public/push': typeof ApiPublicPushRoute
   '/s/$kind/$id': typeof SKindIdRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
 }
@@ -303,6 +312,7 @@ export interface FileRouteTypes {
     | '/settings/$section'
     | '/u/$username'
     | '/watch/$postId'
+    | '/api/public/push'
     | '/s/$kind/$id'
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
@@ -332,6 +342,7 @@ export interface FileRouteTypes {
     | '/settings/$section'
     | '/u/$username'
     | '/watch/$postId'
+    | '/api/public/push'
     | '/s/$kind/$id'
     | '/settings'
   id:
@@ -362,6 +373,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/$section'
     | '/_authenticated/u/$username'
     | '/_authenticated/watch/$postId'
+    | '/api/public/push'
     | '/s/$kind/$id'
     | '/_authenticated/settings/'
   fileRoutesById: FileRoutesById
@@ -371,6 +383,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ReglesRoute: typeof ReglesRoute
+  ApiPublicPushRoute: typeof ApiPublicPushRoute
   SKindIdRoute: typeof SKindIdRoute
 }
 
@@ -565,6 +578,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWatchPostIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/push': {
+      id: '/api/public/push'
+      path: '/api/public/push'
+      fullPath: '/api/public/push'
+      preLoaderRoute: typeof ApiPublicPushRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/s/$kind/$id': {
       id: '/s/$kind/$id'
       path: '/s/$kind/$id'
@@ -635,6 +655,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ReglesRoute: ReglesRoute,
+  ApiPublicPushRoute: ApiPublicPushRoute,
   SKindIdRoute: SKindIdRoute,
 }
 export const routeTree = rootRouteImport
