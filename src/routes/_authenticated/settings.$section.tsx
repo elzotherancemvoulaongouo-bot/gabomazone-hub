@@ -21,6 +21,7 @@ import { PostCard } from "@/components/PostCard";
 import { ProfileSettingsForm } from "@/components/settings/ProfileSettingsForm";
 import { SETTINGS_SECTIONS } from "@/lib/settings-sections";
 import { useSettings, useUpdateSettings, type UserSettings } from "@/lib/settings";
+import { disablePushNotifications, enablePushNotifications } from "@/lib/push";
 import { useBlockActions, useBlockedUsers } from "@/lib/social";
 import { POST_SELECT } from "@/lib/posts";
 import type { FeedPost } from "@/components/PostCard";
