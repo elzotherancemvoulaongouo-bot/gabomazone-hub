@@ -236,7 +236,14 @@ function Panel({ section, userId, email }: { section: string; userId: string; em
       <Groups first="Canaux">
         <Group title="Canaux">
           <Row label="Notifications push" hint="Sur cet appareil">
-            <Switch checked={settings.notif_push} onCheckedChange={(v) => set({ notif_push: v })} />
+            <Switch
+              checked={settings.notif_push}
+              onCheckedChange={(v) => {
+                set({ notif_push: v });
+                if (v) void enablePushNotifications(userId);
+                else void disablePushNotifications();
+              }}
+            />
           </Row>
           <Row label="Notifications par e-mail" hint={email}>
             <Switch
