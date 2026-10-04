@@ -60,7 +60,7 @@ function FeedPage() {
     const pages = (data?.pages ?? []).map((page) =>
       page.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true))),
     );
-    return rankByScores(pages, scores, Number(feedAlgo?.weights.max_same_author_in_row ?? 2));
+    return rankByScores(pages, scores, Number(feedAlgo?.weights['max_same_author_in_row'] ?? 2));
   }, [rankingOn, recentPosts, data, scores, feedAlgo]);
 
   const posts = ordered.filter(
