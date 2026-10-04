@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      algorithm_settings: {
+        Row: {
+          enabled: boolean
+          key: string
+          updated_at: string
+          updated_by: string | null
+          weights: Json
+        }
+        Insert: {
+          enabled?: boolean
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          weights?: Json
+        }
+        Update: {
+          enabled?: boolean
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          weights?: Json
+        }
+        Relationships: []
+      }
       banned_words: {
         Row: {
           created_at: string
@@ -808,6 +832,35 @@ export type Database = {
           },
         ]
       }
+      post_shares: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_shares_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           as_community: boolean
@@ -1295,6 +1348,14 @@ export type Database = {
         Returns: undefined
       }
       moderation_normalize: { Args: { _t: string }; Returns: string }
+      score_posts: {
+        Args: { _ids: string[] }
+        Returns: {
+          post_id: string
+          reason: string
+          score: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
