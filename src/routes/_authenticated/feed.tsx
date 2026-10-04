@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Camera } from "lucide-react";
-import { useInfiniteFeed } from "@/lib/feed";
-import { PostCard } from "@/components/PostCard";
+import { useInfiniteFeed, fetchPostScores, rankByScores } from "@/lib/feed";
+import { useAlgorithmSettings } from "@/lib/algorithms";
+import { PostCard, type FeedPost } from "@/components/PostCard";
 import { LazyMount } from "@/components/LazyMount";
 import { FeedComposer } from "@/components/FeedComposer";
 import { StoriesBar } from "@/components/StoriesBar";
@@ -28,21 +30,40 @@ export const Route = createFileRoute("/_authenticated/feed")({
   component: FeedPage,
 });
 
+type Tab = "for-you" | "recent";
+
 function FeedPage() {
   const { user } = Route.useRouteContext();
-  const {
-    posts: allPosts,
-    isPending,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-  } = useInfiniteFeed();
+  const [tab, setTab] = useState<Tab>("for-you");
+  const { posts: recentPosts, data, isPending, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useInfiniteFeed();
   const { data: hidden } = useHiddenPostIds(user.id);
   const { data: blocked } = useBlockedIds(user.id);
   const { data: settings } = useSettings(user.id);
+  const { data: algos } = useAlgorithmSettings();
+  const feedAlgo = algos?.find((a) => a.key === "feed");
+  const rankingOn = tab === "for-you" && feedAlgo?.enabled !== false;
   const sentinel = useRef<HTMLDivElement>(null);
 
-  const posts = allPosts.filter(
+  const ids = recentPosts.map((p) => p.id);
+  const { data: scores } = useQuery({
+    queryKey: ["post-scores", ids],
+    queryFn: () => fetchPostScores(ids),
+    enabled: rankingOn && ids.length > 0,
+    staleTime: 60_000,
+    placeholderData: (prev) => prev,
+  });
+
+  const ordered = useMemo<FeedPost[]>(() => {
+    if (!rankingOn) return recentPosts;
+    const seen = new Set<string>();
+    const pages = (data?.pages ?? []).map((page) =>
+      page.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true))),
+    );
+    return rankByScores(pages, scores, Number(feedAlgo?.weights.max_same_author_in_row ?? 2));
+  }, [rankingOn, recentPosts, data, scores, feedAlgo]);
+
+  const posts = ordered.filter(
     (p) => !(hidden ?? []).includes(p.id) && !(blocked ?? []).includes(p.user_id),
   );
 
@@ -66,6 +87,26 @@ function FeedPage() {
       <h1 className="sr-only">Fil d'actualité Gabomazone</h1>
       <StoriesBar userId={user.id} />
       <FeedComposer userId={user.id} defaultVisibility={settings?.post_visibility ?? "public"} />
+      <div role="tablist" className="flex gap-2">
+        {(
+          [
+            ["for-you", "Pour vous"],
+            ["recent", "Récents"],
+          ] as const
+        ).map(([key, label]) => (
+          <Button
+            key={key}
+            role="tab"
+            aria-selected={tab === key}
+            size="sm"
+            variant={tab === key ? "default" : "secondary"}
+            className="rounded-full"
+            onClick={() => setTab(key)}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
       {isPending ? (
         <>
           <Skeleton className="h-96 w-full rounded-2xl" />
