@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ReglesRouteImport } from './routes/regles'
+import { Route as AuthenticatedAlgorithmsRouteImport } from './routes/_authenticated/algorithms'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
 import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated/events'
 import { Route as AuthenticatedExploreRouteImport } from './routes/_authenticated/explore'
@@ -56,6 +57,11 @@ const ReglesRoute = ReglesRouteImport.update({
   id: '/regles',
   path: '/regles',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAlgorithmsRoute = AuthenticatedAlgorithmsRouteImport.update({
+  id: '/algorithms',
+  path: '/algorithms',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCreateRoute = AuthenticatedCreateRouteImport.update({
   id: '/create',
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/regles': typeof ReglesRoute
+  '/algorithms': typeof AuthenticatedAlgorithmsRoute
   '/create': typeof AuthenticatedCreateRoute
   '/events': typeof AuthenticatedEventsRoute
   '/explore': typeof AuthenticatedExploreRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/regles': typeof ReglesRoute
+  '/algorithms': typeof AuthenticatedAlgorithmsRoute
   '/create': typeof AuthenticatedCreateRoute
   '/events': typeof AuthenticatedEventsRoute
   '/explore': typeof AuthenticatedExploreRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/regles': typeof ReglesRoute
+  '/_authenticated/algorithms': typeof AuthenticatedAlgorithmsRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
   '/_authenticated/events': typeof AuthenticatedEventsRoute
   '/_authenticated/explore': typeof AuthenticatedExploreRoute
@@ -281,6 +290,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/regles'
+    | '/algorithms'
     | '/create'
     | '/events'
     | '/explore'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/regles'
+    | '/algorithms'
     | '/create'
     | '/events'
     | '/explore'
@@ -340,6 +351,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/regles'
+    | '/_authenticated/algorithms'
     | '/_authenticated/create'
     | '/_authenticated/events'
     | '/_authenticated/explore'
@@ -403,6 +415,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/regles'
       preLoaderRoute: typeof ReglesRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/algorithms': {
+      id: '/_authenticated/algorithms'
+      path: '/algorithms'
+      fullPath: '/algorithms'
+      preLoaderRoute: typeof AuthenticatedAlgorithmsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/create': {
       id: '/_authenticated/create'
@@ -576,6 +595,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAlgorithmsRoute: typeof AuthenticatedAlgorithmsRoute
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
   AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
   AuthenticatedExploreRoute: typeof AuthenticatedExploreRoute
@@ -602,6 +622,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAlgorithmsRoute: AuthenticatedAlgorithmsRoute,
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
   AuthenticatedEventsRoute: AuthenticatedEventsRoute,
   AuthenticatedExploreRoute: AuthenticatedExploreRoute,
