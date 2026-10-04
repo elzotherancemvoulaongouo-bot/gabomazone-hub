@@ -35,6 +35,7 @@ export function openShareSheet(payload: SharePayload | null) {
  */
 export async function shareContent(payload: SharePayload) {
   const data = { title: payload.title || "Gabomazone", text: payload.text || "", url: payload.url };
+  void recordPostShare(payload.url);
   if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
     try {
       if (!navigator.canShare || navigator.canShare(data)) {

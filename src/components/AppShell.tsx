@@ -491,6 +491,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </Link>
               </Button>
             ) : null}
+            {isModerator ? (
+              <Button asChild variant="outline" className="mt-3 h-12 w-full justify-start px-4">
+                <Link to="/algorithms" onClick={() => setMenuOpen(false)}>
+                  Algorithmes
+                </Link>
+              </Button>
+            ) : null}
             <div className="mt-6 border-t border-border">
               <Button
                 variant="ghost"
