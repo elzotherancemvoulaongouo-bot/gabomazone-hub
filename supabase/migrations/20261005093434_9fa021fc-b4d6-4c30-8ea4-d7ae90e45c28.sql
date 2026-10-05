@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.moderation_auto_trigger() FROM public, anon, authenticated;
