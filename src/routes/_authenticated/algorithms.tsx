@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { useAutoModLog, reviewAutoMod, appealAutoMod, type AutoModEntry } from "@/lib/auto-moderation";
 
 export const Route = createFileRoute("/_authenticated/algorithms")({
   head: () => ({
@@ -29,6 +31,10 @@ const TITLES: Record<string, { title: string; text: string }> = {
     title: "Fil d'actualité",
     text: "Trie l'onglet « Pour vous » par score. L'onglet « Récents » reste chronologique.",
   },
+  moderation: {
+    title: "Modération automatique",
+    text: "Score de risque 0-100 sur chaque publication, commentaire et message. Seuil haut : masqué ; seuil moyen : file de validation.",
+  },
 };
 
 const LABELS: Record<string, string> = {
@@ -44,6 +50,17 @@ const LABELS: Record<string, string> = {
   report_penalty: "Pénalité par signalement",
   spam_penalty: "Pénalité spam probable",
   max_same_author_in_row: "Max. posts de suite du même auteur",
+  hide_threshold: "Seuil de masquage auto",
+  queue_threshold: "Seuil file de validation",
+  banned_word: "Mot interdit",
+  many_links: "3 liens ou plus",
+  repeated_link: "Même lien répété",
+  burst: "Publications en rafale",
+  duplicate: "Texte dupliqué",
+  shouting: "Majuscules",
+  repeat_offender: "Récidive (30 j)",
+  cooldown_strikes: "Infractions avant pause (24 h)",
+  cooldown_minutes: "Durée de la pause (min)",
 };
 
 function AlgorithmsPage() {
@@ -52,15 +69,7 @@ function AlgorithmsPage() {
   const { data, isPending } = useAlgorithmSettings();
 
   if (checking) return <Skeleton className="h-40 w-full rounded-2xl" />;
-  if (!isMod)
-    return (
-      <div className="rounded-2xl border border-border/70 p-8 text-center brand-surface">
-        <p className="text-sm text-muted-foreground">Accès réservé aux administrateurs.</p>
-        <Button asChild className="mt-4">
-          <Link to="/feed">Retour à l'accueil</Link>
-        </Button>
-      </div>
-    );
+  if (!isMod) return <MyModeration />;
 
   return (
     <div className="space-y-4">
@@ -70,6 +79,7 @@ function AlgorithmsPage() {
       ) : (
         (data ?? []).map((algo) => <AlgoCard key={algo.key} algo={algo} />)
       )}
+      <ModQueue />
     </div>
   );
 }
@@ -126,6 +136,152 @@ function AlgoCard({ algo }: { algo: AlgorithmSetting }) {
       <Button className="w-full" disabled={saving} onClick={() => save({ weights })}>
         Enregistrer les poids
       </Button>
+    </section>
+  );
+}
+
+const STATUS: Record<AutoModEntry["status"], string> = {
+  pending: "En attente",
+  approved: "Approuvé",
+  rejected: "Rejeté",
+  restored: "Restauré",
+  appealed: "Appel en cours",
+};
+
+function EntryHead({ e }: { e: AutoModEntry }) {
+  return (
+    <>
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <span className="font-semibold">
+          {e.target_type === "post" ? "Publication" : e.target_type === "comment" ? "Commentaire" : "Message"} ·
+          risque {e.score}/100 · {e.decision === "hidden" ? "masqué" : "en file"}
+        </span>
+        <span className="text-muted-foreground">{STATUS[e.status]}</span>
+      </div>
+      {e.excerpt ? <p className="line-clamp-3 text-sm">« {e.excerpt} »</p> : null}
+      <p className="text-xs text-muted-foreground">Raisons : {e.reasons.join(", ") || "—"}</p>
+      {e.appeal_text ? <p className="text-xs">Appel : {e.appeal_text}</p> : null}
+    </>
+  );
+}
+
+/** Admin : file de validation + journal avec annulation. */
+function ModQueue() {
+  const queryClient = useQueryClient();
+  const { data, isPending } = useAutoModLog();
+  const [view, setView] = useState<"queue" | "log">("queue");
+  const list = (data ?? []).filter((e) =>
+    view === "queue" ? e.status === "pending" || e.status === "appealed" : true,
+  );
+
+  async function act(id: string, action: "approve" | "reject" | "restore") {
+    try {
+      await reviewAutoMod(id, action);
+      await queryClient.invalidateQueries({ queryKey: ["auto-mod-log"] });
+      toast.success("Décision enregistrée");
+    } catch {
+      toast.error("Action impossible");
+    }
+  }
+
+  return (
+    <section className="space-y-3 rounded-2xl border border-border/70 p-4 brand-surface">
+      <div className="flex gap-2">
+        {(
+          [
+            ["queue", "File de validation"],
+            ["log", "Journal"],
+          ] as const
+        ).map(([k, label]) => (
+          <Button
+            key={k}
+            size="sm"
+            variant={view === k ? "default" : "secondary"}
+            className="rounded-full"
+            onClick={() => setView(k)}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
+      {isPending ? (
+        <Skeleton className="h-24 w-full" />
+      ) : list.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Rien à afficher.</p>
+      ) : (
+        list.map((e) => (
+          <div key={e.id} className="space-y-2 rounded-xl border border-border/60 p-3">
+            <EntryHead e={e} />
+            <div className="flex flex-wrap gap-2">
+              {view === "queue" ? (
+                <>
+                  <Button size="sm" onClick={() => act(e.id, "approve")}>Approuver</Button>
+                  <Button size="sm" variant="destructive" onClick={() => act(e.id, "reject")}>Rejeter</Button>
+                  {e.decision === "hidden" ? (
+                    <Button size="sm" variant="secondary" onClick={() => act(e.id, "restore")}>Restaurer</Button>
+                  ) : null}
+                </>
+              ) : e.status !== "restored" && e.target_type !== "message" ? (
+                <Button size="sm" variant="secondary" onClick={() => act(e.id, "restore")}>Annuler</Button>
+              ) : null}
+            </div>
+          </div>
+        ))
+      )}
+    </section>
+  );
+}
+
+/** Membre : ses contenus modérés automatiquement, avec appel. */
+function MyModeration() {
+  const { data, isPending } = useAutoModLog();
+  return (
+    <div className="space-y-4">
+      <h1 className="font-display text-2xl font-bold">Mes contenus modérés</h1>
+      {isPending ? (
+        <Skeleton className="h-24 w-full rounded-2xl" />
+      ) : (data ?? []).length === 0 ? (
+        <div className="rounded-2xl border border-border/70 p-8 text-center brand-surface">
+          <p className="text-sm text-muted-foreground">Aucun de vos contenus n'a été modéré.</p>
+          <Button asChild className="mt-4">
+            <Link to="/feed">Retour à l'accueil</Link>
+          </Button>
+        </div>
+      ) : (
+        (data ?? []).map((e) => <AppealCard key={e.id} e={e} />)
+      )}
+    </div>
+  );
+}
+
+function AppealCard({ e }: { e: AutoModEntry }) {
+  const queryClient = useQueryClient();
+  const [text, setText] = useState("");
+  const canAppeal = e.status === "pending" || e.status === "rejected";
+  async function send() {
+    try {
+      await appealAutoMod(e.id, text);
+      await queryClient.invalidateQueries({ queryKey: ["auto-mod-log"] });
+      toast.success("Appel envoyé à la modération");
+    } catch {
+      toast.error("Appel impossible");
+    }
+  }
+  return (
+    <section className="space-y-2 rounded-2xl border border-border/70 p-4 brand-surface">
+      <EntryHead e={e} />
+      {canAppeal ? (
+        <>
+          <Textarea
+            placeholder="Expliquez pourquoi ce contenu respecte les règles"
+            value={text}
+            onChange={(ev) => setText(ev.target.value)}
+          />
+          <Button size="sm" className="w-full" disabled={!text.trim()} onClick={send}>
+            Faire appel
+          </Button>
+        </>
+      ) : null}
     </section>
   );
 }

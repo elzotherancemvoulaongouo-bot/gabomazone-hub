@@ -121,6 +121,10 @@ export function notificationLabel(n: NotificationRow) {
       return `${who} vous invite à suivre la page ${n.preview ?? ""}`.trim();
     case "group_invite":
       return `${who} vous invite à rejoindre le groupe ${n.preview ?? ""}`.trim();
+    case "moderation_hidden":
+      return "Modération automatique";
+    case "moderation_warning":
+      return "Avertissement de modération";
     default:
       return who;
   }

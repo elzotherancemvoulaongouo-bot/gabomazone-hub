@@ -156,5 +156,15 @@ function NotificationItem({ notification: n }: { notification: NotificationRow }
       </li>
     );
   }
+  if (n.type === "moderation_hidden") {
+    return (
+      <li onClick={onOpen} className="space-y-2">
+        {body}
+        <Button asChild size="sm" variant="secondary" className="w-full">
+          <Link to="/algorithms">Voir et faire appel</Link>
+        </Button>
+      </li>
+    );
+  }
   return <li onClick={onOpen}>{body}</li>;
 }
