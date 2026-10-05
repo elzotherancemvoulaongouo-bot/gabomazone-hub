@@ -575,6 +575,54 @@ export type Database = {
           },
         ]
       }
+      moderation_auto_log: {
+        Row: {
+          appeal_text: string | null
+          created_at: string
+          decision: string
+          excerpt: string | null
+          id: string
+          reasons: string[]
+          reviewed_at: string | null
+          reviewed_by: string | null
+          score: number
+          status: string
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Insert: {
+          appeal_text?: string | null
+          created_at?: string
+          decision: string
+          excerpt?: string | null
+          id?: string
+          reasons?: string[]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          score: number
+          status?: string
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Update: {
+          appeal_text?: string | null
+          created_at?: string
+          decision?: string
+          excerpt?: string | null
+          id?: string
+          reasons?: string[]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          score?: number
+          status?: string
+          target_id?: string
+          target_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           actor_id: string | null
@@ -1347,7 +1395,22 @@ export type Database = {
         }
         Returns: undefined
       }
+      moderation_appeal: {
+        Args: { _log_id: string; _text: string }
+        Returns: undefined
+      }
       moderation_normalize: { Args: { _t: string }; Returns: string }
+      moderation_review: {
+        Args: { _action: string; _log_id: string }
+        Returns: undefined
+      }
+      moderation_risk: {
+        Args: { _id: string; _table: string; _text: string; _user: string }
+        Returns: {
+          reasons: string[]
+          score: number
+        }[]
+      }
       score_posts: {
         Args: { _ids: string[] }
         Returns: {
