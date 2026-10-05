@@ -83,3 +83,18 @@ export function consumeAfterLogin(): string | null {
     return null;
   }
 }
+
+/** Compte un partage de publication (signal pour l'algorithme du fil). Silencieux en cas d'échec. */
+async function recordPostShare(url: string) {
+  try {
+    const match = url.match(/\/s\/(?:p|watch)\/([0-9a-f-]{36})/i);
+    if (!match) return;
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data } = await supabase.auth.getSession();
+    const userId = data.session?.user.id;
+    if (!userId) return;
+    await supabase.from("post_shares").insert({ post_id: match[1]!, user_id: userId });
+  } catch {
+    /* ignoré */
+  }
+}
