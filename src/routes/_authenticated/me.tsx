@@ -23,12 +23,7 @@ function MePage() {
   const { data, isPending } = useQuery({
     queryKey: ["profile", user.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (error) throw error;
+      const data = await fetchProfileById(user.id);
       return data as ProfileRow | null;
     },
   });
