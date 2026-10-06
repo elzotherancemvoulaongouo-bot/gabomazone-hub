@@ -450,12 +450,7 @@ function AccountPanel({ email, userId }: { email: string; userId: string }) {
   const { data: profile } = useQuery({
     queryKey: ["profile-brief", "settings-account", userId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("username, phone")
-        .eq("id", userId)
-        .maybeSingle();
-      if (error) throw error;
+      const data = await fetchProfileById(userId);
       if (data) {
         setUsername(data.username ?? "");
         setPhone(data.phone ?? "");

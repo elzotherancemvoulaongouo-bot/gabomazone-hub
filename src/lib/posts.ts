@@ -150,12 +150,34 @@ export async function deletePost(postId: string) {
   if (error) throw error;
 }
 
+/** Colonnes lisibles de tous les membres ; téléphone et e-mail passent par get_profile_contact. */
+export const PROFILE_COLUMNS =
+  "id, username, display_name, bio, avatar_url, cover_url, created_at, updated_at, first_name, last_name, birthdate, gender, country, city, website";
+
+/** Ajoute téléphone et e-mail de contact, visibles seulement par soi-même et ses amis. */
+export async function withContact<T extends { id: string }>(profile: T | null) {
+  if (!profile) return null;
+  const { data } = await supabase.rpc("get_profile_contact", { _id: profile.id });
+  const c = data?.[0];
+  return { ...profile, phone: c?.phone ?? null, contact_email: c?.contact_email ?? null };
+}
+
 export async function fetchProfileByUsername(username: string) {
   const { data, error } = await supabase
     .from("profiles")
-    .select("*")
+    .select(PROFILE_COLUMNS)
     .eq("username", username)
     .maybeSingle();
   if (error) throw error;
-  return data;
+  return withContact(data);
+}
+
+export async function fetchProfileById(id: string) {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select(PROFILE_COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return withContact(data);
 }

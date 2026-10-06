@@ -49,13 +49,7 @@ export function ProfileSettingsForm({ userId }: { userId: string }) {
   const { data, isPending } = useQuery({
     queryKey: ["profile", userId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
+      return fetchProfileById(userId);
     },
   });
 
