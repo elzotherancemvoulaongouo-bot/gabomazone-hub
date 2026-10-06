@@ -1358,6 +1358,13 @@ export type Database = {
     }
     Functions: {
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
+      get_profile_contact: {
+        Args: { _id: string }
+        Returns: {
+          contact_email: string
+          phone: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
