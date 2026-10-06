@@ -43,6 +43,8 @@ const ICONS = {
   comment: MessageCircle,
   page_invite: Flag,
   group_invite: Users,
+  moderation_hidden: Flag,
+  moderation_warning: Flag,
 } as const;
 
 function NotificationsPage() {
