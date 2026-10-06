@@ -173,7 +173,11 @@ export async function fetchProfileByUsername(username: string) {
 }
 
 export async function fetchProfileById(id: string) {
-  const { data, error } = await supabase.from("profiles").select(PROFILE_COLUMNS).eq("id", id).maybeSingle();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select(PROFILE_COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw error;
   return withContact(data);
 }
