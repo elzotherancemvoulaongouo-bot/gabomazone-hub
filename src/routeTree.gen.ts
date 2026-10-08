@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ReglesRouteImport } from './routes/regles'
 import { Route as AuthenticatedAlgorithmsRouteImport } from './routes/_authenticated/algorithms'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
+import { Route as AuthenticatedDiscoverRouteImport } from './routes/_authenticated/discover'
 import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated/events'
 import { Route as AuthenticatedExploreRouteImport } from './routes/_authenticated/explore'
 import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
@@ -66,6 +67,11 @@ const AuthenticatedAlgorithmsRoute = AuthenticatedAlgorithmsRouteImport.update({
 const AuthenticatedCreateRoute = AuthenticatedCreateRouteImport.update({
   id: '/create',
   path: '/create',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDiscoverRoute = AuthenticatedDiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedEventsRoute = AuthenticatedEventsRouteImport.update({
@@ -198,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/regles': typeof ReglesRoute
   '/algorithms': typeof AuthenticatedAlgorithmsRoute
   '/create': typeof AuthenticatedCreateRoute
+  '/discover': typeof AuthenticatedDiscoverRoute
   '/events': typeof AuthenticatedEventsRoute
   '/explore': typeof AuthenticatedExploreRoute
   '/feed': typeof AuthenticatedFeedRoute
@@ -228,6 +235,7 @@ export interface FileRoutesByTo {
   '/regles': typeof ReglesRoute
   '/algorithms': typeof AuthenticatedAlgorithmsRoute
   '/create': typeof AuthenticatedCreateRoute
+  '/discover': typeof AuthenticatedDiscoverRoute
   '/events': typeof AuthenticatedEventsRoute
   '/explore': typeof AuthenticatedExploreRoute
   '/feed': typeof AuthenticatedFeedRoute
@@ -260,6 +268,7 @@ export interface FileRoutesById {
   '/regles': typeof ReglesRoute
   '/_authenticated/algorithms': typeof AuthenticatedAlgorithmsRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
+  '/_authenticated/discover': typeof AuthenticatedDiscoverRoute
   '/_authenticated/events': typeof AuthenticatedEventsRoute
   '/_authenticated/explore': typeof AuthenticatedExploreRoute
   '/_authenticated/feed': typeof AuthenticatedFeedRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/regles'
     | '/algorithms'
     | '/create'
+    | '/discover'
     | '/events'
     | '/explore'
     | '/feed'
@@ -322,6 +332,7 @@ export interface FileRouteTypes {
     | '/regles'
     | '/algorithms'
     | '/create'
+    | '/discover'
     | '/events'
     | '/explore'
     | '/feed'
@@ -353,6 +364,7 @@ export interface FileRouteTypes {
     | '/regles'
     | '/_authenticated/algorithms'
     | '/_authenticated/create'
+    | '/_authenticated/discover'
     | '/_authenticated/events'
     | '/_authenticated/explore'
     | '/_authenticated/feed'
@@ -428,6 +440,13 @@ declare module '@tanstack/react-router' {
       path: '/create'
       fullPath: '/create'
       preLoaderRoute: typeof AuthenticatedCreateRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/discover': {
+      id: '/_authenticated/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof AuthenticatedDiscoverRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/events': {
@@ -597,6 +616,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAlgorithmsRoute: typeof AuthenticatedAlgorithmsRoute
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
+  AuthenticatedDiscoverRoute: typeof AuthenticatedDiscoverRoute
   AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
   AuthenticatedExploreRoute: typeof AuthenticatedExploreRoute
   AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
@@ -624,6 +644,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAlgorithmsRoute: AuthenticatedAlgorithmsRoute,
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
+  AuthenticatedDiscoverRoute: AuthenticatedDiscoverRoute,
   AuthenticatedEventsRoute: AuthenticatedEventsRoute,
   AuthenticatedExploreRoute: AuthenticatedExploreRoute,
   AuthenticatedFeedRoute: AuthenticatedFeedRoute,

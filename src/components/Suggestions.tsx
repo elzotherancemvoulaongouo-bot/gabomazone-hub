@@ -34,7 +34,7 @@ export function PeopleSuggestions({ limit = 10, compact = false }: { limit?: num
             <X className="h-4 w-4" />
           </button>
           <Link to="/u/$username" params={{ username: p.username }} className="flex flex-col items-center gap-1">
-            <UserAvatar src={p.avatar_url} name={p.display_name ?? p.username} className="h-16 w-16" />
+            <UserAvatar avatarPath={p.avatar_url} name={p.display_name ?? p.username} className="h-16 w-16" />
             <span className="line-clamp-1 text-sm font-semibold">{p.display_name ?? p.username}</span>
           </Link>
           <span className="line-clamp-2 min-h-8 text-xs text-muted-foreground">
@@ -56,7 +56,7 @@ export function CommunitySuggestions({ limit = 10 }: { limit?: number }) {
     <ul className="space-y-2">
       {data.map((c) => (
         <li key={c.kind + c.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
-          <UserAvatar src={c.avatar_url} name={c.name} className="h-12 w-12" />
+          <UserAvatar avatarPath={c.avatar_url} name={c.name} className="h-12 w-12" />
           <div className="min-w-0 flex-1">
             <p className="line-clamp-1 font-semibold">{c.name}</p>
             <p className="line-clamp-1 text-xs text-muted-foreground">
