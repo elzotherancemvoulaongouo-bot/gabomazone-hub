@@ -1066,6 +1066,27 @@ export type Database = {
         }
         Relationships: []
       }
+      recommendation_dismissals: {
+        Row: {
+          created_at: string
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          target_id?: string
+          target_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           created_at: string
@@ -1416,6 +1437,31 @@ export type Database = {
         Returns: {
           reasons: string[]
           score: number
+        }[]
+      }
+      recommend_communities: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_url: string
+          category: string
+          id: string
+          kind: string
+          name: string
+          reasons: string[]
+          score: number
+          slug: string
+        }[]
+      }
+      recommend_people: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_url: string
+          city: string
+          display_name: string
+          id: string
+          reasons: string[]
+          score: number
+          username: string
         }[]
       }
       score_posts: {

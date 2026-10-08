@@ -50,6 +50,7 @@ const shortcuts = [
   { to: "/pages", label: "Pages", icon: Store },
   { to: "/friends", label: "Amis", icon: Users },
   { to: "/videos", label: "Vidéos", icon: Play },
+  { to: "/discover", label: "Découvrir", icon: Compass },
   { to: "/events", label: "Événements", icon: CalendarDays },
 ] as const;
 
