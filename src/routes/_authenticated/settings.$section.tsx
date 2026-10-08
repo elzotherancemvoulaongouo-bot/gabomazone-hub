@@ -22,7 +22,7 @@ import { ProfileSettingsForm } from "@/components/settings/ProfileSettingsForm";
 import { SETTINGS_SECTIONS } from "@/lib/settings-sections";
 import { useSettings, useUpdateSettings, type UserSettings } from "@/lib/settings";
 import { useBlockActions, useBlockedUsers } from "@/lib/social";
-import { POST_SELECT } from "@/lib/posts";
+import { POST_SELECT, fetchProfileById } from "@/lib/posts";
 import type { FeedPost } from "@/components/PostCard";
 import { cn } from "@/lib/utils";
 

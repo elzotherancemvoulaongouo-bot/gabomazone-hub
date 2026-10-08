@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchProfileById } from "@/lib/posts";
 import { CoverPhoto } from "@/components/CoverPhoto";
 import { AvatarPhotoEditor } from "@/components/AvatarPhotoEditor";
 import { Button } from "@/components/ui/button";
