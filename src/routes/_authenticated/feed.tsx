@@ -12,6 +12,7 @@ import { useHiddenPostIds, useBlockedIds } from "@/lib/social";
 import { useSettings } from "@/lib/settings";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { PeopleSuggestions } from "@/components/Suggestions";
 
 export const Route = createFileRoute("/_authenticated/feed")({
   head: () => ({
@@ -120,6 +121,17 @@ function FeedPage() {
             placeholderHeight={post.media_url ? 520 : 200}
           >
             <PostCard post={post} currentUserId={user.id} contextPosts={posts} />
+            {index === 2 && (
+              <section className="mt-4 space-y-2 rounded-2xl border border-border/70 bg-card p-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold">Suggestions pour vous</h2>
+                  <Link to="/discover" className="text-xs font-medium text-primary">
+                    Tout voir
+                  </Link>
+                </div>
+                <PeopleSuggestions limit={8} compact />
+              </section>
+            )}
           </LazyMount>
         ))
       ) : (
